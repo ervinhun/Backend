@@ -1,0 +1,104 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1792407122.3482661,
+    "seen": 1792407149.033213,
+    "ast_hash": "665d6140131b22ee9a81cf39ccb22ff4",
+    "semantic_hash": ""
+  },
+  "Api/Api.csproj": {
+    "mtime": 1792405522.543036,
+    "seen": 1792407149.0332181,
+    "ast_hash": "e7124e0ac31e937178a3e070e40eae29",
+    "semantic_hash": ""
+  },
+  "Api/Program.cs": {
+    "mtime": 1792405376.5205157,
+    "seen": 1792407149.03322,
+    "ast_hash": "0957fa06ba34527bfe48f0514a2528b2",
+    "semantic_hash": ""
+  },
+  "Api/Properties/launchSettings.json": {
+    "mtime": 1792405376.7200725,
+    "seen": 1792407149.033221,
+    "ast_hash": "5bf2bc704420f9362ebf61cc89f94172",
+    "semantic_hash": ""
+  },
+  "Api/appsettings.Development.json": {
+    "mtime": 1792405603.2034352,
+    "seen": 1792407149.033223,
+    "ast_hash": "a976616aa668a67f5c99896d585b617a",
+    "semantic_hash": ""
+  },
+  "Api/appsettings.Production.json": {
+    "mtime": 1792405603.2058477,
+    "seen": 1792407149.0332239,
+    "ast_hash": "d0d497e9ac4baed8c39a2b63462ca598",
+    "semantic_hash": ""
+  },
+  "Api/appsettings.json": {
+    "mtime": 1792405603.2007735,
+    "seen": 1792407149.033225,
+    "ast_hash": "22670fad8976c2bf5b49f7ebb962317e",
+    "semantic_hash": ""
+  },
+  "Api/obj/Api.csproj.nuget.dgspec.json": {
+    "mtime": 1792405524.5230942,
+    "seen": 1792407149.033226,
+    "ast_hash": "491d3b37f662099f4b08e877189626d3",
+    "semantic_hash": ""
+  },
+  "Api/obj/project.assets.json": {
+    "mtime": 1792405524.5166347,
+    "seen": 1792407149.033228,
+    "ast_hash": "c7491325e56d5f3268b1bb5197e4f978",
+    "semantic_hash": ""
+  },
+  "Backend.slnx": {
+    "mtime": 1792404283.880805,
+    "seen": 1792407149.033229,
+    "ast_hash": "75148732674a0d5b82dfd851851527c4",
+    "semantic_hash": ""
+  },
+  "Tests/Tests.csproj": {
+    "mtime": 1792404283.8811903,
+    "seen": 1792407149.03323,
+    "ast_hash": "2f6cddfd8a93015837970ec10a7f59e7",
+    "semantic_hash": ""
+  },
+  "Tests/UnitTest1.cs": {
+    "mtime": 1792404283.8815804,
+    "seen": 1792407149.033231,
+    "ast_hash": "2f36f1efe2be98a679273124a55b3e44",
+    "semantic_hash": ""
+  },
+  "Tests/obj/Tests.csproj.nuget.dgspec.json": {
+    "mtime": 1792404283.8819687,
+    "seen": 1792407149.033232,
+    "ast_hash": "383e4d296e3bc862795ac5fc21e89d37",
+    "semantic_hash": ""
+  },
+  "Tests/obj/project.assets.json": {
+    "mtime": 1792404283.88306,
+    "seen": 1792407149.033234,
+    "ast_hash": "bc9be801fe7217c49359a7d84883475c",
+    "semantic_hash": ""
+  },
+  "dotnet-tools.json": {
+    "mtime": 1792405529.149348,
+    "seen": 1792407149.0332348,
+    "ast_hash": "974d0b86344d7223880a5f37cd09fbb8",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1792407122.3478906,
+    "seen": 1792407149.033236,
+    "ast_hash": "67d88e9d0760c3ba54c75dfd9551c1c5",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1792399144.8877203,
+    "seen": 1792407149.033237,
+    "ast_hash": "3ba5e0da27d20de50493ec1d72fd502e",
+    "semantic_hash": ""
+  }
+}
