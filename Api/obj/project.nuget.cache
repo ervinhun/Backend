@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "VqQaZ8gpep4=",
+  "dgSpecHash": "NcUTCreaClA=",
   "success": true,
   "projectFilePath": "/Users/paul/Desktop/FridgeFriend/Backend/Api/Api.csproj",
   "expectedPackageFiles": [
+    "/Users/paul/.nuget/packages/dotnetenv/3.2.0/dotnetenv.3.2.0.nupkg.sha512",
     "/Users/paul/.nuget/packages/humanizer/2.14.1/humanizer.2.14.1.nupkg.sha512",
     "/Users/paul/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/paul/.nuget/packages/humanizer.core.af/2.14.1/humanizer.core.af.2.14.1.nupkg.sha512",
@@ -98,6 +99,7 @@
     "/Users/paul/.nuget/packages/nuget.projectmodel/6.12.1/nuget.projectmodel.6.12.1.nupkg.sha512",
     "/Users/paul/.nuget/packages/nuget.protocol/6.12.1/nuget.protocol.6.12.1.nupkg.sha512",
     "/Users/paul/.nuget/packages/nuget.versioning/6.12.1/nuget.versioning.6.12.1.nupkg.sha512",
+    "/Users/paul/.nuget/packages/superpower/3.0.0/superpower.3.0.0.nupkg.sha512",
     "/Users/paul/.nuget/packages/swashbuckle.aspnetcore.swaggerui/10.3.0/swashbuckle.aspnetcore.swaggerui.10.3.0.nupkg.sha512",
     "/Users/paul/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
     "/Users/paul/.nuget/packages/system.composition/9.0.0/system.composition.9.0.0.nupkg.sha512",

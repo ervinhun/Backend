@@ -6,5 +6,7 @@
   "4": "UnitTest1.cs",
   "5": "CLAUDE.md",
   "6": "README.md",
-  "7": "Program.cs"
+  "7": "Program.cs",
+  "8": "BusinessLogic.csproj",
+  "9": "DataAccess.csproj"
 }

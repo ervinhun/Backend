@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="Api/Api.csproj" />
+  <Project Path="BusinessLogic/BusinessLogic.csproj" />
+  <Project Path="DataAccess/DataAccess.csproj" />
   <Project Path="Tests/Tests.csproj" />
 </Solution>

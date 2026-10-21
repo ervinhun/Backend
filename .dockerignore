@@ -1,0 +1,22 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/.DS_Store
+
+.git/
+.gitIgnore
+.claude/
+graphify-out/
+Tests/
+
+# Secrets are passed in by docker compose, never baked into the image
+.env
+.env.*
+
+Dockerfile
+docker-compose*.yml
+README.md
+CLAUDE.md
