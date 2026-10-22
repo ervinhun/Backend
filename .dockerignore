@@ -11,6 +11,7 @@
 .claude/
 graphify-out/
 Tests/
+db/
 
 # Secrets are passed in by docker compose, never baked into the image
 .env

@@ -1,0 +1,24 @@
+# Runs Flyway against the production database (e.g. NeonDB) instead of a
+# local container. No `db`/`api` services here — production Postgres is
+# managed and reached over the network, and the API itself is deployed
+# separately (see .github/workflows/cd.yml).
+#
+# Usage:
+#   docker compose -f docker-compose.production.yml --env-file .env.production run --rm flyway
+#
+# Requires .env.production (copy .env.production.example and fill it in;
+# git-ignored, same as .env).
+
+services:
+  flyway:
+    image: redgate/flyway:11.12.0
+    container_name: fridgefriend-flyway-production
+    command:
+      - -url=${DB_URL}
+      - -user=${DB_USER}
+      - -password=${DB_PASSWORD}
+      - -baselineOnMigrate=true
+      - -connectRetries=60
+      - migrate
+    volumes:
+      - ./db/migrations:/flyway/sql

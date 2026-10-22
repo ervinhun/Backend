@@ -136,6 +136,7 @@ _NCrunch*
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # graphify: keep graph.json + report, ignore local cache/state
 graphify-out/cache/
