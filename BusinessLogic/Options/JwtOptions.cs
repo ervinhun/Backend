@@ -19,4 +19,8 @@ public class JwtOptions
 
     [Range(1, 60 * 24 * 30)]
     public int AccessTokenMinutes { get; set; } = 60;
+
+    /// <summary>How long a refresh token (and so a sign-in on one device) lasts without being used.</summary>
+    [Range(1, 365)]
+    public int RefreshTokenDays { get; set; } = 30;
 }

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using BusinessLogic.Constants;
 using BusinessLogic.Interfaces;
@@ -15,7 +16,7 @@ public class JwtTokenService(IOptions<JwtOptions> options, TimeProvider timeProv
     private readonly JwtOptions _options = options.Value;
     private readonly JsonWebTokenHandler _handler = new();
 
-    public (string Token, DateTimeOffset ExpiresAt) CreateAccessToken(User user)
+    public (string Token, DateTimeOffset ExpiresAt) CreateAccessToken(User user, Guid sessionId)
     {
         var now = timeProvider.GetUtcNow();
         var expiresAt = now.AddMinutes(_options.AccessTokenMinutes);
@@ -35,6 +36,7 @@ public class JwtTokenService(IOptions<JwtOptions> options, TimeProvider timeProv
                 new Claim(AppClaimTypes.Locale, user.Locale),
                 new Claim(AppClaimTypes.AuthProvider, user.AuthProvider),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Sid, sessionId.ToString()),
             ]),
             SigningCredentials = new SigningCredentials(
                 CreateSigningKey(_options.Secret), SecurityAlgorithms.HmacSha256),
@@ -42,6 +44,17 @@ public class JwtTokenService(IOptions<JwtOptions> options, TimeProvider timeProv
 
         return (_handler.CreateToken(descriptor), expiresAt);
     }
+
+    public (string Token, string Hash, DateTimeOffset ExpiresAt) CreateRefreshToken()
+    {
+        // 256 bits of randomness; opaque to the client, unlike the JWT access token.
+        var token = Base64UrlEncoder.Encode(RandomNumberGenerator.GetBytes(32));
+        return (token, HashRefreshToken(token), timeProvider.GetUtcNow().AddDays(_options.RefreshTokenDays));
+    }
+
+    // A plain hash is enough (no salt/stretching): the token is random, not a guessable password.
+    public string HashRefreshToken(string token) =>
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
     public static SymmetricSecurityKey CreateSigningKey(string secret) =>
         new(Encoding.UTF8.GetBytes(secret));

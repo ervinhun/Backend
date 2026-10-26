@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<RevokedToken> RevokedTokens => Set<RevokedToken>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +45,25 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             token.Property(t => t.UserId).HasColumnName("user_id");
             token.Property(t => t.ExpiresAt).HasColumnName("expires_at");
             token.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+        });
+
+        modelBuilder.Entity<RefreshToken>(token =>
+        {
+            token.ToTable("refresh_tokens");
+            token.HasKey(t => t.Id);
+
+            token.Property(t => t.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            token.Property(t => t.UserId).HasColumnName("user_id");
+            token.Property(t => t.FamilyId).HasColumnName("family_id");
+            token.Property(t => t.TokenHash).HasColumnName("token_hash").IsRequired();
+            token.Property(t => t.ExpiresAt).HasColumnName("expires_at");
+            token.Property(t => t.RevokedAt).HasColumnName("revoked_at");
+            token.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_refresh_tokens_updated_at trigger.
+            token.Property(t => t.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+
+            token.HasIndex(t => t.TokenHash).IsUnique();
         });
     }
 }

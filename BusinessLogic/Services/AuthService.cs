@@ -13,9 +13,11 @@ public class AuthService(
     IUserRepository users,
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService,
-    IRevokedTokenRepository revokedTokens) : IAuthService
+    ITokenRepository tokens,
+    TimeProvider timeProvider) : IAuthService
 {
     private const string EmailTakenMessage = "An account with this email already exists.";
+    private const string InvalidRefreshMessage = "Your session has expired. Please sign in again.";
 
     // Verified against when the email is unknown, so a login for a missing
     // account costs the same as one with a wrong password (no user enumeration by timing).
@@ -48,7 +50,7 @@ public class AuthService(
             throw new ConflictException(EmailTakenMessage);
         }
 
-        return CreateResponse(user);
+        return await StartSessionAsync(user, ct);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
@@ -63,7 +65,7 @@ public class AuthService(
         if (user?.PasswordHash is null || result == PasswordVerificationResult.Failed)
             throw new UnauthorizedException("Invalid email or password.");
 
-        return CreateResponse(user);
+        return await StartSessionAsync(user, ct);
     }
 
     public async Task<UserDto> GetUserAsync(Guid userId, CancellationToken ct = default)
@@ -73,13 +75,55 @@ public class AuthService(
         return user.ToDto();
     }
 
-    public Task LogoutAsync(Guid userId, Guid tokenId, DateTimeOffset expiresAt, CancellationToken ct = default) =>
-        revokedTokens.RevokeAsync(new RevokedToken { Jti = tokenId, UserId = userId, ExpiresAt = expiresAt }, ct);
-
-    private AuthResponse CreateResponse(User user)
+    public async Task<AuthResponse> RefreshAsync(RefreshRequest request, CancellationToken ct = default)
     {
-        var (token, expiresAt) = tokenService.CreateAccessToken(user);
-        return new AuthResponse(token, expiresAt, user.ToDto());
+        var now = timeProvider.GetUtcNow();
+        var stored = await tokens.GetRefreshTokenByHashAsync(tokenService.HashRefreshToken(request.RefreshToken), ct);
+
+        if (stored is null || stored.ExpiresAt <= now)
+            throw new UnauthorizedException(InvalidRefreshMessage);
+
+        // Each refresh token works once. Seeing one again (or losing a race for it)
+        // means it may have been copied, so end that whole sign-in on every holder.
+        if (stored.RevokedAt is not null || !await tokens.TryRevokeRefreshTokenAsync(stored.Id, now, ct))
+        {
+            await tokens.RevokeRefreshTokenFamilyAsync(stored.FamilyId, now, ct);
+            throw new UnauthorizedException(InvalidRefreshMessage);
+        }
+
+        var user = await users.GetByIdAsync(stored.UserId, ct)
+            ?? throw new UnauthorizedException(InvalidRefreshMessage);
+        return await IssueTokensAsync(user, stored.FamilyId, ct);
+    }
+
+    public async Task LogoutAsync(
+        Guid userId, Guid tokenId, Guid? sessionId, DateTimeOffset expiresAt, CancellationToken ct = default)
+    {
+        await tokens.RevokeAccessTokenAsync(
+            new RevokedToken { Jti = tokenId, UserId = userId, ExpiresAt = expiresAt }, ct);
+
+        // Also end the sign-in's refresh tokens, or the app could just refresh back in.
+        if (sessionId is { } familyId)
+            await tokens.RevokeRefreshTokenFamilyAsync(familyId, timeProvider.GetUtcNow(), ct);
+    }
+
+    /// <summary>A new sign-in on a device: a new refresh token family.</summary>
+    private Task<AuthResponse> StartSessionAsync(User user, CancellationToken ct) =>
+        IssueTokensAsync(user, Guid.NewGuid(), ct);
+
+    private async Task<AuthResponse> IssueTokensAsync(User user, Guid familyId, CancellationToken ct)
+    {
+        var refresh = tokenService.CreateRefreshToken();
+        await tokens.AddRefreshTokenAsync(new RefreshToken
+        {
+            UserId = user.Id,
+            FamilyId = familyId,
+            TokenHash = refresh.Hash,
+            ExpiresAt = refresh.ExpiresAt,
+        }, ct);
+
+        var (accessToken, expiresAt) = tokenService.CreateAccessToken(user, familyId);
+        return new AuthResponse(accessToken, expiresAt, refresh.Token, refresh.ExpiresAt, user.ToDto());
     }
 
     private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();

@@ -8,7 +8,7 @@ namespace Api.Authentication;
 /// Resolved from DI per request (via <see cref="JwtBearerOptions.EventsType"/>),
 /// so it can take scoped services like the repository.
 /// </summary>
-public class AppJwtBearerEvents(IUserRepository users, IRevokedTokenRepository revokedTokens) : JwtBearerEvents
+public class AppJwtBearerEvents(IUserRepository users, ITokenRepository tokens) : JwtBearerEvents
 {
     // A signature-valid token stays valid until it expires, so also reject it once
     // it has been signed out (revoked_tokens) or its account is soft-deleted or gone.
@@ -25,7 +25,7 @@ public class AppJwtBearerEvents(IUserRepository users, IRevokedTokenRepository r
             return;
         }
 
-        if (await revokedTokens.IsRevokedAsync(tokenId, ct))
+        if (await tokens.IsAccessTokenRevokedAsync(tokenId, ct))
         {
             context.Fail("This token has been signed out.");
             return;

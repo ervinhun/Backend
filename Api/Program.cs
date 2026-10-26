@@ -52,7 +52,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRevokedTokenRepository, RevokedTokenRepository>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 
 // Business logic
 builder.Services.AddSingleton(TimeProvider.System);

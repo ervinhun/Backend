@@ -8,9 +8,12 @@ public interface IAuthService
     Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default);
     Task<UserDto> GetUserAsync(Guid userId, CancellationToken ct = default);
 
+    /// <summary>Swaps a refresh token for a new access + refresh token pair. The old refresh token stops working.</summary>
+    Task<AuthResponse> RefreshAsync(RefreshRequest request, CancellationToken ct = default);
+
     /// <summary>
-    /// Signs out one access token: it is rejected from now on, while the user's
-    /// other tokens (other devices) keep working.
+    /// Signs out one device: its access token and its sign-in's refresh tokens stop
+    /// working, while the user's other devices stay signed in.
     /// </summary>
-    Task LogoutAsync(Guid userId, Guid tokenId, DateTimeOffset expiresAt, CancellationToken ct = default);
+    Task LogoutAsync(Guid userId, Guid tokenId, Guid? sessionId, DateTimeOffset expiresAt, CancellationToken ct = default);
 }

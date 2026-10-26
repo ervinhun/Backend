@@ -17,13 +17,15 @@ public class JwtTokenServiceTests
         Locale = "pl",
     };
 
+    private static readonly Guid SessionId = Guid.NewGuid();
+
     [Fact]
     public async Task CreateAccessToken_ProducesTokenThatValidatesWithSameKey()
     {
         var time = new FakeTimeProvider(DateTimeOffset.UtcNow);
         var service = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), time);
 
-        var (token, expiresAt) = service.CreateAccessToken(User);
+        var (token, expiresAt) = service.CreateAccessToken(User, SessionId);
 
         Assert.Equal(time.GetUtcNow().AddMinutes(TestJwt.Options.AccessTokenMinutes), expiresAt);
 
@@ -40,13 +42,14 @@ public class JwtTokenServiceTests
         Assert.Equal(User.DefaultDisplayName, result.Claims[JwtRegisteredClaimNames.Name]);
         Assert.Equal(User.Locale, result.Claims[AppClaimTypes.Locale]);
         Assert.Equal(User.AuthProvider, result.Claims[AppClaimTypes.AuthProvider]);
+        Assert.Equal(SessionId.ToString(), result.Claims[JwtRegisteredClaimNames.Sid]);
     }
 
     [Fact]
     public async Task CreateAccessToken_IsRejectedWithDifferentKey()
     {
         var service = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), TimeProvider.System);
-        var (token, _) = service.CreateAccessToken(User);
+        var (token, _) = service.CreateAccessToken(User, SessionId);
 
         var result = await new JsonWebTokenHandler().ValidateTokenAsync(token, new TokenValidationParameters
         {
@@ -56,5 +59,20 @@ public class JwtTokenServiceTests
         });
 
         Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void CreateRefreshToken_IsRandom_AndHashMatches()
+    {
+        var time = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        var service = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), time);
+
+        var a = service.CreateRefreshToken();
+        var b = service.CreateRefreshToken();
+
+        Assert.NotEqual(a.Token, b.Token);
+        Assert.Equal(a.Hash, service.HashRefreshToken(a.Token));
+        Assert.NotEqual(a.Token, a.Hash);
+        Assert.Equal(time.GetUtcNow().AddDays(TestJwt.Options.RefreshTokenDays), a.ExpiresAt);
     }
 }

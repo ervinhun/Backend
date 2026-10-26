@@ -32,7 +32,13 @@ public class AuthController(IAuthService authService) : ControllerBase
         return await authService.GetUserAsync(userId, ct);
     }
 
-    /// <summary>Signs out the bearer token used for this request. Other devices stay signed in.</summary>
+    /// <summary>Gets a new access token (and refresh token) without signing in again.</summary>
+    [HttpPost(nameof(Refresh))]
+    [AllowAnonymous]
+    public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest request, CancellationToken ct) =>
+        await authService.RefreshAsync(request, ct);
+
+    /// <summary>Signs out this device: its access and refresh tokens stop working. Other devices stay signed in.</summary>
     [HttpPost(nameof(Logout))]
     [Authorize]
     public async Task<IActionResult> Logout(CancellationToken ct)
@@ -42,7 +48,8 @@ public class AuthController(IAuthService authService) : ControllerBase
             || !long.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Exp), out var exp))
             return Unauthorized();
 
-        await authService.LogoutAsync(userId, tokenId, DateTimeOffset.FromUnixTimeSeconds(exp), ct);
+        Guid? sessionId = Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sid), out var sid) ? sid : null;
+        await authService.LogoutAsync(userId, tokenId, sessionId, DateTimeOffset.FromUnixTimeSeconds(exp), ct);
         return NoContent();
     }
 }
