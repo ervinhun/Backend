@@ -12,7 +12,8 @@ namespace BusinessLogic.Services;
 public class AuthService(
     IUserRepository users,
     IPasswordHasher<User> passwordHasher,
-    ITokenService tokenService) : IAuthService
+    ITokenService tokenService,
+    IRevokedTokenRepository revokedTokens) : IAuthService
 {
     private const string EmailTakenMessage = "An account with this email already exists.";
 
@@ -71,6 +72,9 @@ public class AuthService(
             ?? throw new NotFoundException("User not found.");
         return user.ToDto();
     }
+
+    public Task LogoutAsync(Guid userId, Guid tokenId, DateTimeOffset expiresAt, CancellationToken ct = default) =>
+        revokedTokens.RevokeAsync(new RevokedToken { Jti = tokenId, UserId = userId, ExpiresAt = expiresAt }, ct);
 
     private AuthResponse CreateResponse(User user)
     {

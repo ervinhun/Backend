@@ -10,12 +10,13 @@ namespace Tests.BusinessLogic;
 public class AuthServiceTests
 {
     private readonly InMemoryUserRepository _users = new();
+    private readonly InMemoryRevokedTokenRepository _revoked = new();
     private readonly AuthService _service;
 
     public AuthServiceTests()
     {
         var tokens = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), TimeProvider.System);
-        _service = new AuthService(_users, new PasswordHasher<User>(), tokens);
+        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _revoked);
     }
 
     private static RegisterRequest Register(string email = "Anna@Example.com ", string password = "correct-horse") =>
@@ -79,5 +80,19 @@ public class AuthServiceTests
 
         await Assert.ThrowsAsync<UnauthorizedException>(() =>
             _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse" }));
+    }
+
+    [Fact]
+    public async Task Logout_RevokesThatToken_AndIsIdempotent()
+    {
+        var userId = Guid.NewGuid();
+        var tokenId = Guid.NewGuid();
+        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(30);
+
+        await _service.LogoutAsync(userId, tokenId, expiresAt);
+        await _service.LogoutAsync(userId, tokenId, expiresAt);
+
+        var revoked = Assert.Single(_revoked.All);
+        Assert.Equal((tokenId, userId, expiresAt), (revoked.Jti, revoked.UserId, revoked.ExpiresAt));
     }
 }

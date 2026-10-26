@@ -10,6 +10,7 @@ namespace DataAccess;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<RevokedToken> RevokedTokens => Set<RevokedToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +32,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.Property(u => u.DeletedAt).HasColumnName("deleted_at");
 
             user.HasIndex(u => u.Email).IsUnique();
+        });
+
+        modelBuilder.Entity<RevokedToken>(token =>
+        {
+            token.ToTable("revoked_tokens");
+            token.HasKey(t => t.Jti);
+
+            // The id comes from the token, not the database.
+            token.Property(t => t.Jti).HasColumnName("jti").ValueGeneratedNever();
+            token.Property(t => t.UserId).HasColumnName("user_id");
+            token.Property(t => t.ExpiresAt).HasColumnName("expires_at");
+            token.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
         });
     }
 }

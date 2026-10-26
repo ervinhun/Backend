@@ -31,4 +31,18 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         return await authService.GetUserAsync(userId, ct);
     }
+
+    /// <summary>Signs out the bearer token used for this request. Other devices stay signed in.</summary>
+    [HttpPost(nameof(Logout))]
+    [Authorize]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId)
+            || !Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Jti), out var tokenId)
+            || !long.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Exp), out var exp))
+            return Unauthorized();
+
+        await authService.LogoutAsync(userId, tokenId, DateTimeOffset.FromUnixTimeSeconds(exp), ct);
+        return NoContent();
+    }
 }

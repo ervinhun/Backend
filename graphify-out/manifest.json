@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "Api/Program.cs": {
-    "mtime": 1793005626.9947042,
-    "seen": 1793005629.812612,
-    "ast_hash": "51d82595dc911b237973da9363b1bf16",
+    "mtime": 1793013648.8045182,
+    "seen": 1793013703.107252,
+    "ast_hash": "f3a9b6dcc5019fba6714b55394c2a1cd",
     "semantic_hash": ""
   },
   "Api/Properties/launchSettings.json": {
@@ -36,8 +36,8 @@
     "semantic_hash": ""
   },
   "Api/appsettings.json": {
-    "mtime": 1793005408.2267146,
-    "seen": 1793005435.372777,
+    "mtime": 1793013374.392914,
+    "seen": 1793013703.10736,
     "ast_hash": "d6646f8b131dd5cae71d6967d6e138ae",
     "semantic_hash": ""
   },
@@ -66,8 +66,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792660684.184345,
-    "seen": 1792661204.5902982,
+    "mtime": 1793013374.3953295,
+    "seen": 1793013703.108106,
     "ast_hash": "dcdca2a2d640d5fd60a33bda60897df0",
     "semantic_hash": ""
   },
@@ -78,8 +78,8 @@
     "semantic_hash": ""
   },
   "BusinessLogic/BusinessLogic.csproj": {
-    "mtime": 1793005408.2272093,
-    "seen": 1793005435.3728,
+    "mtime": 1793013374.3931944,
+    "seen": 1793013703.1073868,
     "ast_hash": "c354f300eb9bda0ad79701044820f52d",
     "semantic_hash": ""
   },
@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "Api/Controllers/AuthController.cs": {
-    "mtime": 1793005408.2243338,
-    "seen": 1793005435.372715,
-    "ast_hash": "5d68fa0094fb4201511af64cb2d6b3c1",
+    "mtime": 1793013648.8040004,
+    "seen": 1793013703.107125,
+    "ast_hash": "3cf8105de4e7b21a1ce2304114470312",
     "semantic_hash": ""
   },
   "Api/Extensions/LocalDatabaseExtensions.cs": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "BusinessLogic/Interfaces/IAuthService.cs": {
-    "mtime": 1793005408.2323942,
-    "seen": 1793005435.372808,
-    "ast_hash": "a33914ce545586ce2f3ad2491e0b057f",
+    "mtime": 1793013648.803632,
+    "seen": 1793013703.1076548,
+    "ast_hash": "b4d5555e392bcb7ee71bda9cb94d84f4",
     "semantic_hash": ""
   },
   "BusinessLogic/Interfaces/ITokenService.cs": {
@@ -174,9 +174,9 @@
     "semantic_hash": ""
   },
   "BusinessLogic/Services/AuthService.cs": {
-    "mtime": 1793005408.2334893,
-    "seen": 1793005435.372812,
-    "ast_hash": "d26ad5b1345c008c133400e8b197f08a",
+    "mtime": 1793013648.8037972,
+    "seen": 1793013703.1078,
+    "ast_hash": "0d8a31c864a2e21f356d21220ca54f20",
     "semantic_hash": ""
   },
   "BusinessLogic/Services/JwtTokenService.cs": {
@@ -186,14 +186,14 @@
     "semantic_hash": ""
   },
   "DataAccess/AppDbContext.cs": {
-    "mtime": 1793005408.2339797,
-    "seen": 1793005435.372813,
-    "ast_hash": "1c2840361e20b45118522e602739ae6b",
+    "mtime": 1793013648.8034377,
+    "seen": 1793013703.107831,
+    "ast_hash": "f648009cd39796b2eb0672756df21a4b",
     "semantic_hash": ""
   },
   "DataAccess/Entities/User.cs": {
-    "mtime": 1793005408.23486,
-    "seen": 1793005435.3728151,
+    "mtime": 1793013374.3943884,
+    "seen": 1793013703.107872,
     "ast_hash": "11744e7c807a223a8b402dd23e554f10",
     "semantic_hash": ""
   },
@@ -204,27 +204,27 @@
     "semantic_hash": ""
   },
   "DataAccess/Interfaces/IUserRepository.cs": {
-    "mtime": 1793005408.2355423,
-    "seen": 1793005435.3728168,
+    "mtime": 1793013374.3947139,
+    "seen": 1793013703.107905,
     "ast_hash": "c50c04c450d2d5ab36f35864ff5bc1d1",
     "semantic_hash": ""
   },
   "DataAccess/Repositories/UserRepository.cs": {
-    "mtime": 1793005408.2359507,
-    "seen": 1793005435.372818,
+    "mtime": 1793013374.3950195,
+    "seen": 1793013703.107906,
     "ast_hash": "a1c89f0ae1deee637a7d4895422f6e76",
     "semantic_hash": ""
   },
   "Tests/Api/AuthEndpointsTests.cs": {
-    "mtime": 1793005408.23641,
-    "seen": 1793005435.372818,
-    "ast_hash": "6a3e0ceec58e492d291782e55fc219d4",
+    "mtime": 1793013668.7657948,
+    "seen": 1793013703.107908,
+    "ast_hash": "be033599989507b8b1efa64e67f6e445",
     "semantic_hash": ""
   },
   "Tests/BusinessLogic/AuthServiceTests.cs": {
-    "mtime": 1793005408.2367115,
-    "seen": 1793005435.372819,
-    "ast_hash": "bb22409dfad825c8d09b8c7335875926",
+    "mtime": 1793013668.7653122,
+    "seen": 1793013703.1079092,
+    "ast_hash": "a9d40f7269c3190597fe8a227c1a22a4",
     "semantic_hash": ""
   },
   "Tests/BusinessLogic/JwtTokenServiceTests.cs": {
@@ -234,8 +234,8 @@
     "semantic_hash": ""
   },
   "Tests/Fakes/InMemoryUserRepository.cs": {
-    "mtime": 1793005408.2373438,
-    "seen": 1793005435.372821,
+    "mtime": 1793013374.396644,
+    "seen": 1793013703.1079419,
     "ast_hash": "9a8edec462613f0942c83064a6df18be",
     "semantic_hash": ""
   },
@@ -270,15 +270,39 @@
     "semantic_hash": ""
   },
   "Api/Authentication/AppJwtBearerEvents.cs": {
-    "mtime": 1793005615.465853,
-    "seen": 1793005629.812521,
-    "ast_hash": "6d37b47c8318d15a59d4ce07edbd0cd9",
+    "mtime": 1793013648.8043838,
+    "seen": 1793013703.107032,
+    "ast_hash": "5cf7d5187b4f1813be0e778614abfb4a",
     "semantic_hash": ""
   },
   "Api/Authentication/ConfigureJwtBearerOptions.cs": {
     "mtime": 1793005615.4636703,
     "seen": 1793005629.812522,
     "ast_hash": "26c58a9e38702724c750aa0ed5ef2035",
+    "semantic_hash": ""
+  },
+  "DataAccess/Entities/RevokedToken.cs": {
+    "mtime": 1793013648.7744737,
+    "seen": 1793013703.107871,
+    "ast_hash": "cbbb3a8c9b6f7b828e080f825138d0b1",
+    "semantic_hash": ""
+  },
+  "DataAccess/Interfaces/IRevokedTokenRepository.cs": {
+    "mtime": 1793013648.777744,
+    "seen": 1793013703.107903,
+    "ast_hash": "e9472163409c6cae268103ac90430ca5",
+    "semantic_hash": ""
+  },
+  "DataAccess/Repositories/RevokedTokenRepository.cs": {
+    "mtime": 1793013648.7803721,
+    "seen": 1793013703.107906,
+    "ast_hash": "f16ec8e6ae5eb16102e73f302686b116",
+    "semantic_hash": ""
+  },
+  "Tests/Fakes/InMemoryRevokedTokenRepository.cs": {
+    "mtime": 1793013668.7414362,
+    "seen": 1793013703.1079412,
+    "ast_hash": "2dc8c23df9e1855bfc461dac4f525d3b",
     "semantic_hash": ""
   }
 }

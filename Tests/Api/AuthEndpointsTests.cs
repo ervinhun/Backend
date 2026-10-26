@@ -27,7 +27,10 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
                 ["Jwt:Audience"] = TestJwt.Options.Audience,
             }));
             builder.ConfigureServices(services =>
-                services.Replace(ServiceDescriptor.Singleton<IUserRepository, InMemoryUserRepository>()));
+            {
+                services.Replace(ServiceDescriptor.Singleton<IUserRepository, InMemoryUserRepository>());
+                services.Replace(ServiceDescriptor.Singleton<IRevokedTokenRepository, InMemoryRevokedTokenRepository>());
+            });
         }
     }
 
@@ -124,5 +127,35 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
         var response = await _client.SendAsync(request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    private async Task<HttpStatusCode> SendAsync(HttpMethod method, string url, string? token)
+    {
+        var request = new HttpRequestMessage(method, url);
+        if (token is not null)
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return (await _client.SendAsync(request)).StatusCode;
+    }
+
+    [Fact]
+    public async Task Logout_RevokesOnlyThatToken()
+    {
+        var email = $"{Guid.NewGuid():N}@example.com";
+        var phone = await (await _client.PostAsJsonAsync("/api/auth/register", RegisterBody(email)))
+            .Content.ReadFromJsonAsync<AuthResponse>();
+        var tablet = await (await _client.PostAsJsonAsync("/api/auth/login", new { email, password = "correct-horse" }))
+            .Content.ReadFromJsonAsync<AuthResponse>();
+
+        Assert.Equal(HttpStatusCode.NoContent, await SendAsync(HttpMethod.Post, "/api/auth/logout", phone!.AccessToken));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, await SendAsync(HttpMethod.Get, "/api/auth/me", phone.AccessToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, await SendAsync(HttpMethod.Post, "/api/auth/logout", phone.AccessToken));
+        Assert.Equal(HttpStatusCode.OK, await SendAsync(HttpMethod.Get, "/api/auth/me", tablet!.AccessToken));
+    }
+
+    [Fact]
+    public async Task Logout_WithoutToken_Returns401()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, await SendAsync(HttpMethod.Post, "/api/auth/logout", null));
     }
 }
