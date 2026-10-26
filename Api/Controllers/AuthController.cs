@@ -13,11 +13,8 @@ public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost(nameof(Register))]
     [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken ct)
-    {
-        var response = await authService.RegisterAsync(request, ct);
-        return CreatedAtAction(nameof(Me), response);
-    }
+    public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken ct) =>
+        await authService.RegisterAsync(request, ct);
 
     [HttpPost(nameof(Login))]
     [AllowAnonymous]

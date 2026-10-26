@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -64,10 +65,25 @@ public static class ServiceCollectionExtensions
                     ClockSkew = TimeSpan.FromSeconds(30),
                     NameClaimType = "name",
                 };
+                bearer.Events = new JwtBearerEvents { OnTokenValidated = RejectDeletedUsers };
             });
 
         services.AddAuthorization();
         return services;
+    }
+
+    // A signature-valid token outlives its user row: reject it once the account is
+    // soft-deleted (users.deleted_at) or gone, instead of waiting for it to expire.
+    private static async Task RejectDeletedUsers(TokenValidatedContext context)
+    {
+        var sub = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var users = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+
+        if (!Guid.TryParse(sub, out var userId)
+            || await users.GetByIdAsync(userId, context.HttpContext.RequestAborted) is null)
+        {
+            context.Fail("The user this token was issued for no longer exists.");
+        }
     }
 
     /// <summary>Adds a Bearer scheme to the OpenAPI doc so Swagger UI shows an "Authorize" button.</summary>

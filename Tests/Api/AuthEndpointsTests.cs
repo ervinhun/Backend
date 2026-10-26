@@ -31,9 +31,14 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
         }
     }
 
+    private readonly Factory _factory;
     private readonly HttpClient _client;
 
-    public AuthEndpointsTests(Factory factory) => _client = factory.CreateClient();
+    public AuthEndpointsTests(Factory factory)
+    {
+        _factory = factory;
+        _client = factory.CreateClient();
+    }
 
     private static object RegisterBody(string email) =>
         new { email, password = "correct-horse", displayName = "Anna" };
@@ -44,7 +49,7 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
         var email = $"{Guid.NewGuid():N}@example.com";
 
         var register = await _client.PostAsJsonAsync("/api/auth/register", RegisterBody(email));
-        Assert.Equal(HttpStatusCode.Created, register.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, register.StatusCode);
 
         var login = await _client.PostAsJsonAsync("/api/auth/login", new { email, password = "correct-horse" });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
@@ -99,6 +104,23 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
         if (token is not null)
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
+        var response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Me_AfterUserSoftDeleted_Returns401()
+    {
+        var email = $"{Guid.NewGuid():N}@example.com";
+        var register = await _client.PostAsJsonAsync("/api/auth/register", RegisterBody(email));
+        var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
+
+        var users = (InMemoryUserRepository)_factory.Services.GetRequiredService<IUserRepository>();
+        users.All.Single(u => u.Email == email).DeletedAt = DateTimeOffset.UtcNow;
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
         var response = await _client.SendAsync(request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

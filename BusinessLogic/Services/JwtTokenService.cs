@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using BusinessLogic.Constants;
 using BusinessLogic.Interfaces;
 using BusinessLogic.Options;
 using DataAccess.Entities;
@@ -31,6 +32,8 @@ public class JwtTokenService(IOptions<JwtOptions> options, TimeProvider timeProv
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Name, user.DefaultDisplayName),
+                new Claim(AppClaimTypes.Locale, user.Locale),
+                new Claim(AppClaimTypes.AuthProvider, user.AuthProvider),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             ]),
             SigningCredentials = new SigningCredentials(

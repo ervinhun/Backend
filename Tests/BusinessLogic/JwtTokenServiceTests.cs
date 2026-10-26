@@ -1,3 +1,4 @@
+using BusinessLogic.Constants;
 using BusinessLogic.Services;
 using DataAccess.Entities;
 using Microsoft.Extensions.Time.Testing;
@@ -13,6 +14,7 @@ public class JwtTokenServiceTests
         Id = Guid.NewGuid(),
         Email = "anna@example.com",
         DefaultDisplayName = "Anna",
+        Locale = "pl",
     };
 
     [Fact]
@@ -35,6 +37,9 @@ public class JwtTokenServiceTests
         Assert.True(result.IsValid, result.Exception?.Message);
         Assert.Equal(User.Id.ToString(), result.Claims[JwtRegisteredClaimNames.Sub]);
         Assert.Equal(User.Email, result.Claims[JwtRegisteredClaimNames.Email]);
+        Assert.Equal(User.DefaultDisplayName, result.Claims[JwtRegisteredClaimNames.Name]);
+        Assert.Equal(User.Locale, result.Claims[AppClaimTypes.Locale]);
+        Assert.Equal(User.AuthProvider, result.Claims[AppClaimTypes.AuthProvider]);
     }
 
     [Fact]

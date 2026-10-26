@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "Api/Controllers/AuthController.cs": {
-    "mtime": 1792661562.9937499,
-    "seen": 1792661567.636946,
-    "ast_hash": "c2b4d7814c243f89f43d6695b585a456",
+    "mtime": 1793004693.0485573,
+    "seen": 1793004698.2990432,
+    "ast_hash": "5d68fa0094fb4201511af64cb2d6b3c1",
     "semantic_hash": ""
   },
   "Api/Extensions/LocalDatabaseExtensions.cs": {
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "Api/Extensions/ServiceCollectionExtensions.cs": {
-    "mtime": 1792660808.1133487,
-    "seen": 1792661204.5902631,
-    "ast_hash": "f497f0cea7fbcb4d1ed0994a7db8ca76",
+    "mtime": 1793004448.5151737,
+    "seen": 1793004467.480321,
+    "ast_hash": "be7e617b1efaff1dae616560ba7ba389",
     "semantic_hash": ""
   },
   "Api/Middleware/AppExceptionHandler.cs": {
@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "BusinessLogic/Services/JwtTokenService.cs": {
-    "mtime": 1792660773.215661,
-    "seen": 1792661204.590283,
-    "ast_hash": "b5bf101ef289dd63a046476b0b0a7e39",
+    "mtime": 1793004448.514899,
+    "seen": 1793004467.4809651,
+    "ast_hash": "e65f015658a1c56b65414780e42f3a38",
     "semantic_hash": ""
   },
   "DataAccess/AppDbContext.cs": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   "Tests/Api/AuthEndpointsTests.cs": {
-    "mtime": 1792660863.6148207,
-    "seen": 1792661204.590288,
-    "ast_hash": "ddcc3e82b88c9290954cea0ea7cc9d2f",
+    "mtime": 1793004693.0487804,
+    "seen": 1793004698.3002,
+    "ast_hash": "6a3e0ceec58e492d291782e55fc219d4",
     "semantic_hash": ""
   },
   "Tests/BusinessLogic/AuthServiceTests.cs": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   "Tests/BusinessLogic/JwtTokenServiceTests.cs": {
-    "mtime": 1792660863.610626,
-    "seen": 1792661204.5902898,
-    "ast_hash": "2c95b16e2fefc6fff73ca67dc761f1ab",
+    "mtime": 1793004458.0434475,
+    "seen": 1793004467.48115,
+    "ast_hash": "bbce7cb9a37980c208f0b0d6aba79ac1",
     "semantic_hash": ""
   },
   "Tests/Fakes/InMemoryUserRepository.cs": {
@@ -267,6 +267,12 @@
     "mtime": 1792660684.1853952,
     "seen": 1792661204.5902982,
     "ast_hash": "d912ae37cadf3a0884e88f2a25011be4",
+    "semantic_hash": ""
+  },
+  "BusinessLogic/Constants/AppClaimTypes.cs": {
+    "mtime": 1793004448.4915955,
+    "seen": 1793004467.480605,
+    "ast_hash": "ab3d5af031aa2b12e4f46ce257d3f300",
     "semantic_hash": ""
   }
 }
