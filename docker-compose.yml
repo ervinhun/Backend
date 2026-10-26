@@ -7,6 +7,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      # The db is started by compose itself here, not by the API on startup.
+      LocalDatabase__AutoStart: "false"
     depends_on:
       flyway:
         condition: service_completed_successfully
