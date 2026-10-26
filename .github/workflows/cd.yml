@@ -10,6 +10,11 @@ name: CD
 # Triggered off CI actually completing (workflow_run), not a second
 # independent `push:` trigger, so a release is never tagged from a commit
 # whose build/test hasn't actually finished and passed.
+#
+# Pinned to ubuntu-24.04 rather than ubuntu-latest: GitHub is migrating
+# that floating tag to Ubuntu 26 starting 2026-10-19 (actions/runner-
+# images#14748) — pin so a runner-image change can't silently break a
+# release push, and bump deliberately once Ubuntu 26 is verified fine.
 
 on:
   workflow_run:
@@ -22,7 +27,7 @@ jobs:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     outputs:
@@ -57,7 +62,7 @@ jobs:
   deploy-dev:
     name: Deploy to dev (TODO)
     needs: version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Placeholder — real deploy not implemented yet
         run: |
