@@ -25,6 +25,8 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
                 ["Jwt:Secret"] = TestJwt.Options.Secret,
                 ["Jwt:Issuer"] = TestJwt.Options.Issuer,
                 ["Jwt:Audience"] = TestJwt.Options.Audience,
+                // These tests all share one client IP; rate limiting has its own tests.
+                ["RateLimiting:Auth:PermitLimit"] = "10000",
             }));
             builder.ConfigureServices(services =>
             {

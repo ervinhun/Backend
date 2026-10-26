@@ -1,6 +1,7 @@
 using Api.Authentication;
 using Api.Extensions;
 using Api.Middleware;
+using Api.RateLimiting;
 using BusinessLogic.Interfaces;
 using BusinessLogic.Options;
 using BusinessLogic.Services;
@@ -73,6 +74,14 @@ builder.Services.AddScoped<AppJwtBearerEvents>();
 
 builder.Services.AddAuthorization();
 
+// Rate limiting
+builder.Services.AddOptions<AuthRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(AuthRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddRateLimiter(_ => { });
+builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -87,6 +96,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

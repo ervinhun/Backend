@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using BusinessLogic.Dtos.Auth;
 using BusinessLogic.Interfaces;
+using Api.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Api.Controllers;
@@ -13,11 +15,13 @@ public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost(nameof(Register))]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken ct) =>
         await authService.RegisterAsync(request, ct);
 
     [HttpPost(nameof(Login))]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken ct) =>
         await authService.LoginAsync(request, ct);
 
