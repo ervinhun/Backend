@@ -21,7 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.HasKey(u => u.Id);
 
             user.Property(u => u.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
-            user.Property(u => u.Email).HasColumnName("email").IsRequired();
+            user.Property(u => u.Email).HasColumnName("email");
             user.Property(u => u.PasswordHash).HasColumnName("password_hash");
             user.Property(u => u.AuthProvider).HasColumnName("auth_provider").IsRequired();
             user.Property(u => u.DefaultDisplayName).HasColumnName("default_display_name").IsRequired();
