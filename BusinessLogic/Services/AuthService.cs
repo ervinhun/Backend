@@ -16,7 +16,7 @@ public class AuthService(
     ITokenRepository tokens,
     TimeProvider timeProvider) : IAuthService
 {
-    private const string EmailTakenMessage = "An account with this email already exists.";
+    private const string EmailTakenMessage = "There was an error registering this e-mail, try another one.";
     private const string InvalidRefreshMessage = "Your session has expired. Please sign in again.";
 
     // Verified against when the email is unknown, so a login for a missing
