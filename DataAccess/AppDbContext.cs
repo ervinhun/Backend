@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<UserLogin> UserLogins => Set<UserLogin>();
     public DbSet<Fridge> Fridges => Set<Fridge>();
     public DbSet<FridgeMember> FridgeMembers => Set<FridgeMember>();
     public DbSet<Container> Containers => Set<Container>();
@@ -35,6 +36,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.Property(u => u.DeletedAt).HasColumnName("deleted_at");
 
             user.HasIndex(u => u.Email).IsUnique();
+            user.HasMany(u => u.Logins).WithOne().HasForeignKey(l => l.UserId);
+        });
+
+        modelBuilder.Entity<UserLogin>(login =>
+        {
+            login.ToTable("user_logins");
+            login.HasKey(l => l.Id);
+
+            login.Property(l => l.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            login.Property(l => l.UserId).HasColumnName("user_id");
+            login.Property(l => l.ProviderUserId).HasColumnName("provider_user_id").IsRequired();
+            login.Property(l => l.Provider).HasColumnName("provider").IsRequired();
+            login.Property(l => l.IsActive).HasColumnName("is_active");
+            login.Property(l => l.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_user_logins_updated_at trigger.
+            login.Property(l => l.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            login.Property(l => l.DeletedAt).HasColumnName("deleted_at");
         });
 
         modelBuilder.Entity<UserSession>(session =>
