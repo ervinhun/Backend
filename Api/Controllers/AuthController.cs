@@ -47,13 +47,10 @@ public class AuthController(IAuthService authService) : ControllerBase
     [Authorize]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
-        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId)
-            || !Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Jti), out var tokenId)
-            || !long.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Exp), out var exp))
+        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sid), out var deviceId))
             return Unauthorized();
 
-        Guid? sessionId = Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sid), out var sid) ? sid : null;
-        await authService.LogoutAsync(userId, tokenId, sessionId, DateTimeOffset.FromUnixTimeSeconds(exp), ct);
+        await authService.LogoutAsync(deviceId, ct);
         return NoContent();
     }
 }

@@ -13,7 +13,7 @@ public class AuthService(
     IUserRepository users,
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService,
-    ITokenRepository tokens,
+    IUserDeviceRepository devices,
     TimeProvider timeProvider) : IAuthService
 {
     private const string EmailTakenMessage = "There was an error registering this e-mail, try another one.";
@@ -78,51 +78,49 @@ public class AuthService(
     public async Task<AuthResponse> RefreshAsync(RefreshRequest request, CancellationToken ct = default)
     {
         var now = timeProvider.GetUtcNow();
-        var stored = await tokens.GetRefreshTokenByHashAsync(tokenService.HashRefreshToken(request.RefreshToken), ct);
+        var tokenHash = tokenService.HashRefreshToken(request.RefreshToken);
+        var device = await devices.GetByRefreshTokenHashAsync(tokenHash, ct)
+            ?? throw new UnauthorizedException(InvalidRefreshMessage);
 
-        if (stored is null || stored.ExpiresAt <= now)
-            throw new UnauthorizedException(InvalidRefreshMessage);
-
-        // Each refresh token works once. Seeing one again (or losing a race for it)
-        // means it may have been copied, so end that whole sign-in on every holder.
-        if (stored.RevokedAt is not null || !await tokens.TryRevokeRefreshTokenAsync(stored.Id, now, ct))
+        // An expired refresh token ends the sign-in, so the device row goes too.
+        if (device.RefreshTokenExpiresAt is not { } expiresAt || expiresAt <= now)
         {
-            await tokens.RevokeRefreshTokenFamilyAsync(stored.FamilyId, now, ct);
+            await devices.SignOutAsync(device.Id, now, ct);
             throw new UnauthorizedException(InvalidRefreshMessage);
         }
 
-        var user = await users.GetByIdAsync(stored.UserId, ct)
+        var user = await users.GetByIdAsync(device.UserId, ct)
             ?? throw new UnauthorizedException(InvalidRefreshMessage);
-        return await IssueTokensAsync(user, stored.FamilyId, ct);
+
+        var refresh = tokenService.CreateRefreshToken();
+        // A concurrent request already swapped this token, so it no longer works.
+        if (!await devices.TryRotateRefreshTokenAsync(device.Id, tokenHash, refresh.Hash, refresh.ExpiresAt, now, ct))
+            throw new UnauthorizedException(InvalidRefreshMessage);
+
+        return CreateResponse(user, device.Id, refresh);
     }
 
-    public async Task LogoutAsync(
-        Guid userId, Guid tokenId, Guid? sessionId, DateTimeOffset expiresAt, CancellationToken ct = default)
-    {
-        await tokens.RevokeAccessTokenAsync(
-            new RevokedToken { Jti = tokenId, UserId = userId, ExpiresAt = expiresAt }, ct);
+    public Task LogoutAsync(Guid deviceId, CancellationToken ct = default) =>
+        devices.SignOutAsync(deviceId, timeProvider.GetUtcNow(), ct);
 
-        // Also end the sign-in's refresh tokens, or the app could just refresh back in.
-        if (sessionId is { } familyId)
-            await tokens.RevokeRefreshTokenFamilyAsync(familyId, timeProvider.GetUtcNow(), ct);
-    }
-
-    /// <summary>A new sign-in on a device: a new refresh token family.</summary>
-    private Task<AuthResponse> StartSessionAsync(User user, CancellationToken ct) =>
-        IssueTokensAsync(user, Guid.NewGuid(), ct);
-
-    private async Task<AuthResponse> IssueTokensAsync(User user, Guid familyId, CancellationToken ct)
+    /// <summary>A new sign-in: a new user_devices row holding the refresh token.</summary>
+    private async Task<AuthResponse> StartSessionAsync(User user, CancellationToken ct)
     {
         var refresh = tokenService.CreateRefreshToken();
-        await tokens.AddRefreshTokenAsync(new RefreshToken
+        var device = await devices.AddAsync(new UserDevice
         {
             UserId = user.Id,
-            FamilyId = familyId,
-            TokenHash = refresh.Hash,
-            ExpiresAt = refresh.ExpiresAt,
+            RefreshTokenHash = refresh.Hash,
+            RefreshTokenExpiresAt = refresh.ExpiresAt,
+            LastSeenAt = timeProvider.GetUtcNow(),
         }, ct);
 
-        var (accessToken, expiresAt) = tokenService.CreateAccessToken(user, familyId);
+        return CreateResponse(user, device.Id, refresh);
+    }
+
+    private AuthResponse CreateResponse(User user, Guid deviceId, (string Token, string Hash, DateTimeOffset ExpiresAt) refresh)
+    {
+        var (accessToken, expiresAt) = tokenService.CreateAccessToken(user, deviceId);
         return new AuthResponse(accessToken, expiresAt, refresh.Token, refresh.ExpiresAt, user.ToDto());
     }
 

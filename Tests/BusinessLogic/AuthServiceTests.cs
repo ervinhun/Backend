@@ -11,14 +11,14 @@ namespace Tests.BusinessLogic;
 public class AuthServiceTests
 {
     private readonly InMemoryUserRepository _users = new();
-    private readonly InMemoryTokenRepository _tokens = new();
+    private readonly InMemoryUserDeviceRepository _devices = new();
     private readonly FakeTimeProvider _time = new(DateTimeOffset.UtcNow);
     private readonly AuthService _service;
 
     public AuthServiceTests()
     {
         var tokens = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), _time);
-        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _tokens, _time);
+        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _devices, _time);
     }
 
     private static RegisterRequest Register(string email = "Anna@Example.com ", string password = "correct-horse") =>
@@ -86,64 +86,57 @@ public class AuthServiceTests
 
     private static RefreshRequest Refresh(AuthResponse response) => new() { RefreshToken = response.RefreshToken };
 
+    private UserDevice SignedIn => Assert.Single(_devices.All, d => d.DeletedAt is null);
+
     [Fact]
-    public async Task Login_IssuesRefreshToken_StoredOnlyAsHash()
+    public async Task Login_CreatesDevice_WithRefreshTokenStoredOnlyAsHash()
     {
         var response = await _service.RegisterAsync(Register());
 
-        var stored = Assert.Single(_tokens.RefreshTokens);
+        var device = Assert.Single(_devices.All);
         Assert.False(string.IsNullOrEmpty(response.RefreshToken));
-        Assert.NotEqual(response.RefreshToken, stored.TokenHash);
-        Assert.Equal(response.User.Id, stored.UserId);
+        Assert.NotNull(device.RefreshTokenHash);
+        Assert.NotEqual(response.RefreshToken, device.RefreshTokenHash);
+        Assert.Null(device.PushToken);
+        Assert.Equal(response.User.Id, device.UserId);
         Assert.Equal(_time.GetUtcNow().AddDays(TestJwt.Options.RefreshTokenDays), response.RefreshTokenExpiresAt);
+        Assert.Equal(response.RefreshTokenExpiresAt, device.RefreshTokenExpiresAt);
     }
 
     [Fact]
-    public async Task Refresh_RotatesTokens_InSameFamily()
+    public async Task Refresh_RotatesTokens_OnSameDevice()
     {
         var first = await _service.RegisterAsync(Register());
+        var oldHash = SignedIn.RefreshTokenHash;
 
         var second = await _service.RefreshAsync(Refresh(first));
 
         Assert.NotEqual(first.RefreshToken, second.RefreshToken);
         Assert.NotEqual(first.AccessToken, second.AccessToken);
         Assert.Equal(first.User.Id, second.User.Id);
-        Assert.Single(_tokens.RefreshTokens.Select(t => t.FamilyId).Distinct());
-        Assert.Single(_tokens.RefreshTokens, t => t.RevokedAt is null);
+        Assert.NotEqual(oldHash, Assert.Single(_devices.All).RefreshTokenHash);
     }
 
     [Fact]
-    public async Task Refresh_ReusedToken_RevokesWholeFamily()
+    public async Task Refresh_UsedToken_IsRejected_NewerOneStillWorks()
     {
         var first = await _service.RegisterAsync(Register());
         var second = await _service.RefreshAsync(Refresh(first));
 
-        // Someone replays the already-used first token...
         await Assert.ThrowsAsync<UnauthorizedException>(() => _service.RefreshAsync(Refresh(first)));
 
-        // ...so the legitimate newer token is dead too.
-        await Assert.ThrowsAsync<UnauthorizedException>(() => _service.RefreshAsync(Refresh(second)));
-        Assert.All(_tokens.RefreshTokens, t => Assert.NotNull(t.RevokedAt));
+        await _service.RefreshAsync(Refresh(second));
+        Assert.Null(Assert.Single(_devices.All).DeletedAt);
     }
 
     [Fact]
-    public async Task Refresh_OtherSignInsAreUnaffectedByReuse()
-    {
-        var phone = await _service.RegisterAsync(Register());
-        var tablet = await _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse" });
-        await _service.RefreshAsync(Refresh(phone));
-        await Assert.ThrowsAsync<UnauthorizedException>(() => _service.RefreshAsync(Refresh(phone)));
-
-        await _service.RefreshAsync(Refresh(tablet));
-    }
-
-    [Fact]
-    public async Task Refresh_ExpiredToken_ThrowsUnauthorized()
+    public async Task Refresh_ExpiredToken_SignsDeviceOut()
     {
         var response = await _service.RegisterAsync(Register());
         _time.Advance(TimeSpan.FromDays(TestJwt.Options.RefreshTokenDays) + TimeSpan.FromSeconds(1));
 
         await Assert.ThrowsAsync<UnauthorizedException>(() => _service.RefreshAsync(Refresh(response)));
+        Assert.NotNull(Assert.Single(_devices.All).DeletedAt);
     }
 
     [Fact]
@@ -163,20 +156,18 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task Logout_RevokesAccessToken_AndThatSignInsRefreshTokens()
+    public async Task Logout_SoftDeletesOnlyThatDevice()
     {
-        var phone = await _service.RegisterAsync(Register());
-        var tablet = await _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse" });
-        var phoneFamily = _tokens.RefreshTokens.First(t => t.RevokedAt is null).FamilyId;
-        var tokenId = Guid.NewGuid();
-        var expiresAt = _time.GetUtcNow().AddMinutes(30);
+        await _service.RegisterAsync(Register());
+        var phone = SignedIn;
+        await _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse" });
 
-        await _service.LogoutAsync(phone.User.Id, tokenId, phoneFamily, expiresAt);
-        await _service.LogoutAsync(phone.User.Id, tokenId, phoneFamily, expiresAt);
+        await _service.LogoutAsync(phone.Id);
+        await _service.LogoutAsync(phone.Id);
 
-        var revoked = Assert.Single(_tokens.RevokedAccessTokens);
-        Assert.Equal((tokenId, expiresAt), (revoked.Jti, revoked.ExpiresAt));
-        Assert.All(_tokens.RefreshTokens.Where(t => t.FamilyId == phoneFamily), t => Assert.NotNull(t.RevokedAt));
-        Assert.Single(_tokens.RefreshTokens, t => t.RevokedAt is null);
+        Assert.NotNull(phone.DeletedAt);
+        Assert.False(phone.IsActive);
+        Assert.Null(phone.RefreshTokenHash);
+        Assert.NotEqual(phone.Id, SignedIn.Id);
     }
 }

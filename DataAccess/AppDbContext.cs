@@ -10,8 +10,7 @@ namespace DataAccess;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
-    public DbSet<RevokedToken> RevokedTokens => Set<RevokedToken>();
-    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<UserDevice> UserDevices => Set<UserDevice>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,35 +34,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.HasIndex(u => u.Email).IsUnique();
         });
 
-        modelBuilder.Entity<RevokedToken>(token =>
+        modelBuilder.Entity<UserDevice>(device =>
         {
-            token.ToTable("revoked_tokens");
-            token.HasKey(t => t.Jti);
+            device.ToTable("user_devices");
+            device.HasKey(d => d.Id);
 
-            // The id comes from the token, not the database.
-            token.Property(t => t.Jti).HasColumnName("jti").ValueGeneratedNever();
-            token.Property(t => t.UserId).HasColumnName("user_id");
-            token.Property(t => t.ExpiresAt).HasColumnName("expires_at");
-            token.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
-        });
-
-        modelBuilder.Entity<RefreshToken>(token =>
-        {
-            token.ToTable("refresh_tokens");
-            token.HasKey(t => t.Id);
-
-            token.Property(t => t.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
-            token.Property(t => t.UserId).HasColumnName("user_id");
-            token.Property(t => t.FamilyId).HasColumnName("family_id");
-            token.Property(t => t.TokenHash).HasColumnName("token_hash").IsRequired();
-            token.Property(t => t.ExpiresAt).HasColumnName("expires_at");
-            token.Property(t => t.RevokedAt).HasColumnName("revoked_at");
-            token.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
-            // Bumped server-side by the trg_refresh_tokens_updated_at trigger.
-            token.Property(t => t.UpdatedAt).HasColumnName("updated_at")
+            device.Property(d => d.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            device.Property(d => d.UserId).HasColumnName("user_id");
+            device.Property(d => d.PushToken).HasColumnName("push_token");
+            device.Property(d => d.Platform).HasColumnName("platform");
+            // Defaults to true in C#; a HasDefaultValue(true) would make EF skip sending false.
+            device.Property(d => d.IsActive).HasColumnName("is_active");
+            device.Property(d => d.LastSeenAt).HasColumnName("last_seen_at");
+            device.Property(d => d.RefreshTokenHash).HasColumnName("refresh_token_hash");
+            device.Property(d => d.RefreshTokenExpiresAt).HasColumnName("refresh_token_expires_at");
+            device.Property(d => d.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_user_devices_updated_at trigger.
+            device.Property(d => d.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            device.Property(d => d.DeletedAt).HasColumnName("deleted_at");
 
-            token.HasIndex(t => t.TokenHash).IsUnique();
+            device.HasIndex(d => d.RefreshTokenHash).IsUnique();
         });
     }
 }

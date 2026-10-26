@@ -8,24 +8,24 @@ namespace Api.Authentication;
 /// Resolved from DI per request (via <see cref="JwtBearerOptions.EventsType"/>),
 /// so it can take scoped services like the repository.
 /// </summary>
-public class AppJwtBearerEvents(IUserRepository users, ITokenRepository tokens) : JwtBearerEvents
+public class AppJwtBearerEvents(IUserRepository users, IUserDeviceRepository devices) : JwtBearerEvents
 {
     // A signature-valid token stays valid until it expires, so also reject it once
-    // it has been signed out (revoked_tokens) or its account is soft-deleted or gone.
+    // its device has signed out or its account is soft-deleted or gone.
     public override async Task TokenValidated(TokenValidatedContext context)
     {
         var ct = context.HttpContext.RequestAborted;
         var sub = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+        var sid = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
 
         // Every token we issue has both; one without them can't be signed out, so refuse it.
-        if (!Guid.TryParse(sub, out var userId) || !Guid.TryParse(jti, out var tokenId))
+        if (!Guid.TryParse(sub, out var userId) || !Guid.TryParse(sid, out var deviceId))
         {
-            context.Fail("The token is missing its subject or id.");
+            context.Fail("The token is missing its subject or session.");
             return;
         }
 
-        if (await tokens.IsAccessTokenRevokedAsync(tokenId, ct))
+        if (!await devices.IsSignedInAsync(deviceId, userId, ct))
         {
             context.Fail("This token has been signed out.");
             return;

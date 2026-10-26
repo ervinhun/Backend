@@ -31,7 +31,7 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
             builder.ConfigureServices(services =>
             {
                 services.Replace(ServiceDescriptor.Singleton<IUserRepository, InMemoryUserRepository>());
-                services.Replace(ServiceDescriptor.Singleton<ITokenRepository, InMemoryTokenRepository>());
+                services.Replace(ServiceDescriptor.Singleton<IUserDeviceRepository, InMemoryUserDeviceRepository>());
             });
         }
     }
@@ -140,7 +140,7 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
     }
 
     [Fact]
-    public async Task Logout_RevokesOnlyThatToken()
+    public async Task Logout_SignsOutOnlyThatDevice()
     {
         var email = $"{Guid.NewGuid():N}@example.com";
         var phone = await (await _client.PostAsJsonAsync("/api/auth/register", RegisterBody(email)))
