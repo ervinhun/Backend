@@ -138,7 +138,6 @@ _NCrunch*
 !.env.example
 !.env.production.example
 
-# graphify: keep graph.json + report, ignore local cache/state
-graphify-out/cache/
-graphify-out/.graphify_labels.pending.json
-graphify-out/graph.html
+# graphify: remove from github
+# to update locally use  graphify update .
+graphify-out/
