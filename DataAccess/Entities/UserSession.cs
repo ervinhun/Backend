@@ -1,9 +1,7 @@
 namespace DataAccess.Entities;
 
 /// <summary>
-/// Maps the <c>user_sessions</c> table (db/migrations/V2__users.sql, refresh token
-/// columns from V13__user_device_refresh_tokens.sql, renamed by
-/// V14__rename_user_devices_to_user_sessions.sql). One row per signed-in session;
+/// Maps the <c>user_sessions</c> table (db/migrations/V2__users.sql). One row per signed-in session;
 /// its id is the access token's <c>sid</c>.
 /// </summary>
 public class UserSession

@@ -306,9 +306,9 @@
     "semantic_hash": ""
   },
   "DataAccess/Entities/UserSession.cs": {
-    "mtime": 1793096792.3720496,
-    "seen": 1793096997.425938,
-    "ast_hash": "598cfb031f9d43f525c2c5efb359c19f",
+    "mtime": 1793097785.4807014,
+    "seen": 1793097814.471225,
+    "ast_hash": "04a922d4875812bc80f1b916c7b9a809",
     "semantic_hash": ""
   },
   "DataAccess/Interfaces/IUserSessionRepository.cs": {
