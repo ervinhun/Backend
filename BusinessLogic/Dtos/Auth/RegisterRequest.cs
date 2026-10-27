@@ -15,4 +15,12 @@ public class RegisterRequest
 
     [MaxLength(10)]
     public string? Locale { get; init; }
+
+    /// <summary>The phone the user is signing in on, e.g. "iPhone 15 Pro". Stored on the new session.</summary>
+    [MaxLength(100)]
+    public string? PhoneModel { get; init; }
+
+    /// <summary>The phone's OS, e.g. "ios" or "android". Stored on the new session.</summary>
+    [MaxLength(20)]
+    public string? Platform { get; init; }
 }

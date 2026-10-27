@@ -10,7 +10,7 @@ namespace DataAccess;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
-    public DbSet<UserDevice> UserDevices => Set<UserDevice>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,27 +34,28 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.HasIndex(u => u.Email).IsUnique();
         });
 
-        modelBuilder.Entity<UserDevice>(device =>
+        modelBuilder.Entity<UserSession>(session =>
         {
-            device.ToTable("user_devices");
-            device.HasKey(d => d.Id);
+            session.ToTable("user_sessions");
+            session.HasKey(d => d.Id);
 
-            device.Property(d => d.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
-            device.Property(d => d.UserId).HasColumnName("user_id");
-            device.Property(d => d.PushToken).HasColumnName("push_token");
-            device.Property(d => d.Platform).HasColumnName("platform");
+            session.Property(d => d.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            session.Property(d => d.UserId).HasColumnName("user_id");
+            session.Property(d => d.PushToken).HasColumnName("push_token");
+            session.Property(d => d.Platform).HasColumnName("platform");
+            session.Property(d => d.PhoneModel).HasColumnName("phone_model");
             // Defaults to true in C#; a HasDefaultValue(true) would make EF skip sending false.
-            device.Property(d => d.IsActive).HasColumnName("is_active");
-            device.Property(d => d.LastSeenAt).HasColumnName("last_seen_at");
-            device.Property(d => d.RefreshTokenHash).HasColumnName("refresh_token_hash");
-            device.Property(d => d.RefreshTokenExpiresAt).HasColumnName("refresh_token_expires_at");
-            device.Property(d => d.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
-            // Bumped server-side by the trg_user_devices_updated_at trigger.
-            device.Property(d => d.UpdatedAt).HasColumnName("updated_at")
+            session.Property(d => d.IsActive).HasColumnName("is_active");
+            session.Property(d => d.LastSeenAt).HasColumnName("last_seen_at");
+            session.Property(d => d.RefreshTokenHash).HasColumnName("refresh_token_hash");
+            session.Property(d => d.RefreshTokenExpiresAt).HasColumnName("refresh_token_expires_at");
+            session.Property(d => d.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_user_sessions_updated_at trigger.
+            session.Property(d => d.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
-            device.Property(d => d.DeletedAt).HasColumnName("deleted_at");
+            session.Property(d => d.DeletedAt).HasColumnName("deleted_at");
 
-            device.HasIndex(d => d.RefreshTokenHash).IsUnique();
+            session.HasIndex(d => d.RefreshTokenHash).IsUnique();
         });
     }
 }

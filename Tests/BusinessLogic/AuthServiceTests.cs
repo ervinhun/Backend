@@ -11,14 +11,14 @@ namespace Tests.BusinessLogic;
 public class AuthServiceTests
 {
     private readonly InMemoryUserRepository _users = new();
-    private readonly InMemoryUserDeviceRepository _devices = new();
+    private readonly InMemoryUserSessionRepository _sessions = new();
     private readonly FakeTimeProvider _time = new(DateTimeOffset.UtcNow);
     private readonly AuthService _service;
 
     public AuthServiceTests()
     {
         var tokens = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), _time);
-        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _devices, _time);
+        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _sessions, _time);
     }
 
     private static RegisterRequest Register(string email = "Anna@Example.com ", string password = "correct-horse") =>
@@ -86,25 +86,44 @@ public class AuthServiceTests
 
     private static RefreshRequest Refresh(AuthResponse response) => new() { RefreshToken = response.RefreshToken };
 
-    private UserDevice SignedIn => Assert.Single(_devices.All, d => d.DeletedAt is null);
+    private UserSession SignedIn => Assert.Single(_sessions.All, d => d.DeletedAt is null);
 
     [Fact]
-    public async Task Login_CreatesDevice_WithRefreshTokenStoredOnlyAsHash()
+    public async Task Login_CreatesSession_WithRefreshTokenStoredOnlyAsHash()
     {
         var response = await _service.RegisterAsync(Register());
 
-        var device = Assert.Single(_devices.All);
+        var session = Assert.Single(_sessions.All);
         Assert.False(string.IsNullOrEmpty(response.RefreshToken));
-        Assert.NotNull(device.RefreshTokenHash);
-        Assert.NotEqual(response.RefreshToken, device.RefreshTokenHash);
-        Assert.Null(device.PushToken);
-        Assert.Equal(response.User.Id, device.UserId);
+        Assert.NotNull(session.RefreshTokenHash);
+        Assert.NotEqual(response.RefreshToken, session.RefreshTokenHash);
+        Assert.Null(session.PushToken);
+        Assert.Equal(response.User.Id, session.UserId);
         Assert.Equal(_time.GetUtcNow().AddDays(TestJwt.Options.RefreshTokenDays), response.RefreshTokenExpiresAt);
-        Assert.Equal(response.RefreshTokenExpiresAt, device.RefreshTokenExpiresAt);
+        Assert.Equal(response.RefreshTokenExpiresAt, session.RefreshTokenExpiresAt);
     }
 
     [Fact]
-    public async Task Refresh_RotatesTokens_OnSameDevice()
+    public async Task RegisterAndLogin_StorePhoneModelAndPlatformOnTheirSession()
+    {
+        await _service.RegisterAsync(new RegisterRequest
+        {
+            Email = "anna@example.com", Password = "correct-horse", DisplayName = "Anna",
+            PhoneModel = " iPhone 15 Pro ", Platform = " ios ",
+        });
+        await _service.LoginAsync(new LoginRequest
+        {
+            Email = "anna@example.com", Password = "correct-horse", PhoneModel = "Pixel 8", Platform = "android",
+        });
+        await _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse", Platform = "  " });
+
+        Assert.Equal(
+            new (string?, string?)[] { (null, null), ("Pixel 8", "android"), ("iPhone 15 Pro", "ios") },
+            _sessions.All.Select(s => (s.PhoneModel, s.Platform)).OrderBy(x => x.PhoneModel, StringComparer.Ordinal).ToArray());
+    }
+
+    [Fact]
+    public async Task Refresh_RotatesTokens_OnSameSession()
     {
         var first = await _service.RegisterAsync(Register());
         var oldHash = SignedIn.RefreshTokenHash;
@@ -114,7 +133,7 @@ public class AuthServiceTests
         Assert.NotEqual(first.RefreshToken, second.RefreshToken);
         Assert.NotEqual(first.AccessToken, second.AccessToken);
         Assert.Equal(first.User.Id, second.User.Id);
-        Assert.NotEqual(oldHash, Assert.Single(_devices.All).RefreshTokenHash);
+        Assert.NotEqual(oldHash, Assert.Single(_sessions.All).RefreshTokenHash);
     }
 
     [Fact]
@@ -126,17 +145,17 @@ public class AuthServiceTests
         await Assert.ThrowsAsync<UnauthorizedException>(() => _service.RefreshAsync(Refresh(first)));
 
         await _service.RefreshAsync(Refresh(second));
-        Assert.Null(Assert.Single(_devices.All).DeletedAt);
+        Assert.Null(Assert.Single(_sessions.All).DeletedAt);
     }
 
     [Fact]
-    public async Task Refresh_ExpiredToken_SignsDeviceOut()
+    public async Task Refresh_ExpiredToken_SignsSessionOut()
     {
         var response = await _service.RegisterAsync(Register());
         _time.Advance(TimeSpan.FromDays(TestJwt.Options.RefreshTokenDays) + TimeSpan.FromSeconds(1));
 
         await Assert.ThrowsAsync<UnauthorizedException>(() => _service.RefreshAsync(Refresh(response)));
-        Assert.NotNull(Assert.Single(_devices.All).DeletedAt);
+        Assert.NotNull(Assert.Single(_sessions.All).DeletedAt);
     }
 
     [Fact]
@@ -156,7 +175,7 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task Logout_SoftDeletesOnlyThatDevice()
+    public async Task Logout_SoftDeletesOnlyThatSession()
     {
         await _service.RegisterAsync(Register());
         var phone = SignedIn;

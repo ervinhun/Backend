@@ -42,15 +42,15 @@ public class AuthController(IAuthService authService) : ControllerBase
     public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest request, CancellationToken ct) =>
         await authService.RefreshAsync(request, ct);
 
-    /// <summary>Signs out this device: its access and refresh tokens stop working. Other devices stay signed in.</summary>
+    /// <summary>Signs out this session: its access and refresh tokens stop working. Other sessions stay signed in.</summary>
     [HttpPost(nameof(Logout))]
     [Authorize]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
-        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sid), out var deviceId))
+        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sid), out var sessionId))
             return Unauthorized();
 
-        await authService.LogoutAsync(deviceId, ct);
+        await authService.LogoutAsync(sessionId, ct);
         return NoContent();
     }
 }

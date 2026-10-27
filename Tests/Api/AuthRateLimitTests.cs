@@ -31,7 +31,7 @@ public class AuthRateLimitTests
             builder.ConfigureServices(services =>
             {
                 services.Replace(ServiceDescriptor.Singleton<IUserRepository, InMemoryUserRepository>());
-                services.Replace(ServiceDescriptor.Singleton<IUserDeviceRepository, InMemoryUserDeviceRepository>());
+                services.Replace(ServiceDescriptor.Singleton<IUserSessionRepository, InMemoryUserSessionRepository>());
             });
         })
         .CreateClient();

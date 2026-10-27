@@ -13,7 +13,7 @@ public class AuthService(
     IUserRepository users,
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService,
-    IUserDeviceRepository devices,
+    IUserSessionRepository sessions,
     TimeProvider timeProvider) : IAuthService
 {
     private const string EmailTakenMessage = "There was an error registering this e-mail, try another one.";
@@ -50,7 +50,7 @@ public class AuthService(
             throw new ConflictException(EmailTakenMessage);
         }
 
-        return await StartSessionAsync(user, ct);
+        return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
@@ -65,7 +65,7 @@ public class AuthService(
         if (user?.PasswordHash is null || result == PasswordVerificationResult.Failed)
             throw new UnauthorizedException("Invalid email or password.");
 
-        return await StartSessionAsync(user, ct);
+        return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);
     }
 
     public async Task<UserDto> GetUserAsync(Guid userId, CancellationToken ct = default)
@@ -79,50 +79,54 @@ public class AuthService(
     {
         var now = timeProvider.GetUtcNow();
         var tokenHash = tokenService.HashRefreshToken(request.RefreshToken);
-        var device = await devices.GetByRefreshTokenHashAsync(tokenHash, ct)
+        var session = await sessions.GetByRefreshTokenHashAsync(tokenHash, ct)
             ?? throw new UnauthorizedException(InvalidRefreshMessage);
 
-        // An expired refresh token ends the sign-in, so the device row goes too.
-        if (device.RefreshTokenExpiresAt is not { } expiresAt || expiresAt <= now)
+        // An expired refresh token ends the sign-in, so the session row goes too.
+        if (session.RefreshTokenExpiresAt is not { } expiresAt || expiresAt <= now)
         {
-            await devices.SignOutAsync(device.Id, now, ct);
+            await sessions.SignOutAsync(session.Id, now, ct);
             throw new UnauthorizedException(InvalidRefreshMessage);
         }
 
-        var user = await users.GetByIdAsync(device.UserId, ct)
+        var user = await users.GetByIdAsync(session.UserId, ct)
             ?? throw new UnauthorizedException(InvalidRefreshMessage);
 
         var refresh = tokenService.CreateRefreshToken();
         // A concurrent request already swapped this token, so it no longer works.
-        if (!await devices.TryRotateRefreshTokenAsync(device.Id, tokenHash, refresh.Hash, refresh.ExpiresAt, now, ct))
+        if (!await sessions.TryRotateRefreshTokenAsync(session.Id, tokenHash, refresh.Hash, refresh.ExpiresAt, now, ct))
             throw new UnauthorizedException(InvalidRefreshMessage);
 
-        return CreateResponse(user, device.Id, refresh);
+        return CreateResponse(user, session.Id, refresh);
     }
 
-    public Task LogoutAsync(Guid deviceId, CancellationToken ct = default) =>
-        devices.SignOutAsync(deviceId, timeProvider.GetUtcNow(), ct);
+    public Task LogoutAsync(Guid sessionId, CancellationToken ct = default) =>
+        sessions.SignOutAsync(sessionId, timeProvider.GetUtcNow(), ct);
 
-    /// <summary>A new sign-in: a new user_devices row holding the refresh token.</summary>
-    private async Task<AuthResponse> StartSessionAsync(User user, CancellationToken ct)
+    /// <summary>A new sign-in: a new user_sessions row holding the refresh token.</summary>
+    private async Task<AuthResponse> StartSessionAsync(User user, string? phoneModel, string? platform, CancellationToken ct)
     {
         var refresh = tokenService.CreateRefreshToken();
-        var device = await devices.AddAsync(new UserDevice
+        var session = await sessions.AddAsync(new UserSession
         {
             UserId = user.Id,
             RefreshTokenHash = refresh.Hash,
             RefreshTokenExpiresAt = refresh.ExpiresAt,
+            PhoneModel = TrimToNull(phoneModel),
+            Platform = TrimToNull(platform),
             LastSeenAt = timeProvider.GetUtcNow(),
         }, ct);
 
-        return CreateResponse(user, device.Id, refresh);
+        return CreateResponse(user, session.Id, refresh);
     }
 
-    private AuthResponse CreateResponse(User user, Guid deviceId, (string Token, string Hash, DateTimeOffset ExpiresAt) refresh)
+    private AuthResponse CreateResponse(User user, Guid sessionId, (string Token, string Hash, DateTimeOffset ExpiresAt) refresh)
     {
-        var (accessToken, expiresAt) = tokenService.CreateAccessToken(user, deviceId);
+        var (accessToken, expiresAt) = tokenService.CreateAccessToken(user, sessionId);
         return new AuthResponse(accessToken, expiresAt, refresh.Token, refresh.ExpiresAt, user.ToDto());
     }
 
     private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+    private static string? TrimToNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

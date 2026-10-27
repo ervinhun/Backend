@@ -12,8 +12,8 @@ public interface IAuthService
     Task<AuthResponse> RefreshAsync(RefreshRequest request, CancellationToken ct = default);
 
     /// <summary>
-    /// Signs out one device: its access and refresh tokens stop working, while the
-    /// user's other devices stay signed in.
+    /// Signs out one session: its access and refresh tokens stop working, while the
+    /// user's other sessions stay signed in.
     /// </summary>
-    Task LogoutAsync(Guid deviceId, CancellationToken ct = default);
+    Task LogoutAsync(Guid sessionId, CancellationToken ct = default);
 }
