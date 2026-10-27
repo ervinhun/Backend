@@ -8,7 +8,7 @@ CREATE TABLE fridges (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name                TEXT NOT NULL,
     invite_code         TEXT NOT NULL UNIQUE,
-    max_members         INT NOT NULL DEFAULT 50,
+    max_members         INT NOT NULL DEFAULT 15,
     max_containers      INT NOT NULL DEFAULT 10,
     created_by_user_id  UUID NOT NULL REFERENCES users(id),
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),

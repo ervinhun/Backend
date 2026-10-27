@@ -1,17 +1,17 @@
 name: CI
 
 # Adapted from docs/ci-cd/backend-ci-cd in the Final project repo.
-# Test running is temporarily switched off below (RUN_TESTS) until the
-# team actually starts writing tests — flip it to 'true' when ready.
+# Tests need Docker (they start a Postgres container with Testcontainers),
+# which ubuntu-latest provides. Set RUN_TESTS to 'false' to skip tests and coverage.
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, development]
   push:
-    branches: [main]
+    branches: [main, development]
 
 env:
-  RUN_TESTS: 'false'
+  RUN_TESTS: 'true'
 
 jobs:
   build-and-test:
