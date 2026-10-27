@@ -1,40 +1,33 @@
 using System.Net;
 using System.Net.Http.Json;
-using DataAccess.Interfaces;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Tests.Fakes;
+using Tests.Database;
 
 namespace Tests.Api;
 
-public class AuthRateLimitTests
+public class AuthRateLimitTests(PostgresFixture database) : DatabaseTest(database)
 {
     private const int Limit = 3;
 
-    private static HttpClient CreateClient() => new WebApplicationFactory<Program>()
-        .WithWebHostBuilder(builder =>
+    private readonly List<ApiFactory> _factories = [];
+
+    // A new factory per call gives each test its own rate limit budget.
+    private HttpClient CreateClient()
+    {
+        var factory = new ApiFactory(Database.ConnectionString, new Dictionary<string, string?>
         {
-            builder.UseEnvironment("Testing");
-            builder.ConfigureAppConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = "Host=unused",
-                ["Jwt:Secret"] = TestJwt.Options.Secret,
-                ["Jwt:Issuer"] = TestJwt.Options.Issuer,
-                ["Jwt:Audience"] = TestJwt.Options.Audience,
-                ["RateLimiting:Auth:PermitLimit"] = Limit.ToString(),
-                ["RateLimiting:Auth:WindowSeconds"] = "60",
-            }));
-            builder.ConfigureServices(services =>
-            {
-                services.Replace(ServiceDescriptor.Singleton<IUserRepository, InMemoryUserRepository>());
-                services.Replace(ServiceDescriptor.Singleton<IUserSessionRepository, InMemoryUserSessionRepository>());
-            });
-        })
-        .CreateClient();
+            ["RateLimiting:Auth:PermitLimit"] = Limit.ToString(),
+            ["RateLimiting:Auth:WindowSeconds"] = "60",
+        });
+        _factories.Add(factory);
+        return factory.CreateClient();
+    }
+
+    public override async Task DisposeAsync()
+    {
+        foreach (var factory in _factories)
+            await factory.DisposeAsync();
+    }
 
     private static object WrongLogin => new { email = "anna@example.com", password = "wrong-password" };
 
