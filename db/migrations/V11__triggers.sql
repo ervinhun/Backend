@@ -8,7 +8,7 @@
 CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
-CREATE TRIGGER trg_user_devices_updated_at BEFORE UPDATE ON user_devices
+CREATE TRIGGER trg_user_sessions_updated_at BEFORE UPDATE ON user_sessions
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TRIGGER trg_fridges_updated_at BEFORE UPDATE ON fridges
