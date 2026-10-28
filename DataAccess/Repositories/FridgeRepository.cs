@@ -1,6 +1,7 @@
 using DataAccess.Entities;
 using DataAccess.Exceptions;
 using DataAccess.Interfaces;
+using DataAccess.Models.Fridge;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -14,7 +15,7 @@ public class FridgeRepository(AppDbContext db, TimeProvider timeProvider) : IFri
 {
     private const string InviteCodeTakenMessage = "A fridge with this invite code already exists.";
 
-    public async Task<AddFridgeResult> AddAsync(
+    public async Task<AddFridgeStatus> AddAsync(
         Fridge fridge,
         FridgeMember owner,
         int maxOwnedFridges,
@@ -33,7 +34,7 @@ public class FridgeRepository(AppDbContext db, TimeProvider timeProvider) : IFri
             ct
         );
         if (owned >= maxOwnedFridges)
-            return new AddFridgeResult(AddFridgeStatus.LimitReached, owned);
+            return AddFridgeStatus.LimitReached;
 
         owner.Fridge = fridge;
         db.FridgeMembers.Add(owner);
@@ -52,7 +53,7 @@ public class FridgeRepository(AppDbContext db, TimeProvider timeProvider) : IFri
             db.Entry(fridge).State = EntityState.Detached;
             throw new DuplicateKeyException(InviteCodeTakenMessage, ex);
         }
-        return new AddFridgeResult(AddFridgeStatus.Added, owned);
+        return AddFridgeStatus.Added;
     }
 
     public async Task<IReadOnlyList<FridgeWithMembership>> GetForUserAsync(
@@ -221,18 +222,18 @@ public class FridgeRepository(AppDbContext db, TimeProvider timeProvider) : IFri
         DateTimeOffset now,
         Guid? fridgeId = null
     ) =>
-        from m in db.FridgeMembers.AsNoTracking()
-        join f in db.Fridges.AsNoTracking() on m.FridgeId equals f.Id
+        from fridgeMember in db.FridgeMembers.AsNoTracking()
+        join fridge in db.Fridges.AsNoTracking() on fridgeMember.FridgeId equals fridge.Id
         where
-            m.UserId == userId
-            && (m.AccessExpiresAt == null || m.AccessExpiresAt > now)
-            && (fridgeId == null || f.Id == fridgeId)
-        orderby f.CreatedAt
+            fridgeMember.UserId == userId
+            && (fridgeMember.AccessExpiresAt == null || fridgeMember.AccessExpiresAt > now)
+            && (fridgeId == null || fridge.Id == fridgeId)
+        orderby fridge.CreatedAt
         select new FridgeWithMembership(
-            f,
-            m,
+            fridge,
+            fridgeMember,
             db.FridgeMembers.Count(x =>
-                x.FridgeId == f.Id && (x.AccessExpiresAt == null || x.AccessExpiresAt > now)
+                x.FridgeId == fridge.Id && (x.AccessExpiresAt == null || x.AccessExpiresAt > now)
             )
         );
 }

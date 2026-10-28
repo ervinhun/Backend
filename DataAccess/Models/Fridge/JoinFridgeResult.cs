@@ -1,4 +1,4 @@
-namespace DataAccess.Interfaces;
+namespace DataAccess.Models.Fridge;
 
 public enum JoinFridgeStatus
 {

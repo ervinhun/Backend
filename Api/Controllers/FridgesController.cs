@@ -31,7 +31,7 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
     public async Task<IReadOnlyList<FridgeResponse>> GetMine(CancellationToken ct) =>
         await fridges.GetForUserAsync(CurrentUserId, ct);
 
-    [HttpPost("join")]
+    [HttpPost(nameof(Join))]
     [EnableRateLimiting(RateLimitPolicies.InviteCode)]
     public async Task<ActionResult<FridgeResponse>> Join(
         JoinFridgeRequest request,
@@ -40,13 +40,7 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<FridgeResponse>> Get(Guid id, CancellationToken ct)
-    {
-        var (_, error) = await AuthorizeAsync(id, ownerOnly: false, ct);
-        if (error is not null)
-            return error;
-
-        return await fridges.GetAsync(id, CurrentUserId, ct);
-    }
+        => await fridges.GetAsync(id, CurrentUserId, ct);
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<FridgeResponse>> Update(
@@ -54,22 +48,12 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
         SaveFridgeRequest request,
         CancellationToken ct
     )
-    {
-        var (_, error) = await AuthorizeAsync(id, ownerOnly: true, ct);
-        if (error is not null)
-            return error;
-
-        return await fridges.UpdateAsync(id, CurrentUserId, request, ct);
-    }
+        => await fridges.UpdateAsync(id, CurrentUserId, request, ct);
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var (_, error) = await AuthorizeAsync(id, ownerOnly: true, ct);
-        if (error is not null)
-            return error;
-
-        await fridges.DeleteAsync(id, ct);
+        await fridges.DeleteAsync(id, CurrentUserId, ct);
         return NoContent();
     }
 
@@ -79,13 +63,7 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
         Guid id,
         CancellationToken ct
     )
-    {
-        var (_, error) = await AuthorizeAsync(id, ownerOnly: true, ct);
-        if (error is not null)
-            return error;
-
-        return await fridges.RegenerateInviteCodeAsync(id, CurrentUserId, ct);
-    }
+        => await fridges.RegenerateInviteCodeAsync(id, CurrentUserId, ct);
 
     [HttpGet("{id:guid}/members")]
     public async Task<ActionResult<IReadOnlyList<FridgeMemberResponse>>> GetMembers(
@@ -93,11 +71,7 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
         CancellationToken ct
     )
     {
-        var (_, error) = await AuthorizeAsync(id, ownerOnly: false, ct);
-        if (error is not null)
-            return error;
-
-        return Ok(await fridges.GetMembersAsync(id, ct));
+        return Ok(await fridges.GetMembersAsync(id, CurrentUserId, ct));
     }
 
     [HttpPut("{id:guid}/members/{userId:guid}")]
@@ -107,40 +81,12 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
         UpdateMemberRightsRequest request,
         CancellationToken ct
     )
-    {
-        var (_, error) = await AuthorizeAsync(id, ownerOnly: true, ct);
-        if (error is not null)
-            return error;
-
-        return await fridges.UpdateMemberRightsAsync(id, userId, request, ct);
-    }
+        => await fridges.UpdateMemberRightsAsync(id, CurrentUserId, userId, request, ct);
 
     [HttpDelete("{id:guid}/members/{userId:guid}")]
     public async Task<IActionResult> RemoveMember(Guid id, Guid userId, CancellationToken ct)
     {
-        var (caller, error) = await AuthorizeAsync(id, ownerOnly: false, ct);
-        if (error is not null)
-            return error;
-        if (userId != CurrentUserId && !caller!.IsOwner)
-            return StatusCode(StatusCodes.Status403Forbidden);
-
-        await fridges.RemoveMemberAsync(id, userId, ct);
+        await fridges.RemoveMemberAsync(id, CurrentUserId, userId, ct);
         return NoContent();
-    }
-
-    // Non-members get 404 so the existence of a fridge is not leaked.
-    private async Task<(FridgeMemberResponse? Member, ActionResult? Error)> AuthorizeAsync(
-        Guid fridgeId,
-        bool ownerOnly,
-        CancellationToken ct
-    )
-    {
-        var member = await fridges.GetMemberAsync(fridgeId, CurrentUserId, ct);
-        if (member is null)
-            return (null, NotFound());
-        if (ownerOnly && !member.IsOwner)
-            return (null, StatusCode(StatusCodes.Status403Forbidden));
-
-        return (member, null);
     }
 }

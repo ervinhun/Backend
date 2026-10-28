@@ -7,6 +7,7 @@ using BusinessLogic.Mappers;
 using DataAccess.Entities;
 using DataAccess.Exceptions;
 using DataAccess.Interfaces;
+using DataAccess.Models.Fridge;
 
 namespace BusinessLogic.Services;
 
@@ -25,7 +26,7 @@ public class FridgeService(
     private const int InviteCodeAttempts = 5;
 
     /// <summary>How many fridges one user may own; ones they only joined don't count.</summary>
-    public const int MaxOwnedFridges = 5;
+    private const int MaxOwnedFridges = 5;
 
     public async Task<FridgeResponse> CreateAsync(
         Guid userId,
@@ -60,14 +61,18 @@ public class FridgeService(
         CancellationToken ct = default
     )
     {
+        await RequireMemberAsync(fridgeId, userId, ownerOnly: true, ct);
+
         if (!await fridges.UpdateNameAsync(fridgeId, request.Name.Trim(), ct))
             throw new NotFoundException(FridgeNotFoundMessage);
 
         return await GetAsync(fridgeId, userId, ct);
     }
 
-    public async Task DeleteAsync(Guid fridgeId, CancellationToken ct = default)
+    public async Task DeleteAsync(Guid fridgeId, Guid userId, CancellationToken ct = default)
     {
+        await RequireMemberAsync(fridgeId, userId, ownerOnly: true, ct);
+
         if (!await fridges.DeleteAsync(fridgeId, timeProvider.GetUtcNow(), ct))
             throw new NotFoundException(FridgeNotFoundMessage);
     }
@@ -78,6 +83,8 @@ public class FridgeService(
         CancellationToken ct = default
     )
     {
+        await RequireMemberAsync(fridgeId, userId, ownerOnly: true, ct);
+
         await RetryOnDuplicateCodeAsync(() => SetNewInviteCodeAsync(fridgeId, ct));
 
         return await GetAsync(fridgeId, userId, ct);
@@ -114,25 +121,28 @@ public class FridgeService(
 
     public async Task<IReadOnlyList<FridgeMemberResponse>> GetMembersAsync(
         Guid fridgeId,
-        CancellationToken ct = default
-    ) => (await fridges.GetMembersAsync(fridgeId, ct)).Select(m => m.ToResponse()).ToList();
-
-    public async Task<FridgeMemberResponse?> GetMemberAsync(
-        Guid fridgeId,
         Guid userId,
         CancellationToken ct = default
-    ) => (await fridges.GetMemberAsync(fridgeId, userId, ct))?.ToResponse();
+    )
+    {
+        await RequireMemberAsync(fridgeId, userId, ownerOnly: false, ct);
+
+        return (await fridges.GetMembersAsync(fridgeId, ct)).Select(m => m.ToResponse()).ToList();
+    }
 
     public async Task<FridgeMemberResponse> UpdateMemberRightsAsync(
         Guid fridgeId,
         Guid userId,
+        Guid memberId,
         UpdateMemberRightsRequest request,
         CancellationToken ct = default
     )
     {
+        await RequireMemberAsync(fridgeId, userId, ownerOnly: true, ct);
+
         var member = await GetNonOwnerAsync(
             fridgeId,
-            userId,
+            memberId,
             "The owner's rights cannot be changed.",
             ct
         );
@@ -140,7 +150,7 @@ public class FridgeService(
         if (
             !await fridges.UpdateMemberRightsAsync(
                 fridgeId,
-                userId,
+                memberId,
                 request.CanPut,
                 request.CanUse,
                 request.AccessExpiresAt,
@@ -156,17 +166,43 @@ public class FridgeService(
         return member.ToResponse();
     }
 
-    public async Task RemoveMemberAsync(Guid fridgeId, Guid userId, CancellationToken ct = default)
+    public async Task RemoveMemberAsync(
+        Guid fridgeId,
+        Guid userId,
+        Guid memberId,
+        CancellationToken ct = default
+    )
     {
+        var caller = await RequireMemberAsync(fridgeId, userId, ownerOnly: false, ct);
+        if (memberId != userId && !caller.IsOwner)
+            throw new ForbiddenException("Only the fridge owner can remove other members.");
+
         await GetNonOwnerAsync(
             fridgeId,
-            userId,
+            memberId,
             "The owner cannot be removed; delete the fridge instead.",
             ct
         );
 
-        if (!await fridges.RemoveMemberAsync(fridgeId, userId, timeProvider.GetUtcNow(), ct))
+        if (!await fridges.RemoveMemberAsync(fridgeId, memberId, timeProvider.GetUtcNow(), ct))
             throw new NotFoundException(MemberNotFoundMessage);
+    }
+
+    // Non-members get 404 so the existence of a fridge is not leaked.
+    private async Task<FridgeMember> RequireMemberAsync(
+        Guid fridgeId,
+        Guid userId,
+        bool ownerOnly,
+        CancellationToken ct
+    )
+    {
+        var member =
+            await fridges.GetMemberAsync(fridgeId, userId, ct)
+            ?? throw new NotFoundException(FridgeNotFoundMessage);
+        if (ownerOnly && !member.IsOwner)
+            throw new ForbiddenException("Only the fridge owner can do this.");
+
+        return member;
     }
 
     // The owner holds the fridge, so their rights and membership stay as they are. Someone who isn't in it at all is a 404.
@@ -202,8 +238,8 @@ public class FridgeService(
         };
         var owner = new FridgeMember { UserId = userId, IsOwner = true };
 
-        var result = await fridges.AddAsync(fridge, owner, MaxOwnedFridges, ct);
-        if (result.Status == AddFridgeStatus.LimitReached)
+        var status = await fridges.AddAsync(fridge, owner, MaxOwnedFridges, ct);
+        if (status == AddFridgeStatus.LimitReached)
             throw new ConflictException(
                 $"You can own at most {MaxOwnedFridges} fridges. Delete one to create another."
             );
@@ -230,7 +266,10 @@ public class FridgeService(
             {
                 return await attempt();
             }
-            catch (DuplicateKeyException) when (attemptNumber < InviteCodeAttempts) { }
+            catch (DuplicateKeyException) when (attemptNumber < InviteCodeAttempts)
+            {
+                // The code collided with another fridge's; loop around and draw a new one.
+            }
         }
 
         throw new UnreachableException("The last attempt either returns or throws.");

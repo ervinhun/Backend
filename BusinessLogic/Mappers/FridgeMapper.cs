@@ -1,6 +1,7 @@
 using BusinessLogic.Dtos.Fridge;
 using DataAccess.Entities;
 using DataAccess.Interfaces;
+using DataAccess.Models.Fridge;
 
 namespace BusinessLogic.Mappers;
 

@@ -20,7 +20,7 @@ public interface IFridgeService
         SaveFridgeRequest request,
         CancellationToken ct = default
     );
-    Task DeleteAsync(Guid fridgeId, CancellationToken ct = default);
+    Task DeleteAsync(Guid fridgeId, Guid userId, CancellationToken ct = default);
     Task<FridgeResponse> RegenerateInviteCodeAsync(
         Guid fridgeId,
         Guid userId,
@@ -36,18 +36,19 @@ public interface IFridgeService
 
     Task<IReadOnlyList<FridgeMemberResponse>> GetMembersAsync(
         Guid fridgeId,
-        CancellationToken ct = default
-    );
-    Task<FridgeMemberResponse?> GetMemberAsync(
-        Guid fridgeId,
         Guid userId,
         CancellationToken ct = default
     );
+
+    /// <summary>Owner only. <paramref name="memberId"/> is the member whose rights change.</summary>
     Task<FridgeMemberResponse> UpdateMemberRightsAsync(
         Guid fridgeId,
         Guid userId,
+        Guid memberId,
         UpdateMemberRightsRequest request,
         CancellationToken ct = default
     );
-    Task RemoveMemberAsync(Guid fridgeId, Guid userId, CancellationToken ct = default);
+
+    /// <summary>Members can remove themselves; only the owner can remove others.</summary>
+    Task RemoveMemberAsync(Guid fridgeId, Guid userId, Guid memberId, CancellationToken ct = default);
 }

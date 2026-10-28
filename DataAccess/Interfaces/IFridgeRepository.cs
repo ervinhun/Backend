@@ -1,4 +1,5 @@
 using DataAccess.Entities;
+using DataAccess.Models.Fridge;
 
 namespace DataAccess.Interfaces;
 
@@ -11,7 +12,7 @@ public interface IFridgeRepository
     /// returns <see cref="AddFridgeStatus.LimitReached"/> if the owner already owns
     /// <paramref name="maxOwnedFridges"/> fridges. Concurrent creates are counted one at a time.
     /// </summary>
-    Task<AddFridgeResult> AddAsync(
+    Task<AddFridgeStatus> AddAsync(
         Fridge fridge,
         FridgeMember owner,
         int maxOwnedFridges,
