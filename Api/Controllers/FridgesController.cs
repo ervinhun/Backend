@@ -57,7 +57,7 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id:guid}/invite-code")]
+    [HttpPost($"{{id:guid}}/{nameof(RegenerateInviteCode)}")]
     [EnableRateLimiting(RateLimitPolicies.InviteCode)]
     public async Task<ActionResult<FridgeResponse>> RegenerateInviteCode(
         Guid id,
