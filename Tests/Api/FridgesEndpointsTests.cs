@@ -198,7 +198,7 @@ public class FridgesEndpointsTests : DatabaseTest
         Assert.Equal(
             HttpStatusCode.Forbidden,
             (
-                await SendAsync(ben, HttpMethod.Post, $"/api/fridges/{fridge.Id}/invite-code")
+                await SendAsync(ben, HttpMethod.Post, $"/api/fridges/{fridge.Id}/RegenerateInviteCode")
             ).StatusCode
         );
         Assert.Equal(
@@ -222,7 +222,7 @@ public class FridgesEndpointsTests : DatabaseTest
             )
         ).Content.ReadFromJsonAsync<FridgeResponse>();
         var regenerated = await (
-            await SendAsync(anna, HttpMethod.Post, $"/api/fridges/{fridge.Id}/invite-code")
+            await SendAsync(anna, HttpMethod.Post, $"/api/fridges/{fridge.Id}/RegenerateInviteCode")
         ).Content.ReadFromJsonAsync<FridgeResponse>();
         var deleted = await SendAsync(anna, HttpMethod.Delete, $"/api/fridges/{fridge.Id}");
 

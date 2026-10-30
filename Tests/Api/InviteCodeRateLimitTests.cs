@@ -91,12 +91,12 @@ public class InviteCodeRateLimitTests : DatabaseTest
         )!;
         await SendAsync(anna, HttpMethod.Post, "/api/fridges/join", WrongCode);
         await SendAsync(anna, HttpMethod.Post, "/api/fridges/join", WrongCode);
-        await SendAsync(anna, HttpMethod.Post, $"/api/fridges/{fridge.Id}/invite-code");
+        await SendAsync(anna, HttpMethod.Post, $"/api/fridges/{fridge.Id}/RegenerateInviteCode");
 
         var blocked = await SendAsync(
             anna,
             HttpMethod.Post,
-            $"/api/fridges/{fridge.Id}/invite-code"
+            $"/api/fridges/{fridge.Id}/RegenerateInviteCode"
         );
 
         Assert.Equal(HttpStatusCode.TooManyRequests, blocked.StatusCode);
