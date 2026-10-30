@@ -8,12 +8,13 @@ namespace Api.Middleware;
 public class AppExceptionHandler(IProblemDetailsService problemDetails, ILogger<AppExceptionHandler> logger)
     : IExceptionHandler
 {
-    public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken ct)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var (status, title) = exception switch
         {
             UnauthorizedException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
-            NotFoundException => (StatusCodes.Status404NotFound, "Not found"),
+            ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden"),
+            NotFoundException =>(StatusCodes.Status404NotFound, "Not found"),
             ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred"),
         };
@@ -21,10 +22,10 @@ public class AppExceptionHandler(IProblemDetailsService problemDetails, ILogger<
         if (status == StatusCodes.Status500InternalServerError)
             logger.LogError(exception, "Unhandled exception");
 
-        context.Response.StatusCode = status;
+        httpContext.Response.StatusCode = status;
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
         {
-            HttpContext = context,
+            HttpContext = httpContext,
             Exception = exception,
             ProblemDetails = new ProblemDetails
             {

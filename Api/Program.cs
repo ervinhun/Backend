@@ -54,12 +54,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
 
 // Business logic
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
+builder.Services.AddScoped<IFridgeService, FridgeService>();
 
 // JWT authentication
 builder.Services.AddOptions<JwtOptions>()
@@ -79,6 +82,10 @@ builder.Services.AddOptions<AuthRateLimitOptions>()
     .Bind(builder.Configuration.GetSection(AuthRateLimitOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<InviteCodeRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(InviteCodeRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddRateLimiter(_ => { });
 builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 
@@ -96,9 +103,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+// After authentication, so a policy can count per user. Valid tokens get their DB checks before a 429.
+app.UseRateLimiter();
 
 app.MapGet("/", () => "Hello World!")
     .WithName("GetRoot");
