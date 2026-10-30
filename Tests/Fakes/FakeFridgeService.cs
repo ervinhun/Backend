@@ -58,7 +58,7 @@ public class FakeFridgeService : IFridgeService
         return Task.FromResult(Fridge(fridgeId, request.Name));
     }
 
-    public Task DeleteAsync(Guid fridgeId, CancellationToken ct = default)
+    public Task DeleteAsync(Guid fridgeId, Guid userId, CancellationToken ct = default)
     {
         Record(nameof(DeleteAsync), ct);
         return Task.CompletedTask;
@@ -88,6 +88,7 @@ public class FakeFridgeService : IFridgeService
 
     public Task<IReadOnlyList<FridgeMemberResponse>> GetMembersAsync(
         Guid fridgeId,
+        Guid userId,
         CancellationToken ct = default
     )
     {
@@ -106,19 +107,25 @@ public class FakeFridgeService : IFridgeService
     public Task<FridgeMemberResponse> UpdateMemberRightsAsync(
         Guid fridgeId,
         Guid userId,
+        Guid memberId,
         UpdateMemberRightsRequest request,
         CancellationToken ct = default
     )
     {
         Record(nameof(UpdateMemberRightsAsync), ct);
-        var member = Members[(fridgeId, userId)];
+        var member = Members[(fridgeId, memberId)];
         member.CanPut = request.CanPut;
         member.CanUse = request.CanUse;
         member.AccessExpiresAt = request.AccessExpiresAt;
         return Task.FromResult(member);
     }
 
-    public Task RemoveMemberAsync(Guid fridgeId, Guid userId, CancellationToken ct = default)
+    public Task RemoveMemberAsync(
+        Guid fridgeId,
+        Guid userId,
+        Guid memberId,
+        CancellationToken ct = default
+    )
     {
         Record(nameof(RemoveMemberAsync), ct);
         return Task.CompletedTask;

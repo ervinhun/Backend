@@ -1,6 +1,7 @@
 using DataAccess.Entities;
 using DataAccess.Exceptions;
 using DataAccess.Interfaces;
+using DataAccess.Models.Fridge;
 
 namespace Tests.Fakes;
 
@@ -13,7 +14,7 @@ public class CollidingFridgeRepository(IFridgeRepository inner, int collisions) 
     public int AddCalls { get; private set; }
     public int SetInviteCodeCalls { get; private set; }
 
-    public Task<AddFridgeResult> AddAsync(
+    public Task<AddFridgeStatus> AddAsync(
         Fridge fridge,
         FridgeMember owner,
         int maxOwnedFridges,

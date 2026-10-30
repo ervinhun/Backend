@@ -3,7 +3,6 @@ using Api.Controllers;
 using BusinessLogic.Dtos.Fridge;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Tests.Fakes;
 
@@ -39,9 +38,6 @@ public class FridgesControllerTests
                 },
             },
         };
-
-    private static void AssertStatus(int expected, IActionResult? result) =>
-        Assert.Equal(expected, Assert.IsAssignableFrom<IStatusCodeActionResult>(result).StatusCode);
 
     [Fact]
     public async Task Create_ValidRequest_ReturnsCreatedWithFridge()
@@ -103,49 +99,12 @@ public class FridgesControllerTests
     }
 
     [Fact]
-    public async Task Get_NonMember_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_strangerId).Get(_fridgeId, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result.Result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
-    public async Task Get_UnknownFridge_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_ownerId).Get(Guid.NewGuid(), CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result.Result);
-    }
-
-    [Fact]
     public async Task Update_Owner_ReturnsUpdatedFridge()
     {
         var result = await ControllerFor(_ownerId)
             .Update(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, CancellationToken.None);
 
         Assert.Equal("Renamed", result.Value!.Name);
-    }
-
-    [Fact]
-    public async Task Update_NonOwnerMember_ReturnsForbidden()
-    {
-        var result = await ControllerFor(_memberId)
-            .Update(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, CancellationToken.None);
-
-        AssertStatus(StatusCodes.Status403Forbidden, result.Result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
-    public async Task Update_NonMember_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_strangerId)
-            .Update(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result.Result);
-        Assert.Empty(_service.Calls);
     }
 
     [Fact]
@@ -158,50 +117,12 @@ public class FridgesControllerTests
     }
 
     [Fact]
-    public async Task Delete_NonOwnerMember_ReturnsForbiddenAndKeepsFridge()
-    {
-        var result = await ControllerFor(_memberId).Delete(_fridgeId, CancellationToken.None);
-
-        AssertStatus(StatusCodes.Status403Forbidden, result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
-    public async Task Delete_NonMember_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_strangerId).Delete(_fridgeId, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
     public async Task RegenerateInviteCode_Owner_ReturnsFridgeWithNewCode()
     {
         var result = await ControllerFor(_ownerId)
             .RegenerateInviteCode(_fridgeId, CancellationToken.None);
 
         Assert.Equal("NEWCODE", result.Value!.InviteCode);
-    }
-
-    [Fact]
-    public async Task RegenerateInviteCode_NonOwnerMember_ReturnsForbidden()
-    {
-        var result = await ControllerFor(_memberId)
-            .RegenerateInviteCode(_fridgeId, CancellationToken.None);
-
-        AssertStatus(StatusCodes.Status403Forbidden, result.Result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
-    public async Task RegenerateInviteCode_NonMember_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_strangerId)
-            .RegenerateInviteCode(_fridgeId, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result.Result);
-        Assert.Empty(_service.Calls);
     }
 
     [Fact]
@@ -216,15 +137,6 @@ public class FridgesControllerTests
     }
 
     [Fact]
-    public async Task GetMembers_NonMember_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_strangerId).GetMembers(_fridgeId, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result.Result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
     public async Task UpdateMemberRights_OwnerChangesMember_ReturnsUpdatedMember()
     {
         var request = new UpdateMemberRightsRequest { CanPut = false, CanUse = true };
@@ -234,29 +146,6 @@ public class FridgesControllerTests
 
         Assert.False(result.Value!.CanPut);
         Assert.True(result.Value.CanUse);
-    }
-
-    [Fact]
-    public async Task UpdateMemberRights_NonOwnerMember_ReturnsForbidden()
-    {
-        var request = new UpdateMemberRightsRequest { CanPut = true, CanUse = true };
-
-        var result = await ControllerFor(_memberId)
-            .UpdateMemberRights(_fridgeId, _memberId, request, CancellationToken.None);
-
-        AssertStatus(StatusCodes.Status403Forbidden, result.Result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
-    public async Task UpdateMemberRights_NonMemberCaller_ReturnsNotFound()
-    {
-        var request = new UpdateMemberRightsRequest { CanPut = true, CanUse = true };
-
-        var result = await ControllerFor(_strangerId)
-            .UpdateMemberRights(_fridgeId, _memberId, request, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result.Result);
     }
 
     [Fact]
@@ -279,23 +168,4 @@ public class FridgesControllerTests
         Assert.Contains(nameof(FakeFridgeService.RemoveMemberAsync), _service.Calls);
     }
 
-    [Fact]
-    public async Task RemoveMember_MemberRemovesSomeoneElse_ReturnsForbidden()
-    {
-        var result = await ControllerFor(_memberId)
-            .RemoveMember(_fridgeId, _ownerId, CancellationToken.None);
-
-        AssertStatus(StatusCodes.Status403Forbidden, result);
-        Assert.Empty(_service.Calls);
-    }
-
-    [Fact]
-    public async Task RemoveMember_NonMemberCaller_ReturnsNotFound()
-    {
-        var result = await ControllerFor(_strangerId)
-            .RemoveMember(_fridgeId, _memberId, CancellationToken.None);
-
-        Assert.IsType<NotFoundResult>(result);
-        Assert.Empty(_service.Calls);
-    }
 }

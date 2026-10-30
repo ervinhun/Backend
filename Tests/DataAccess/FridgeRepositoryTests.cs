@@ -1,6 +1,7 @@
 using DataAccess.Entities;
 using DataAccess.Exceptions;
 using DataAccess.Interfaces;
+using DataAccess.Models.Fridge;
 using DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Tests.Database;
@@ -183,7 +184,7 @@ public class FridgeRepositoryTests(PostgresFixture database) : DatabaseTest(data
             maxOwnedFridges: 2
         );
 
-        Assert.Equal(new AddFridgeResult(AddFridgeStatus.LimitReached, 2), result);
+        Assert.Equal(AddFridgeStatus.LimitReached, result);
         Assert.Equal(2, (await Repository.GetForUserAsync(anna.Id)).Count);
     }
 
@@ -207,12 +208,12 @@ public class FridgeRepositoryTests(PostgresFixture database) : DatabaseTest(data
 
         Assert.Equal(
             AddFridgeStatus.LimitReached,
-            (await Repository.AddAsync(Another("CODE0003"), owner(), maxOwnedFridges: 1)).Status
+            (await Repository.AddAsync(Another("CODE0003"), owner(), maxOwnedFridges: 1))
         );
         await Repository.DeleteAsync(annas.Id, DateTimeOffset.UtcNow);
         Assert.Equal(
             AddFridgeStatus.Added,
-            (await Repository.AddAsync(Another("CODE0003"), owner(), maxOwnedFridges: 1)).Status
+            (await Repository.AddAsync(Another("CODE0003"), owner(), maxOwnedFridges: 1))
         );
 
         Assert.Equal(2, (await Repository.GetForUserAsync(anna.Id)).Count);
@@ -239,7 +240,7 @@ public class FridgeRepositoryTests(PostgresFixture database) : DatabaseTest(data
                         new FridgeMember { UserId = anna.Id, IsOwner = true },
                         maxOwnedFridges: 3
                     );
-                    return result.Status == AddFridgeStatus.Added;
+                    return result == AddFridgeStatus.Added;
                 })
         );
 

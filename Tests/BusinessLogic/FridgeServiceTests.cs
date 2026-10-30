@@ -37,6 +37,12 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         );
     }
 
+    private async Task<FridgeMember?> FindMemberAsync(Guid fridgeId, Guid userId) =>
+        await new FridgeRepository(
+            Database.CreateDbContext(),
+            TimeProvider.System
+        ).GetMemberAsync(fridgeId, userId);
+
     private async Task<User> AddUserAsync(string email, string displayName = "Anna")
     {
         await using var db = Database.CreateDbContext();
@@ -137,8 +143,8 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         Assert.Contains("limit", error.Message);
         Assert.Equal(15, (await Service.GetAsync(fridge.Id, anna.Id)).MemberCount);
 
-        var leaver = (await Service.GetMembersAsync(fridge.Id)).First(m => !m.IsOwner);
-        await Service.RemoveMemberAsync(fridge.Id, leaver.UserId);
+        var leaver = (await Service.GetMembersAsync(fridge.Id, anna.Id)).First(m => !m.IsOwner);
+        await Service.RemoveMemberAsync(fridge.Id, anna.Id, leaver.UserId);
         var joined = await Service.JoinAsync(late.Id, Join(fridge.InviteCode!));
 
         Assert.Equal(15, joined.MemberCount);
@@ -155,7 +161,7 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         var error = await Assert.ThrowsAsync<ConflictException>(() =>
             Service.CreateAsync(anna.Id, Save("One too many"))
         );
-        await Service.DeleteAsync(last!.Id);
+        await Service.DeleteAsync(last!.Id, anna.Id);
         var created = await Service.CreateAsync(anna.Id, Save("One more"));
 
         Assert.Contains(FridgeService.MaxOwnedFridges.ToString(), error.Message);
@@ -404,6 +410,57 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
     }
 
     [Fact]
+    public async Task OwnerOnlyActions_AsANonOwnerMember_ThrowForbidden()
+    {
+        var anna = await AddUserAsync("anna@example.com");
+        var ben = await AddUserAsync("ben@example.com", "Ben");
+        var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
+        await AddMemberAsync(fridge.Id, ben);
+        var rights = new UpdateMemberRightsRequest { CanPut = false, CanUse = false };
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            Service.UpdateAsync(fridge.Id, ben.Id, Save("Renamed"))
+        );
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            Service.DeleteAsync(fridge.Id, ben.Id)
+        );
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            Service.RegenerateInviteCodeAsync(fridge.Id, ben.Id)
+        );
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            Service.UpdateMemberRightsAsync(fridge.Id, ben.Id, ben.Id, rights)
+        );
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            Service.RemoveMemberAsync(fridge.Id, ben.Id, anna.Id)
+        );
+        Assert.Equal("Home", (await Service.GetAsync(fridge.Id, anna.Id)).Name);
+    }
+
+    [Fact]
+    public async Task ManagingAFridge_AsANonMember_ThrowsNotFound()
+    {
+        var anna = await AddUserAsync("anna@example.com");
+        var stranger = await AddUserAsync("stranger@example.com", "Stranger");
+        var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
+
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            Service.UpdateAsync(fridge.Id, stranger.Id, Save("Renamed"))
+        );
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            Service.DeleteAsync(fridge.Id, stranger.Id)
+        );
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            Service.RegenerateInviteCodeAsync(fridge.Id, stranger.Id)
+        );
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            Service.GetMembersAsync(fridge.Id, stranger.Id)
+        );
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            Service.RemoveMemberAsync(fridge.Id, stranger.Id, anna.Id)
+        );
+    }
+
+    [Fact]
     public async Task Delete_RemovesTheFridgeForEveryone_AndCannotBeRepeated()
     {
         var anna = await AddUserAsync("anna@example.com");
@@ -411,12 +468,14 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
         await AddMemberAsync(fridge.Id, ben);
 
-        await Service.DeleteAsync(fridge.Id);
+        await Service.DeleteAsync(fridge.Id, anna.Id);
 
         Assert.Empty(await Service.GetForUserAsync(anna.Id));
         Assert.Empty(await Service.GetForUserAsync(ben.Id));
-        Assert.Null(await Service.GetMemberAsync(fridge.Id, ben.Id));
-        await Assert.ThrowsAsync<NotFoundException>(() => Service.DeleteAsync(fridge.Id));
+        Assert.Null(await FindMemberAsync(fridge.Id, ben.Id));
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            Service.DeleteAsync(fridge.Id, anna.Id)
+        );
     }
 
     [Fact]
@@ -427,7 +486,7 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
         await AddMemberAsync(fridge.Id, ben);
 
-        var members = await Service.GetMembersAsync(fridge.Id);
+        var members = await Service.GetMembersAsync(fridge.Id, anna.Id);
 
         Assert.Equal(["Anna", "Ben"], members.Select(m => m.DisplayName));
         Assert.Equal([true, false], members.Select(m => m.IsOwner));
@@ -441,11 +500,11 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
         await AddMemberAsync(fridge.Id, ben, displayName: "Benny");
 
-        var members = await Service.GetMembersAsync(fridge.Id);
-        var member = await Service.GetMemberAsync(fridge.Id, ben.Id);
+        var members = await Service.GetMembersAsync(fridge.Id, anna.Id);
+        var member = members.Single(m => m.UserId == ben.Id);
 
         Assert.Equal(["Anna", "Benny"], members.Select(m => m.DisplayName));
-        Assert.Equal("Benny", member!.DisplayName);
+        Assert.Equal("Benny", member.DisplayName);
     }
 
     [Fact]
@@ -459,6 +518,7 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
 
         var member = await Service.UpdateMemberRightsAsync(
             fridge.Id,
+            anna.Id,
             ben.Id,
             new UpdateMemberRightsRequest
             {
@@ -483,6 +543,7 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         await Assert.ThrowsAsync<NotFoundException>(() =>
             Service.UpdateMemberRightsAsync(
                 fridge.Id,
+                anna.Id,
                 Guid.NewGuid(),
                 new UpdateMemberRightsRequest { CanPut = true, CanUse = true }
             )
@@ -499,10 +560,11 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
             Service.UpdateMemberRightsAsync(
                 fridge.Id,
                 anna.Id,
+                anna.Id,
                 new UpdateMemberRightsRequest { CanPut = false, CanUse = false }
             )
         );
-        Assert.True((await Service.GetMemberAsync(fridge.Id, anna.Id))!.CanPut);
+        Assert.True((await FindMemberAsync(fridge.Id, anna.Id))!.CanPut);
     }
 
     [Fact]
@@ -512,12 +574,12 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
 
         await Assert.ThrowsAsync<ConflictException>(() =>
-            Service.RemoveMemberAsync(fridge.Id, anna.Id)
+            Service.RemoveMemberAsync(fridge.Id, anna.Id, anna.Id)
         );
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            Service.RemoveMemberAsync(fridge.Id, Guid.NewGuid())
+            Service.RemoveMemberAsync(fridge.Id, anna.Id, Guid.NewGuid())
         );
-        Assert.NotNull(await Service.GetMemberAsync(fridge.Id, anna.Id));
+        Assert.NotNull(await FindMemberAsync(fridge.Id, anna.Id));
     }
 
     [Fact]
@@ -528,11 +590,11 @@ public class FridgeServiceTests(PostgresFixture database) : DatabaseTest(databas
         var fridge = await Service.CreateAsync(anna.Id, Save("Home"));
         await AddMemberAsync(fridge.Id, ben);
 
-        await Service.RemoveMemberAsync(fridge.Id, ben.Id);
+        await Service.RemoveMemberAsync(fridge.Id, anna.Id, ben.Id);
 
-        Assert.Null(await Service.GetMemberAsync(fridge.Id, ben.Id));
+        Assert.Null(await FindMemberAsync(fridge.Id, ben.Id));
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            Service.RemoveMemberAsync(fridge.Id, ben.Id)
+            Service.RemoveMemberAsync(fridge.Id, anna.Id, ben.Id)
         );
     }
 }
