@@ -64,6 +64,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
 builder.Services.AddScoped<IFridgeService, FridgeService>();
 
+// Google / Apple sign-in. Singleton so the providers' signing keys stay cached.
+builder.Services.AddOptions<ExternalAuthOptions>()
+    .Bind(builder.Configuration.GetSection(ExternalAuthOptions.SectionName));
+builder.Services.AddSingleton<IExternalTokenValidator, OidcExternalTokenValidator>();
+
 // JWT authentication
 builder.Services.AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))

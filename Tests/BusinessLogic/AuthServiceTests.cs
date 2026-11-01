@@ -13,12 +13,13 @@ public class AuthServiceTests
     private readonly InMemoryUserRepository _users = new();
     private readonly InMemoryUserSessionRepository _sessions = new();
     private readonly FakeTimeProvider _time = new(DateTimeOffset.UtcNow);
+    private readonly FakeExternalTokenValidator _external = new();
     private readonly AuthService _service;
 
     public AuthServiceTests()
     {
         var tokens = new JwtTokenService(Microsoft.Extensions.Options.Options.Create(TestJwt.Options), _time);
-        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _sessions, _time);
+        _service = new AuthService(_users, new PasswordHasher<User>(), tokens, _sessions, _time, _external);
     }
 
     private static RegisterRequest Register(string email = "Anna@Example.com ", string password = "correct-horse") =>
@@ -188,5 +189,134 @@ public class AuthServiceTests
         Assert.False(phone.IsActive);
         Assert.Null(phone.RefreshTokenHash);
         Assert.NotEqual(phone.Id, SignedIn.Id);
+    }
+
+    private ExternalLoginRequest External(
+        string sub = "google-123", string? email = "Anna@Example.com", bool verified = true,
+        string provider = AuthProviders.Google, string? displayName = null) =>
+        new()
+        {
+            Provider = provider,
+            IdToken = _external.Issue(new ExternalIdentity(provider, sub, email, verified, "Anna G")),
+            DisplayName = displayName,
+            PhoneModel = "Pixel 9",
+            Platform = "android",
+        };
+
+    [Fact]
+    public async Task External_NewIdentity_CreatesUserWithoutPassword()
+    {
+        var response = await _service.ExternalLoginAsync(External());
+
+        var stored = Assert.Single(_users.All);
+        Assert.Equal("anna@example.com", stored.Email);
+        Assert.Null(stored.PasswordHash);
+        Assert.Equal(AuthProviders.Google, stored.AuthProvider);
+        Assert.Equal("Anna G", stored.DefaultDisplayName);
+        var login = Assert.Single(_users.Logins);
+        Assert.Equal((stored.Id, "google-123"), (login.UserId, login.ProviderUserId));
+        Assert.Equal(stored.Id, response.User.Id);
+    }
+
+    [Fact]
+    public async Task External_StartsSessionWithDeviceInfo()
+    {
+        var response = await _service.ExternalLoginAsync(External());
+
+        var session = Assert.Single(_sessions.All);
+        Assert.Equal(response.User.Id, session.UserId);
+        Assert.Equal(("Pixel 9", "android"), (session.PhoneModel, session.Platform));
+        Assert.False(string.IsNullOrEmpty(response.RefreshToken));
+    }
+
+    [Fact]
+    public async Task External_DisplayNameFromRequest_WinsOverToken()
+    {
+        // Apple's token has no name; the app sends it on the first sign-in.
+        await _service.ExternalLoginAsync(External(sub: "apple-1", provider: AuthProviders.Apple, displayName: " Anna A "));
+
+        Assert.Equal("Anna A", Assert.Single(_users.All).DefaultDisplayName);
+    }
+
+    [Fact]
+    public async Task External_SameIdentityAgain_ReturnsSameUser()
+    {
+        var first = await _service.ExternalLoginAsync(External());
+        // Email changed at the provider: still matched by sub, not by email.
+        var second = await _service.ExternalLoginAsync(External(email: "new@example.com"));
+
+        Assert.Equal(first.User.Id, second.User.Id);
+        Assert.Single(_users.All);
+        Assert.Single(_users.Logins);
+    }
+
+    [Fact]
+    public async Task External_VerifiedEmailOfPasswordAccount_LinksAndKeepsPassword()
+    {
+        var registered = await _service.RegisterAsync(Register());
+
+        var external = await _service.ExternalLoginAsync(External());
+
+        Assert.Equal(registered.User.Id, external.User.Id);
+        Assert.Equal(registered.User.Id, Assert.Single(_users.Logins).UserId);
+        Assert.Equal(AuthProviders.Password, Assert.Single(_users.All).AuthProvider);
+        await _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse" });
+    }
+
+    [Fact]
+    public async Task External_GoogleAndAppleWithSameEmail_LinkToOneUser()
+    {
+        var google = await _service.ExternalLoginAsync(External());
+        var apple = await _service.ExternalLoginAsync(External(sub: "apple-456", provider: AuthProviders.Apple));
+
+        Assert.Equal(google.User.Id, apple.User.Id);
+        Assert.Equal(2, _users.Logins.Count);
+    }
+
+    [Theory]
+    [InlineData("anna@example.com", false)]
+    [InlineData(null, true)]
+    public async Task External_WithoutVerifiedEmail_ThrowsUnauthorized(string? email, bool verified)
+    {
+        await _service.RegisterAsync(Register());
+
+        await Assert.ThrowsAsync<UnauthorizedException>(() =>
+            _service.ExternalLoginAsync(External(email: email, verified: verified)));
+        Assert.Empty(_users.Logins);
+    }
+
+    [Fact]
+    public async Task External_EmailOfDeletedAccount_ThrowsConflict()
+    {
+        await _service.RegisterAsync(Register());
+        _users.All.Single().DeletedAt = DateTimeOffset.UtcNow;
+
+        await Assert.ThrowsAsync<ConflictException>(() => _service.ExternalLoginAsync(External()));
+    }
+
+    [Fact]
+    public async Task External_LoginOfDeletedAccount_ThrowsConflict()
+    {
+        await _service.ExternalLoginAsync(External());
+        _users.All.Single().DeletedAt = DateTimeOffset.UtcNow;
+
+        await Assert.ThrowsAsync<ConflictException>(() => _service.ExternalLoginAsync(External(email: "other@example.com")));
+    }
+
+    [Fact]
+    public async Task External_InactiveLogin_DoesNotSignIn()
+    {
+        await _service.ExternalLoginAsync(External());
+        _users.Logins.Single().IsActive = false;
+
+        // The unlinked identity can't be used, and isn't silently linked again.
+        await Assert.ThrowsAsync<ConflictException>(() => _service.ExternalLoginAsync(External()));
+    }
+
+    [Fact]
+    public async Task External_InvalidToken_ThrowsUnauthorized()
+    {
+        await Assert.ThrowsAsync<UnauthorizedException>(() => _service.ExternalLoginAsync(
+            new ExternalLoginRequest { Provider = AuthProviders.Google, IdToken = "forged" }));
     }
 }
