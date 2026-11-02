@@ -33,6 +33,15 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
+      # The build rewrites openapi/FridgeFriend.json; the app's API client is generated from it.
+      - name: Check the OpenAPI document is committed and up to date
+        run: |
+          if [ -n "$(git status --porcelain -- openapi/)" ]; then
+            git diff -- openapi/
+            echo "::error::openapi/FridgeFriend.json is out of date. Build the backend and commit it."
+            exit 1
+          fi
+
       - name: Run tests with coverage
         if: env.RUN_TESTS == 'true'
         run: >
