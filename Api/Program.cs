@@ -13,7 +13,6 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 
 // Load variables from the .env file (searching parent directories) without
 // overriding variables already set in the real environment.
@@ -21,32 +20,14 @@ Env.NoClobber().TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.UsePlaceholderConfigForOpenApiBuild();
 builder.EnsureLocalDatabase();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 
-// OpenAPI, with a Bearer scheme so Swagger UI shows an "Authorize" button.
-builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document, _, _) =>
-{
-    document.Components ??= new OpenApiComponents();
-    document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
-    document.Components.SecuritySchemes[JwtBearerDefaults.AuthenticationScheme] = new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-    };
-    document.Security =
-    [
-        new OpenApiSecurityRequirement
-        {
-            [new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, document)] = [],
-        },
-    ];
-    return Task.CompletedTask;
-}));
+builder.Services.AddAppOpenApi();
 
 // Data access
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -118,7 +99,7 @@ app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapGet("/", () => "Hello World!")
-    .WithName("GetRoot");
+    .ExcludeFromDescription();
 
 app.MapControllers();
 
