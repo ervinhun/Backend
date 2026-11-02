@@ -32,6 +32,10 @@ Migrations live in [`db/migrations/`](db/migrations/) as versioned Flyway script
 
   This targets whatever `DB_URL` points at (e.g. a NeonDB connection string) instead of a local container — nothing else in `docker-compose.production.yml` is started.
 
+## OpenAPI document
+
+Every build writes [`openapi/FridgeFriend.json`](openapi/FridgeFriend.json). The app generates its API client from it with `swagger_parser`, so **commit it with any change to an endpoint or DTO**; CI fails if it is out of date. Each operation id is the controller action's name (`Login` → `AuthClient.login`), so action names must be unique across controllers — the build fails otherwise.
+
 ## Project structure
 
 | Project | Contents |

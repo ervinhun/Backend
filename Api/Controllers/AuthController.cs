@@ -27,6 +27,8 @@ public class AuthController(IAuthService authService) : ControllerBase
 
     /// <summary>Signs in with a Google or Apple ID token obtained by the app.</summary>
     [HttpPost(nameof(External))]
+    // "external" is a Dart keyword, so the generated client couldn't use it as a method name.
+    [EndpointName("ExternalLogin")]
     [AllowAnonymous]
     [EnableRateLimiting(RateLimitPolicies.Auth)]
     public async Task<ActionResult<AuthResponse>> External(ExternalLoginRequest request, CancellationToken ct) =>
