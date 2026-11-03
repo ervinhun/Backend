@@ -11,7 +11,7 @@ namespace Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/fridges/{fridgeId:guid}/containers")]
-public class ContainersController(IFridgeService fridges, IContainerService containers)
+public class ContainersController(IContainerService containers)
     : ControllerBase
 {
     // AppJwtBearerEvents rejects any token whose sub isn't a GUID, so this can't fail behind [Authorize].
@@ -24,11 +24,7 @@ public class ContainersController(IFridgeService fridges, IContainerService cont
         CancellationToken ct
     )
     {
-        var error = await AuthorizeAsync(fridgeId, write: true, ct);
-        if (error is not null)
-            return error;
-
-        var container = await containers.CreateAsync(fridgeId, request, ct);
+        var container = await containers.CreateAsync(fridgeId, CurrentUserId, request, ct);
         return CreatedAtAction(
             nameof(Get),
             new { fridgeId, containerId = container.Id },
@@ -42,11 +38,7 @@ public class ContainersController(IFridgeService fridges, IContainerService cont
         CancellationToken ct
     )
     {
-        var error = await AuthorizeAsync(fridgeId, write: false, ct);
-        if (error is not null)
-            return error;
-
-        return Ok(await containers.GetForFridgeAsync(fridgeId, ct));
+        return Ok(await containers.GetForFridgeAsync(fridgeId, CurrentUserId, ct));
     }
 
     [HttpGet("{containerId:guid}")]
@@ -56,11 +48,7 @@ public class ContainersController(IFridgeService fridges, IContainerService cont
         CancellationToken ct
     )
     {
-        var error = await AuthorizeAsync(fridgeId, write: false, ct);
-        if (error is not null)
-            return error;
-
-        return await containers.GetAsync(fridgeId, containerId, ct);
+        return await containers.GetAsync(fridgeId, containerId, CurrentUserId, ct);
     }
 
     [HttpPut("{containerId:guid}")]
@@ -71,37 +59,13 @@ public class ContainersController(IFridgeService fridges, IContainerService cont
         CancellationToken ct
     )
     {
-        var error = await AuthorizeAsync(fridgeId, write: true, ct);
-        if (error is not null)
-            return error;
-
-        return await containers.UpdateAsync(fridgeId, containerId, request, ct);
+        return await containers.UpdateAsync(fridgeId, containerId, CurrentUserId, request, ct);
     }
 
     [HttpDelete("{containerId:guid}")]
     public async Task<IActionResult> Delete(Guid fridgeId, Guid containerId, CancellationToken ct)
     {
-        var error = await AuthorizeAsync(fridgeId, write: true, ct);
-        if (error is not null)
-            return error;
-
-        await containers.DeleteAsync(fridgeId, containerId, ct);
+        await containers.DeleteAsync(fridgeId, containerId, CurrentUserId, ct);
         return NoContent();
-    }
-
-    // Non-members get 404 so the existence of a fridge is not leaked.
-    private async Task<ActionResult?> AuthorizeAsync(
-        Guid fridgeId,
-        bool write,
-        CancellationToken ct
-    )
-    {
-        var member = await fridges.GetMemberAsync(fridgeId, CurrentUserId, ct);
-        if (member is null)
-            return NotFound();
-        if (write && !member.IsOwner && !member.CanPut)
-            return StatusCode(StatusCodes.Status403Forbidden);
-
-        return null;
     }
 }
