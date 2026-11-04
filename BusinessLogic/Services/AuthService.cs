@@ -95,6 +95,10 @@ public class AuthService(
             user = await users.GetByEmailAsync(email, ct);
             if (user is not null)
             {
+                // A password account's email was never verified, so it may not belong to this person.
+                if (user.PasswordHash is not null)
+                    throw new ConflictException("An account with this email already exists. Sign in with your password.");
+
                 login.UserId = user.Id;
                 await users.AddLoginAsync(login, ct);
                 return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);

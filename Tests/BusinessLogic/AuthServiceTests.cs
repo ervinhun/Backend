@@ -251,15 +251,16 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task External_VerifiedEmailOfPasswordAccount_LinksAndKeepsPassword()
+    public async Task External_VerifiedEmailOfPasswordAccount_ThrowsConflict_AndDoesNotLink()
     {
-        var registered = await _service.RegisterAsync(Register());
+        // Registering does not verify the email, so the password may be someone else's.
+        await _service.RegisterAsync(Register());
+        var sessionsBefore = _sessions.All.Count;
 
-        var external = await _service.ExternalLoginAsync(External());
+        await Assert.ThrowsAsync<ConflictException>(() => _service.ExternalLoginAsync(External()));
 
-        Assert.Equal(registered.User.Id, external.User.Id);
-        Assert.Equal(registered.User.Id, Assert.Single(_users.Logins).UserId);
-        Assert.Equal(AuthProviders.Password, Assert.Single(_users.All).AuthProvider);
+        Assert.Empty(_users.Logins);
+        Assert.Equal(sessionsBefore, _sessions.All.Count);
         await _service.LoginAsync(new LoginRequest { Email = "anna@example.com", Password = "correct-horse" });
     }
 
