@@ -52,7 +52,8 @@
               }
             }
           }
-        }
+        },
+        "security": [ ]
       }
     },
     "/api/Auth/Login": {
@@ -102,7 +103,8 @@
               }
             }
           }
-        }
+        },
+        "security": [ ]
       }
     },
     "/api/Auth/ExternalLogin": {
@@ -152,7 +154,8 @@
               }
             }
           }
-        }
+        },
+        "security": [ ]
       }
     },
     "/api/Auth/Me": {
@@ -232,7 +235,8 @@
               }
             }
           }
-        }
+        },
+        "security": [ ]
       }
     },
     "/api/Auth/Logout": {

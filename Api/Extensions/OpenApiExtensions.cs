@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi;
 
@@ -44,6 +45,11 @@ public static class OpenApiExtensions
                 // The generated client names its methods after this: AuthClient.login(...).
                 if (context.Description.ActionDescriptor is ControllerActionDescriptor action)
                     operation.OperationId ??= action.ActionName;
+
+                // The document requires a bearer token everywhere; these endpoints opt out of it.
+                if (context.Description.ActionDescriptor.EndpointMetadata.OfType<IAllowAnonymous>().Any())
+                    operation.Security = [];
+
                 return Task.CompletedTask;
             });
 
