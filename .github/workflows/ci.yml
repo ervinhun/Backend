@@ -33,15 +33,6 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      # The build rewrites openapi/FridgeFriend.json; the app's API client is generated from it.
-      - name: Check the OpenAPI document is committed and up to date
-        run: |
-          if [ -n "$(git status --porcelain -- openapi/)" ]; then
-            git diff -- openapi/
-            echo "::error::openapi/FridgeFriend.json is out of date. Build the backend and commit it."
-            exit 1
-          fi
-
       - name: Run tests with coverage
         if: env.RUN_TESTS == 'true'
         run: >
@@ -69,6 +60,72 @@ jobs:
           name: coverage-report
           path: coverage-report/
           retention-days: 14
+
+  # The build rewrites openapi/FridgeFriend.json; the app's API client is generated from it.
+  # Building runs the project's code and packages, so it stays read-only and a
+  # separate job, which builds nothing, does the commit. Fork PRs are skipped
+  # because the token can't push to them; the next PR from this repo catches up.
+  generate-openapi:
+    name: Generate the OpenAPI document
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout the PR branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        run: dotnet build Api/Api.csproj --configuration Release
+
+      - name: Upload the OpenAPI document
+        uses: actions/upload-artifact@v7
+        with:
+          name: openapi
+          path: openapi/FridgeFriend.json
+          retention-days: 1
+
+  commit-openapi:
+    name: Commit the OpenAPI document if it changed
+    needs: generate-openapi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout the PR branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download the OpenAPI document
+        uses: actions/download-artifact@v8
+        with:
+          name: openapi
+          path: openapi
+
+      # Pushing the built commit only fast-forwards, so if the branch has moved
+      # on this fails and the run for the newer commit regenerates the file.
+      - name: Commit and push
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git add openapi/
+          if git diff --cached --quiet; then
+            echo "openapi/FridgeFriend.json is up to date."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: regenerate the OpenAPI document'
+          git push origin "HEAD:refs/heads/$HEAD_REF"
 
   docker-build-check:
     name: Confirm the Docker image still builds
