@@ -105,7 +105,7 @@
         }
       }
     },
-    "/api/Auth/External": {
+    "/api/Auth/ExternalLogin": {
       "post": {
         "tags": [
           "Auth"
