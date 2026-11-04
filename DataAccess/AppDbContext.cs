@@ -14,6 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Fridge> Fridges => Set<Fridge>();
     public DbSet<FridgeMember> FridgeMembers => Set<FridgeMember>();
     public DbSet<Container> Containers => Set<Container>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<ProductType> ProductTypes => Set<ProductType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -127,6 +129,45 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             container.Property(c => c.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
             container.Property(c => c.DeletedAt).HasColumnName("deleted_at");
+        });
+
+        modelBuilder.Entity<ProductCategory>(category =>
+        {
+            category.ToTable("product_categories");
+            category.HasKey(c => c.Id);
+            category.HasQueryFilter(c => c.DeletedAt == null);
+
+            category.Property(c => c.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            category.Property(c => c.Name).HasColumnName("name").IsRequired();
+            category.Property(c => c.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_product_categories_updated_at trigger.
+            category.Property(c => c.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            category.Property(c => c.DeletedAt).HasColumnName("deleted_at");
+
+            category.HasIndex(c => c.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<ProductType>(type =>
+        {
+            type.ToTable("product_types");
+            type.HasKey(t => t.Id);
+            type.HasQueryFilter(t => t.DeletedAt == null);
+
+            type.Property(t => t.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            type.Property(t => t.CategoryId).HasColumnName("category_id");
+            type.Property(t => t.Name).HasColumnName("name").IsRequired();
+            type.Property(t => t.DefaultExpiryDays).HasColumnName("default_expiry_days");
+            type.Property(t => t.PantryExpiryDays).HasColumnName("pantry_expiry_days");
+            type.Property(t => t.FridgeExpiryDays).HasColumnName("fridge_expiry_days");
+            type.Property(t => t.FreezerExpiryDays).HasColumnName("freezer_expiry_days");
+            type.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_product_types_updated_at trigger.
+            type.Property(t => t.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            type.Property(t => t.DeletedAt).HasColumnName("deleted_at");
+
+            type.HasOne(t => t.Category).WithMany().HasForeignKey(t => t.CategoryId);
         });
     }
 }

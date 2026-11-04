@@ -91,6 +91,13 @@ builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 
 var app = builder.Build();
 
+// The Api tests run without a database.
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var scope = app.Services.CreateScope();
+    await DbInitializer.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
+}
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
