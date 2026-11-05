@@ -56,6 +56,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
 builder.Services.AddScoped<IContainerRepository, ContainerRepository>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
 
 // Business logic
 builder.Services.AddSingleton(TimeProvider.System);
@@ -65,6 +67,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
 builder.Services.AddScoped<IFridgeService, FridgeService>();
 builder.Services.AddScoped<IContainerService, ContainerService>();
+builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 
 // JWT authentication
 builder.Services.AddOptions<JwtOptions>()

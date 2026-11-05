@@ -14,6 +14,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Fridge> Fridges => Set<Fridge>();
     public DbSet<FridgeMember> FridgeMembers => Set<FridgeMember>();
     public DbSet<Container> Containers => Set<Container>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<ProductType> ProductTypes => Set<ProductType>();
+    public DbSet<CatalogProduct> CatalogProducts => Set<CatalogProduct>();
+    public DbSet<Item> Items => Set<Item>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -127,6 +131,98 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             container.Property(c => c.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
             container.Property(c => c.DeletedAt).HasColumnName("deleted_at");
+        });
+
+        modelBuilder.Entity<ProductCategory>(category =>
+        {
+            category.ToTable("product_categories");
+            category.HasKey(c => c.Id);
+            category.HasQueryFilter(c => c.DeletedAt == null);
+
+            category.Property(c => c.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            category.Property(c => c.Name).HasColumnName("name").IsRequired();
+            category.Property(c => c.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_product_categories_updated_at trigger.
+            category.Property(c => c.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            category.Property(c => c.DeletedAt).HasColumnName("deleted_at");
+
+            category.HasIndex(c => c.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<ProductType>(type =>
+        {
+            type.ToTable("product_types");
+            type.HasKey(t => t.Id);
+            type.HasQueryFilter(t => t.DeletedAt == null);
+
+            type.Property(t => t.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            type.Property(t => t.CategoryId).HasColumnName("category_id");
+            type.Property(t => t.Name).HasColumnName("name").IsRequired();
+            type.Property(t => t.DefaultExpiryDays).HasColumnName("default_expiry_days");
+            type.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_product_types_updated_at trigger.
+            type.Property(t => t.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            type.Property(t => t.DeletedAt).HasColumnName("deleted_at");
+
+            type.HasOne<ProductCategory>().WithMany(c => c.ProductTypes).HasForeignKey(t => t.CategoryId);
+        });
+
+        modelBuilder.Entity<CatalogProduct>(product =>
+        {
+            product.ToTable("product_catalog");
+            product.HasKey(p => p.Id);
+            product.HasQueryFilter(p => p.DeletedAt == null);
+
+            product.Property(p => p.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            product.Property(p => p.Barcode).HasColumnName("barcode").IsRequired();
+            product.Property(p => p.ProductTypeId).HasColumnName("product_type_id");
+            product.Property(p => p.Name).HasColumnName("name").IsRequired();
+            product.Property(p => p.ImageUrl).HasColumnName("image_url");
+            product.Property(p => p.Source).HasColumnName("source").IsRequired();
+            product.Property(p => p.CachedAt).HasColumnName("cached_at").HasDefaultValueSql("now()");
+            product.Property(p => p.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_product_catalog_updated_at trigger.
+            product.Property(p => p.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            product.Property(p => p.DeletedAt).HasColumnName("deleted_at");
+
+            product.HasOne<ProductType>().WithMany().HasForeignKey(p => p.ProductTypeId);
+            product.HasIndex(p => p.Barcode).IsUnique();
+        });
+
+        modelBuilder.Entity<Item>(item =>
+        {
+            item.ToTable("items");
+            item.HasKey(i => i.Id);
+            item.HasQueryFilter(i => i.DeletedAt == null);
+
+            item.Property(i => i.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            item.Property(i => i.ContainerId).HasColumnName("container_id");
+            item.Property(i => i.ProductCatalogId).HasColumnName("product_catalog_id");
+            item.Property(i => i.Name).HasColumnName("name").IsRequired();
+            item.Property(i => i.CategoryId).HasColumnName("category_id");
+            item.Property(i => i.Amount).HasColumnName("amount");
+            item.Property(i => i.Unit).HasColumnName("unit");
+            item.Property(i => i.ImageUrl).HasColumnName("image_url");
+            item.Property(i => i.AddedByUserId).HasColumnName("added_by_user_id");
+            item.Property(i => i.AddedAt).HasColumnName("added_at");
+            item.Property(i => i.ExpiryDate).HasColumnName("expiry_date");
+            item.Property(i => i.Comment).HasColumnName("comment");
+            // The column only accepts 'active', 'consumed', 'expired' and 'removed'.
+            item.Property(i => i.Status).HasColumnName("status")
+                .HasConversion(s => s.ToString().ToLowerInvariant(), s => Enum.Parse<ItemStatus>(s, true));
+            item.Property(i => i.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_items_updated_at trigger.
+            item.Property(i => i.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            item.Property(i => i.DeletedAt).HasColumnName("deleted_at");
+
+            item.HasOne<Container>().WithMany().HasForeignKey(i => i.ContainerId);
+            item.HasOne<CatalogProduct>().WithMany().HasForeignKey(i => i.ProductCatalogId);
+            item.HasOne<ProductCategory>().WithMany().HasForeignKey(i => i.CategoryId);
+            item.HasOne<User>().WithMany().HasForeignKey(i => i.AddedByUserId);
         });
     }
 }
