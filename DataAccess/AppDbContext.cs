@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductType> ProductTypes => Set<ProductType>();
     public DbSet<CatalogProduct> CatalogProducts => Set<CatalogProduct>();
+    public DbSet<Item> Items => Set<Item>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -189,6 +190,39 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             product.HasOne<ProductType>().WithMany().HasForeignKey(p => p.ProductTypeId);
             product.HasIndex(p => p.Barcode).IsUnique();
+        });
+
+        modelBuilder.Entity<Item>(item =>
+        {
+            item.ToTable("items");
+            item.HasKey(i => i.Id);
+            item.HasQueryFilter(i => i.DeletedAt == null);
+
+            item.Property(i => i.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            item.Property(i => i.ContainerId).HasColumnName("container_id");
+            item.Property(i => i.ProductCatalogId).HasColumnName("product_catalog_id");
+            item.Property(i => i.Name).HasColumnName("name").IsRequired();
+            item.Property(i => i.CategoryId).HasColumnName("category_id");
+            item.Property(i => i.Amount).HasColumnName("amount");
+            item.Property(i => i.Unit).HasColumnName("unit");
+            item.Property(i => i.ImageUrl).HasColumnName("image_url");
+            item.Property(i => i.AddedByUserId).HasColumnName("added_by_user_id");
+            item.Property(i => i.AddedAt).HasColumnName("added_at");
+            item.Property(i => i.ExpiryDate).HasColumnName("expiry_date");
+            item.Property(i => i.Comment).HasColumnName("comment");
+            // The column only accepts 'active', 'consumed', 'expired' and 'removed'.
+            item.Property(i => i.Status).HasColumnName("status")
+                .HasConversion(s => s.ToString().ToLowerInvariant(), s => Enum.Parse<ItemStatus>(s, true));
+            item.Property(i => i.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_items_updated_at trigger.
+            item.Property(i => i.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            item.Property(i => i.DeletedAt).HasColumnName("deleted_at");
+
+            item.HasOne<Container>().WithMany().HasForeignKey(i => i.ContainerId);
+            item.HasOne<CatalogProduct>().WithMany().HasForeignKey(i => i.ProductCatalogId);
+            item.HasOne<ProductCategory>().WithMany().HasForeignKey(i => i.CategoryId);
+            item.HasOne<User>().WithMany().HasForeignKey(i => i.AddedByUserId);
         });
     }
 }

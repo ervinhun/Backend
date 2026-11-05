@@ -12,6 +12,7 @@ public class AppExceptionHandler(IProblemDetailsService problemDetails, ILogger<
     {
         var (status, title) = exception switch
         {
+            BadRequestException => (StatusCodes.Status400BadRequest, "Bad request"),
             UnauthorizedException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden"),
             NotFoundException =>(StatusCodes.Status404NotFound, "Not found"),

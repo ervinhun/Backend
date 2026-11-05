@@ -28,6 +28,15 @@ public class ProductCatalogRepository(AppDbContext db, TimeProvider timeProvider
     public Task<bool> ProductTypeExistsAsync(Guid productTypeId, CancellationToken ct = default) =>
         db.ProductTypes.AnyAsync(t => t.Id == productTypeId, ct);
 
+    public Task<ProductType?> GetTypeAsync(Guid productTypeId, CancellationToken ct = default) =>
+        db.ProductTypes.AsNoTracking().FirstOrDefaultAsync(t => t.Id == productTypeId, ct);
+
+    public Task<bool> CategoryExistsAsync(Guid categoryId, CancellationToken ct = default) =>
+        db.ProductCategories.AnyAsync(c => c.Id == categoryId, ct);
+
+    public Task<CatalogProduct?> GetProductAsync(Guid productId, CancellationToken ct = default) =>
+        db.CatalogProducts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == productId, ct);
+
     public Task<CatalogProduct?> GetByBarcodeAsync(string barcode, CancellationToken ct = default) =>
         db.CatalogProducts.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == barcode, ct);
 

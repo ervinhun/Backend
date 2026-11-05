@@ -22,6 +22,15 @@ public class CollidingProductCatalogRepository(IProductCatalogRepository inner)
     public Task<bool> ProductTypeExistsAsync(Guid productTypeId, CancellationToken ct = default) =>
         inner.ProductTypeExistsAsync(productTypeId, ct);
 
+    public Task<ProductType?> GetTypeAsync(Guid productTypeId, CancellationToken ct = default) =>
+        inner.GetTypeAsync(productTypeId, ct);
+
+    public Task<bool> CategoryExistsAsync(Guid categoryId, CancellationToken ct = default) =>
+        inner.CategoryExistsAsync(categoryId, ct);
+
+    public Task<CatalogProduct?> GetProductAsync(Guid productId, CancellationToken ct = default) =>
+        inner.GetProductAsync(productId, ct);
+
     public Task<CatalogProduct?> GetByBarcodeAsync(string barcode, CancellationToken ct = default) =>
         Task.FromResult<CatalogProduct?>(null);
 
