@@ -55,6 +55,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connect
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
+builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
 builder.Services.AddScoped<IContainerRepository, ContainerRepository>();
 
 // Business logic
@@ -64,6 +65,7 @@ builder.Services.AddSingleton<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
 builder.Services.AddScoped<IFridgeService, FridgeService>();
+builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 builder.Services.AddScoped<IContainerService, ContainerService>();
 
 // JWT authentication
