@@ -6,7 +6,7 @@ Part of the [FridgeFriend](https://github.com/ervinhun/FridgeFriend) project. Se
 
 ## Getting started
 
-1. Copy `.env.example` to `.env` and fill it in — it holds the database connection string.
+1. Copy `.env.example` to `.env` and fill it in — it holds the database connection string, and optionally the Google/Apple client ids that enable `POST /api/auth/external`.
 2. Run with Docker:
 
    ```sh

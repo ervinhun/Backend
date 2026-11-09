@@ -2,21 +2,30 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BusinessLogic.Dtos.Auth;
+using BusinessLogic.Interfaces;
 using DataAccess;
+using DataAccess.Entities;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tests.Database;
+using Tests.Fakes;
 
 namespace Tests.Api;
 
 public class AuthEndpointsTests : DatabaseTest
 {
-    private readonly ApiFactory _factory;
+    private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
     public AuthEndpointsTests(PostgresFixture database) : base(database)
     {
-        _factory = new ApiFactory(database.ConnectionString);
+        // Google and Apple sign-in accept tokens from the fake instead of calling the providers.
+        _factory = new ApiFactory(database.ConnectionString).WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services =>
+                services.Replace(ServiceDescriptor.Singleton<IExternalTokenValidator, FakeExternalTokenValidator>())));
         _client = _factory.CreateClient();
     }
 
@@ -173,5 +182,59 @@ public class AuthEndpointsTests : DatabaseTest
 
         var refresh = await _client.PostAsJsonAsync("/api/auth/refresh", new { refreshToken = auth.RefreshToken });
         Assert.Equal(HttpStatusCode.Unauthorized, refresh.StatusCode);
+    }
+
+    private string IssueGoogleToken(string email)
+    {
+        var external = (FakeExternalTokenValidator)_factory.Services.GetRequiredService<IExternalTokenValidator>();
+        return external.Issue(new ExternalIdentity(AuthProviders.Google, Guid.NewGuid().ToString(), email, true, "Anna"));
+    }
+
+    [Fact]
+    public async Task External_SignIn_Then_Me()
+    {
+        var email = $"{Guid.NewGuid():N}@example.com";
+
+        var signIn = await _client.PostAsJsonAsync(
+            "/api/auth/external", new { provider = "google", idToken = IssueGoogleToken(email), displayName = "Anna" });
+        Assert.Equal(HttpStatusCode.OK, signIn.StatusCode);
+        var auth = await signIn.Content.ReadFromJsonAsync<AuthResponse>();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
+        var me = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, me.StatusCode);
+        Assert.Equal(email, (await me.Content.ReadFromJsonAsync<UserDto>())!.Email);
+    }
+
+    [Theory]
+    [InlineData("facebook", "token")]
+    [InlineData("google", "")]
+    public async Task External_InvalidBody_Returns400(string provider, string idToken)
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/external", new { provider, idToken });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task External_ForgedToken_Returns401()
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/external", new { provider = "google", idToken = "forged" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task External_SignIn_ReturnsRefreshToken_ThatWorks()
+    {
+        var idToken = IssueGoogleToken($"{Guid.NewGuid():N}@example.com");
+        var auth = await (await _client.PostAsJsonAsync("/api/auth/external", new { provider = "google", idToken }))
+            .Content.ReadFromJsonAsync<AuthResponse>();
+
+        var refresh = await _client.PostAsJsonAsync("/api/auth/refresh", new { refreshToken = auth!.RefreshToken });
+
+        Assert.Equal(HttpStatusCode.OK, refresh.StatusCode);
     }
 }
