@@ -26,7 +26,7 @@ public class FridgeService(
     private const int InviteCodeAttempts = 5;
 
     /// <summary>How many fridges one user may own; ones they only joined don't count.</summary>
-    private const int MaxOwnedFridges = 5;
+    public const int MaxOwnedFridges = 5;
 
     public async Task<FridgeResponse> CreateAsync(
         Guid userId,

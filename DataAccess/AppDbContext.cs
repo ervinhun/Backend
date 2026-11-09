@@ -11,11 +11,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<UserLogin> UserLogins => Set<UserLogin>();
     public DbSet<Fridge> Fridges => Set<Fridge>();
     public DbSet<FridgeMember> FridgeMembers => Set<FridgeMember>();
     public DbSet<Container> Containers => Set<Container>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductType> ProductTypes => Set<ProductType>();
+    public DbSet<CatalogProduct> CatalogProducts => Set<CatalogProduct>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,6 +39,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.Property(u => u.DeletedAt).HasColumnName("deleted_at");
 
             user.HasIndex(u => u.Email).IsUnique();
+            user.HasMany(u => u.Logins).WithOne().HasForeignKey(l => l.UserId);
+        });
+
+        modelBuilder.Entity<UserLogin>(login =>
+        {
+            login.ToTable("user_logins");
+            login.HasKey(l => l.Id);
+
+            login.Property(l => l.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            login.Property(l => l.UserId).HasColumnName("user_id");
+            login.Property(l => l.ProviderUserId).HasColumnName("provider_user_id").IsRequired();
+            login.Property(l => l.Provider).HasColumnName("provider").IsRequired();
+            login.Property(l => l.IsActive).HasColumnName("is_active");
+            login.Property(l => l.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_user_logins_updated_at trigger.
+            login.Property(l => l.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            login.Property(l => l.DeletedAt).HasColumnName("deleted_at");
         });
 
         modelBuilder.Entity<UserSession>(session =>
@@ -167,7 +187,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
             type.Property(t => t.DeletedAt).HasColumnName("deleted_at");
 
-            type.HasOne(t => t.Category).WithMany().HasForeignKey(t => t.CategoryId);
+            type.HasOne(t => t.Category).WithMany(c => c.ProductTypes).HasForeignKey(t => t.CategoryId);
+        });
+
+        modelBuilder.Entity<CatalogProduct>(product =>
+        {
+            product.ToTable("product_catalog");
+            product.HasKey(p => p.Id);
+            product.HasQueryFilter(p => p.DeletedAt == null);
+
+            product.Property(p => p.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            product.Property(p => p.Barcode).HasColumnName("barcode").IsRequired();
+            product.Property(p => p.ProductTypeId).HasColumnName("product_type_id");
+            product.Property(p => p.Name).HasColumnName("name").IsRequired();
+            product.Property(p => p.ImageUrl).HasColumnName("image_url");
+            product.Property(p => p.Source).HasColumnName("source").IsRequired();
+            product.Property(p => p.CachedAt).HasColumnName("cached_at").HasDefaultValueSql("now()");
+            product.Property(p => p.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_product_catalog_updated_at trigger.
+            product.Property(p => p.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            product.Property(p => p.DeletedAt).HasColumnName("deleted_at");
+
+            product.HasOne<ProductType>().WithMany().HasForeignKey(p => p.ProductTypeId);
+            product.HasIndex(p => p.Barcode).IsUnique();
         });
     }
 }

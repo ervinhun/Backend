@@ -55,6 +55,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connect
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
+builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
+builder.Services.AddScoped<IContainerRepository, ContainerRepository>();
 
 // Business logic
 builder.Services.AddSingleton(TimeProvider.System);
@@ -63,6 +65,13 @@ builder.Services.AddSingleton<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
 builder.Services.AddScoped<IFridgeService, FridgeService>();
+builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
+builder.Services.AddScoped<IContainerService, ContainerService>();
+
+// Google / Apple sign-in. Singleton so the providers' signing keys stay cached.
+builder.Services.AddOptions<ExternalAuthOptions>()
+    .Bind(builder.Configuration.GetSection(ExternalAuthOptions.SectionName));
+builder.Services.AddSingleton<IExternalTokenValidator, OidcExternalTokenValidator>();
 
 // JWT authentication
 builder.Services.AddOptions<JwtOptions>()

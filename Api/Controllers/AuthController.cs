@@ -25,6 +25,13 @@ public class AuthController(IAuthService authService) : ControllerBase
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken ct) =>
         await authService.LoginAsync(request, ct);
 
+    /// <summary>Signs in with a Google or Apple ID token obtained by the app.</summary>
+    [HttpPost(nameof(External))]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<ActionResult<AuthResponse>> External(ExternalLoginRequest request, CancellationToken ct) =>
+        await authService.ExternalLoginAsync(request, ct);
+
     /// <summary>Returns the user the bearer token belongs to.</summary>
     [HttpGet(nameof(Me))]
     [Authorize]

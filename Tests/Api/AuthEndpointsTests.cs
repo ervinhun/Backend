@@ -2,47 +2,37 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BusinessLogic.Dtos.Auth;
-using DataAccess.Interfaces;
-using Microsoft.AspNetCore.Hosting;
+using BusinessLogic.Interfaces;
+using DataAccess;
+using DataAccess.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Tests.Database;
 using Tests.Fakes;
 
 namespace Tests.Api;
 
-public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
+public class AuthEndpointsTests : DatabaseTest
 {
-    public class Factory : WebApplicationFactory<Program>
-    {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.UseEnvironment("Testing");
-            builder.ConfigureAppConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = "Host=unused",
-                ["Jwt:Secret"] = TestJwt.Options.Secret,
-                ["Jwt:Issuer"] = TestJwt.Options.Issuer,
-                ["Jwt:Audience"] = TestJwt.Options.Audience,
-                // These tests all share one client IP; rate limiting has its own tests.
-                ["RateLimiting:Auth:PermitLimit"] = "10000",
-            }));
-            builder.ConfigureServices(services =>
-            {
-                services.Replace(ServiceDescriptor.Singleton<IUserRepository, InMemoryUserRepository>());
-                services.Replace(ServiceDescriptor.Singleton<IUserSessionRepository, InMemoryUserSessionRepository>());
-            });
-        }
-    }
-
-    private readonly Factory _factory;
+    private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
-    public AuthEndpointsTests(Factory factory)
+    public AuthEndpointsTests(PostgresFixture database) : base(database)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
+        // Google and Apple sign-in accept tokens from the fake instead of calling the providers.
+        _factory = new ApiFactory(database.ConnectionString).WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services =>
+                services.Replace(ServiceDescriptor.Singleton<IExternalTokenValidator, FakeExternalTokenValidator>())));
+        _client = _factory.CreateClient();
+    }
+
+    public override async Task DisposeAsync()
+    {
+        _client.Dispose();
+        await _factory.DisposeAsync();
     }
 
     private static object RegisterBody(string email) =>
@@ -121,8 +111,12 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
         var register = await _client.PostAsJsonAsync("/api/auth/register", RegisterBody(email));
         var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
 
-        var users = (InMemoryUserRepository)_factory.Services.GetRequiredService<IUserRepository>();
-        users.All.Single(u => u.Email == email).DeletedAt = DateTimeOffset.UtcNow;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await db.Users.Where(u => u.Email == email)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.DeletedAt, DateTimeOffset.UtcNow));
+        }
 
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
@@ -188,5 +182,59 @@ public class AuthEndpointsTests : IClassFixture<AuthEndpointsTests.Factory>
 
         var refresh = await _client.PostAsJsonAsync("/api/auth/refresh", new { refreshToken = auth.RefreshToken });
         Assert.Equal(HttpStatusCode.Unauthorized, refresh.StatusCode);
+    }
+
+    private string IssueGoogleToken(string email)
+    {
+        var external = (FakeExternalTokenValidator)_factory.Services.GetRequiredService<IExternalTokenValidator>();
+        return external.Issue(new ExternalIdentity(AuthProviders.Google, Guid.NewGuid().ToString(), email, true, "Anna"));
+    }
+
+    [Fact]
+    public async Task External_SignIn_Then_Me()
+    {
+        var email = $"{Guid.NewGuid():N}@example.com";
+
+        var signIn = await _client.PostAsJsonAsync(
+            "/api/auth/external", new { provider = "google", idToken = IssueGoogleToken(email), displayName = "Anna" });
+        Assert.Equal(HttpStatusCode.OK, signIn.StatusCode);
+        var auth = await signIn.Content.ReadFromJsonAsync<AuthResponse>();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
+        var me = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, me.StatusCode);
+        Assert.Equal(email, (await me.Content.ReadFromJsonAsync<UserDto>())!.Email);
+    }
+
+    [Theory]
+    [InlineData("facebook", "token")]
+    [InlineData("google", "")]
+    public async Task External_InvalidBody_Returns400(string provider, string idToken)
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/external", new { provider, idToken });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task External_ForgedToken_Returns401()
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/external", new { provider = "google", idToken = "forged" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task External_SignIn_ReturnsRefreshToken_ThatWorks()
+    {
+        var idToken = IssueGoogleToken($"{Guid.NewGuid():N}@example.com");
+        var auth = await (await _client.PostAsJsonAsync("/api/auth/external", new { provider = "google", idToken }))
+            .Content.ReadFromJsonAsync<AuthResponse>();
+
+        var refresh = await _client.PostAsJsonAsync("/api/auth/refresh", new { refreshToken = auth!.RefreshToken });
+
+        Assert.Equal(HttpStatusCode.OK, refresh.StatusCode);
     }
 }
