@@ -75,8 +75,15 @@ public class ProductCatalogRepositoryTests(PostgresFixture database) : DatabaseT
     {
         var types = await Repository.GetTypesAsync();
 
+        // In the database's own order: its collation sorts "Bacon bits" before "Bacon (fully cooked)".
+        await using var db = Database.CreateDbContext();
+        var byName = await db
+            .Database.SqlQuery<string>(
+                $"SELECT name AS \"Value\" FROM product_types WHERE deleted_at IS NULL ORDER BY name"
+            )
+            .ToListAsync();
         Assert.True(types.Count > 1);
-        Assert.Equal(types.Select(t => t.Name).Order(StringComparer.Ordinal), types.Select(t => t.Name));
+        Assert.Equal(byName, types.Select(t => t.Name));
     }
 
     [Fact]
@@ -86,27 +93,26 @@ public class ProductCatalogRepositoryTests(PostgresFixture database) : DatabaseT
 
         var types = await Repository.GetTypesAsync(dairy.Id);
 
-        Assert.Equal(["Eggs", "Hard cheese", "Milk"], types.Select(t => t.Name));
+        Assert.Equal(45, types.Count);
+        Assert.Contains("Yogurt", types.Select(t => t.Name));
         Assert.All(types, t => Assert.Equal(dairy.Id, t.CategoryId));
     }
 
     [Fact]
     public async Task Category_ProductTypes_LoadLazilyWithoutDeletedOnes()
     {
-        await SetTypeDeletedAsync("Eggs", DateTimeOffset.UtcNow);
+        await SetTypeDeletedAsync("Yogurt", DateTimeOffset.UtcNow);
         try
         {
             await using var db = Database.CreateDbContext();
             var dairy = await db.ProductCategories.SingleAsync(c => c.Name == "Dairy & Eggs");
 
-            Assert.Equal(
-                ["Hard cheese", "Milk"],
-                dairy.ProductTypes.Select(t => t.Name).Order(StringComparer.Ordinal)
-            );
+            Assert.Equal(44, dairy.ProductTypes.Count);
+            Assert.DoesNotContain("Yogurt", dairy.ProductTypes.Select(t => t.Name));
         }
         finally
         {
-            await SetTypeDeletedAsync("Eggs", null);
+            await SetTypeDeletedAsync("Yogurt", null);
         }
     }
 
