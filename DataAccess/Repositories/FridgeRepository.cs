@@ -115,6 +115,12 @@ public class FridgeRepository(AppDbContext db, TimeProvider timeProvider) : IFri
         await db
             .Containers.Where(c => c.FridgeId == fridgeId)
             .ExecuteUpdateAsync(s => s.SetProperty(c => c.DeletedAt, now), ct);
+        await db
+            .NotificationSettings.Where(n => n.FridgeId == fridgeId)
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.DeletedAt, now), ct);
+        await db
+            .NotificationRecipients.Where(r => r.FridgeId == fridgeId)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.DeletedAt, now), ct);
 
         await transaction.CommitAsync(ct);
         return true;

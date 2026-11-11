@@ -18,6 +18,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductType> ProductTypes => Set<ProductType>();
     public DbSet<CatalogProduct> CatalogProducts => Set<CatalogProduct>();
+    public DbSet<FridgeNotificationSettings> NotificationSettings => Set<FridgeNotificationSettings>();
+    public DbSet<FridgeNotificationRecipient> NotificationRecipients => Set<FridgeNotificationRecipient>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -208,6 +210,50 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             product.HasOne<ProductType>().WithMany().HasForeignKey(p => p.ProductTypeId);
             product.HasIndex(p => p.Barcode).IsUnique();
+        });
+
+        modelBuilder.Entity<FridgeNotificationSettings>(settings =>
+        {
+            settings.ToTable("fridge_notification_settings");
+            settings.HasKey(s => s.Id);
+            // Soft-deleted settings are left out of every query, like deleted fridges and containers.
+            settings.HasQueryFilter(s => s.DeletedAt == null);
+
+            settings.Property(s => s.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            settings.Property(s => s.FridgeId).HasColumnName("fridge_id");
+            settings.Property(s => s.WarningDaysBefore).HasColumnName("warning_days_before");
+            settings.Property(s => s.DangerDaysBefore).HasColumnName("danger_days_before");
+            // The column only accepts 'all_members', 'adder_and_owners' and 'custom'.
+            settings.Property(s => s.RecipientsScope).HasColumnName("recipients_scope")
+                .HasConversion(
+                    scope => scope == RecipientsScope.AllMembers ? "all_members"
+                        : scope == RecipientsScope.AdderAndOwners ? "adder_and_owners" : "custom",
+                    value => value == "all_members" ? RecipientsScope.AllMembers
+                        : value == "adder_and_owners" ? RecipientsScope.AdderAndOwners : RecipientsScope.Custom
+                );
+            settings.Property(s => s.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_fridge_notification_settings_updated_at trigger.
+            settings.Property(s => s.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            settings.Property(s => s.DeletedAt).HasColumnName("deleted_at");
+
+            settings.HasIndex(s => s.FridgeId).IsUnique();
+        });
+
+        modelBuilder.Entity<FridgeNotificationRecipient>(recipient =>
+        {
+            recipient.ToTable("fridge_notification_recipients");
+            recipient.HasKey(r => r.Id);
+            recipient.HasQueryFilter(r => r.DeletedAt == null);
+
+            recipient.Property(r => r.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            recipient.Property(r => r.FridgeId).HasColumnName("fridge_id");
+            recipient.Property(r => r.UserId).HasColumnName("user_id");
+            recipient.Property(r => r.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_fridge_notification_recipients_updated_at trigger.
+            recipient.Property(r => r.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            recipient.Property(r => r.DeletedAt).HasColumnName("deleted_at");
         });
     }
 }
