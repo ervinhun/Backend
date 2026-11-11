@@ -178,13 +178,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             type.Property(t => t.CategoryId).HasColumnName("category_id");
             type.Property(t => t.Name).HasColumnName("name").IsRequired();
             type.Property(t => t.DefaultExpiryDays).HasColumnName("default_expiry_days");
+            type.Property(t => t.PantryExpiryDays).HasColumnName("pantry_expiry_days");
+            type.Property(t => t.FridgeExpiryDays).HasColumnName("fridge_expiry_days");
+            type.Property(t => t.FreezerExpiryDays).HasColumnName("freezer_expiry_days");
             type.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
             // Bumped server-side by the trg_product_types_updated_at trigger.
             type.Property(t => t.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
             type.Property(t => t.DeletedAt).HasColumnName("deleted_at");
 
-            type.HasOne<ProductCategory>().WithMany(c => c.ProductTypes).HasForeignKey(t => t.CategoryId);
+            type.HasOne(t => t.Category).WithMany(c => c.ProductTypes).HasForeignKey(t => t.CategoryId);
         });
 
         modelBuilder.Entity<CatalogProduct>(product =>

@@ -23,6 +23,9 @@ public static class ProductMapper
             CategoryId = type.CategoryId,
             Name = type.Name,
             DefaultExpiryDays = type.DefaultExpiryDays,
+            PantryExpiryDays = type.PantryExpiryDays,
+            FridgeExpiryDays = type.FridgeExpiryDays,
+            FreezerExpiryDays = type.FreezerExpiryDays,
         };
 
     public static ProductCategoryResponse ToResponse(this ProductCategory category) =>

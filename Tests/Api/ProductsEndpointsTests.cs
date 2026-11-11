@@ -209,7 +209,9 @@ public class ProductsEndpointsTests : DatabaseTest
             ).Content.ReadFromJsonAsync<List<ProductTypeResponse>>()
         )!;
 
-        Assert.Equal(["Eggs", "Hard cheese", "Milk"], types.Select(t => t.Name));
+        Assert.Equal(45, types.Count);
         Assert.All(types, t => Assert.Equal(dairy.Id, t.CategoryId));
+        var butter = types.Single(t => t.Name == "Butter");
+        Assert.Equal((60, 270), (butter.FridgeExpiryDays, butter.FreezerExpiryDays));
     }
 }

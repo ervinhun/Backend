@@ -1,0 +1,3156 @@
+[
+  {
+    "name": "Baby Food",
+    "types": [
+      {
+        "name": "Cereal, dry mixes",
+        "pantryDays": 30
+      },
+      {
+        "name": "Dinners",
+        "fridgeDays": 2
+      },
+      {
+        "name": "Formula (prepared)",
+        "fridgeDays": 1
+      },
+      {
+        "name": "Fruit",
+        "fridgeDays": 3
+      },
+      {
+        "name": "Jars or pouches",
+        "fridgeDays": 3
+      },
+      {
+        "name": "Liquid concentrate or ready-to-feed formula",
+        "fridgeDays": 2
+      },
+      {
+        "name": "Vegetables",
+        "fridgeDays": 2
+      }
+    ]
+  },
+  {
+    "name": "Bakery",
+    "types": [
+      {
+        "name": "Bagel (commercially frozen)",
+        "freezerDays": 90
+      },
+      {
+        "name": "Bagel (fresh baked)",
+        "pantryDays": 2,
+        "freezerDays": 90
+      },
+      {
+        "name": "Bread (homemade)",
+        "pantryDays": 5,
+        "fridgeDays": 90
+      },
+      {
+        "name": "Cheesecake",
+        "fridgeDays": 7,
+        "freezerDays": 180
+      },
+      {
+        "name": "Chiffon pies (chocolate, lemon)",
+        "fridgeDays": 2
+      },
+      {
+        "name": "Commercial bread products (including pan breads, flat breads, rolls, and buns)",
+        "pantryDays": 18,
+        "fridgeDays": 21,
+        "freezerDays": 150
+      },
+      {
+        "name": "Commercial cakes and muffins",
+        "pantryDays": 7,
+        "fridgeDays": 10,
+        "freezerDays": 180
+      },
+      {
+        "name": "Cookie dough",
+        "freezerDays": 60
+      },
+      {
+        "name": "Cookies (crispy)",
+        "pantryDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cookies (soft)",
+        "pantryDays": 90,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cream pies (banana cream, coconut cream, butterscotch)",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Dairy filled eclairs",
+        "fridgeDays": 3,
+        "freezerDays": 90
+      },
+      {
+        "name": "Doughnuts",
+        "pantryDays": 2,
+        "fridgeDays": 2
+      },
+      {
+        "name": "Fruit cake",
+        "pantryDays": 180,
+        "fridgeDays": 360,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fruit pies (apple, peach, blueberry, apricot, cherry, blackberry)",
+        "pantryDays": 2,
+        "fridgeDays": 7,
+        "freezerDays": 240
+      },
+      {
+        "name": "Macaroons (french)",
+        "pantryDays": 2,
+        "freezerDays": 90
+      },
+      {
+        "name": "Muffin (commercially packaged)",
+        "pantryDays": 7,
+        "freezerDays": 90
+      },
+      {
+        "name": "Muffin (homemade - including bran, blueberry, banana, corn, chocolate chip)",
+        "pantryDays": 7,
+        "freezerDays": 90
+      },
+      {
+        "name": "Muffin (mix, dry, commercially packaged)",
+        "pantryDays": 270
+      },
+      {
+        "name": "Pastries, danish",
+        "pantryDays": 10,
+        "fridgeDays": 420
+      },
+      {
+        "name": "Pie crust (refrigerated)",
+        "freezerDays": 60
+      },
+      {
+        "name": "Pies (mincemeat)",
+        "fridgeDays": 7,
+        "freezerDays": 240
+      },
+      {
+        "name": "Pies (pecan)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Pies (pumpkin)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Puff pastry",
+        "freezerDays": 360
+      },
+      {
+        "name": "Quiche",
+        "fridgeDays": 5,
+        "freezerDays": 90
+      },
+      {
+        "name": "Ready-to-bake pie crust",
+        "freezerDays": 60
+      }
+    ]
+  },
+  {
+    "name": "Baking & Cooking",
+    "types": [
+      {
+        "name": "Almond extract",
+        "pantryDays": 730
+      },
+      {
+        "name": "Amaranth (flour, meal)",
+        "pantryDays": 60,
+        "freezerDays": 120
+      },
+      {
+        "name": "Baking powder",
+        "pantryDays": 540
+      },
+      {
+        "name": "Baking soda",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Barley (flour, meal)",
+        "pantryDays": 90,
+        "freezerDays": 180
+      },
+      {
+        "name": "Biscuit or pancake mix",
+        "pantryDays": 270
+      },
+      {
+        "name": "Buckwheat (flour, meal)",
+        "pantryDays": 30,
+        "freezerDays": 60
+      },
+      {
+        "name": "Butter flavor",
+        "pantryDays": 730
+      },
+      {
+        "name": "Cake, brownie, bread mixes",
+        "pantryDays": 540
+      },
+      {
+        "name": "Chili powder",
+        "pantryDays": 730
+      },
+      {
+        "name": "Chocolate (unsweetened and semi-sweet, solid)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Cinnamon extract",
+        "pantryDays": 730
+      },
+      {
+        "name": "Cinnamon rolls (baked)",
+        "pantryDays": 3,
+        "freezerDays": 90
+      },
+      {
+        "name": "Cocoa and cocoa mixes",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Coconut flavor",
+        "pantryDays": 730
+      },
+      {
+        "name": "Coconut flour",
+        "fridgeDays": 360,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cornmeal (regular, degerminated)",
+        "pantryDays": 360,
+        "fridgeDays": 365
+      },
+      {
+        "name": "Cornmeal (stone ground or blue)",
+        "pantryDays": 30,
+        "fridgeDays": 120
+      },
+      {
+        "name": "Cornstarch",
+        "pantryDays": 720
+      },
+      {
+        "name": "Farro (flour, meal)",
+        "pantryDays": 90,
+        "freezerDays": 180
+      },
+      {
+        "name": "Flavored or herb mixes",
+        "pantryDays": 180
+      },
+      {
+        "name": "Flour (white)",
+        "pantryDays": 360,
+        "fridgeDays": 365
+      },
+      {
+        "name": "Flour (whole wheat)",
+        "pantryDays": 180,
+        "fridgeDays": 240
+      },
+      {
+        "name": "Frosting or icing",
+        "pantryDays": 360,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Garam masala",
+        "pantryDays": 365
+      },
+      {
+        "name": "Garlic (chopped, commercial jars)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Gelatin (flavored)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Gelatin (unflavored)",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Herbs (dried)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Lemon extract",
+        "pantryDays": 730
+      },
+      {
+        "name": "Millet (flour, meal)",
+        "pantryDays": 30,
+        "freezerDays": 60
+      },
+      {
+        "name": "Nut oils",
+        "pantryDays": 360,
+        "fridgeDays": 240
+      },
+      {
+        "name": "Oats (flour, meal)",
+        "pantryDays": 60,
+        "freezerDays": 120
+      },
+      {
+        "name": "Oils (olive or vegetable)",
+        "pantryDays": 360,
+        "fridgeDays": 120
+      },
+      {
+        "name": "Pure vanilla extract",
+        "pantryDays": 730
+      },
+      {
+        "name": "Rye (flour, meal)",
+        "pantryDays": 90,
+        "freezerDays": 180
+      },
+      {
+        "name": "Seasoning blends",
+        "pantryDays": 730
+      },
+      {
+        "name": "Shortening (solid)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Sorghum (flour, meal)",
+        "pantryDays": 60,
+        "freezerDays": 120
+      },
+      {
+        "name": "Spelt (flour, meal)",
+        "pantryDays": 90,
+        "freezerDays": 180
+      },
+      {
+        "name": "Spice/spices (ground)",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Spice/spices (whole)",
+        "pantryDays": 1460
+      },
+      {
+        "name": "Sugar (brown)",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Sugar (confectioners)",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Sugar (granulated)",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Sugar substitutes",
+        "pantryDays": 730
+      },
+      {
+        "name": "Tamarind paste",
+        "pantryDays": 360,
+        "fridgeDays": 90
+      },
+      {
+        "name": "Tapiocas",
+        "pantryDays": 360
+      },
+      {
+        "name": "Teff (flour, meal)",
+        "pantryDays": 60,
+        "freezerDays": 120
+      },
+      {
+        "name": "Vegetable oil sprays",
+        "pantryDays": 730
+      },
+      {
+        "name": "Whole wheat flour",
+        "pantryDays": 360,
+        "fridgeDays": 730,
+        "freezerDays": 730
+      },
+      {
+        "name": "Yeast (packaged)",
+        "pantryDays": 730,
+        "fridgeDays": 120,
+        "freezerDays": 180
+      }
+    ]
+  },
+  {
+    "name": "Dairy & Eggs",
+    "types": [
+      {
+        "name": "Almond milk",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Butter",
+        "fridgeDays": 60,
+        "freezerDays": 270
+      },
+      {
+        "name": "Buttermilk",
+        "fridgeDays": 14,
+        "freezerDays": 90
+      },
+      {
+        "name": "Cheese (hard such as cheddar, swiss, block parmesan)",
+        "fridgeDays": 180,
+        "freezerDays": 180
+      },
+      {
+        "name": "Cheese (parmesan; shredded or grated)",
+        "fridgeDays": 360
+      },
+      {
+        "name": "Cheese (processed slices)",
+        "fridgeDays": 28
+      },
+      {
+        "name": "Cheese (shredded; cheddar, mozzarella, etc.)",
+        "fridgeDays": 30,
+        "freezerDays": 120
+      },
+      {
+        "name": "Cheese (soft such as brie, bel paese, goat)",
+        "fridgeDays": 14,
+        "freezerDays": 180
+      },
+      {
+        "name": "Cheese Curds (fresh, unaged)",
+        "fridgeDays": 14,
+        "freezerDays": 120
+      },
+      {
+        "name": "Coconut milk",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Coffee creamer (liquid refrigerated)",
+        "fridgeDays": 21
+      },
+      {
+        "name": "Coffee creamer (powdered)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Cottage cheese",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Cream (half and half)",
+        "fridgeDays": 4,
+        "freezerDays": 120
+      },
+      {
+        "name": "Cream (heavy)",
+        "fridgeDays": 10,
+        "freezerDays": 120
+      },
+      {
+        "name": "Cream (light)",
+        "fridgeDays": 7,
+        "freezerDays": 120
+      },
+      {
+        "name": "Cream (whipped, sweetened)",
+        "fridgeDays": 1,
+        "freezerDays": 60
+      },
+      {
+        "name": "Cream (whipping, ultrapasteurized)",
+        "fridgeDays": 30
+      },
+      {
+        "name": "Cream cheese",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Dips (sour cream based)",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Egg dishes",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Egg substitutes (liquid)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Eggnog (commercial)",
+        "fridgeDays": 5,
+        "freezerDays": 180
+      },
+      {
+        "name": "Eggs (hard boiled cooked)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Eggs (in shell)",
+        "fridgeDays": 35
+      },
+      {
+        "name": "Eggs (raw whites, yolks)",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Ghee",
+        "pantryDays": 240,
+        "fridgeDays": 730
+      },
+      {
+        "name": "Kefir (fermented milk)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Margarine",
+        "fridgeDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Milk (lactose-free)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Milk (plain or flavored)",
+        "freezerDays": 90
+      },
+      {
+        "name": "Nacho cheese (store bought)",
+        "pantryDays": 730,
+        "fridgeDays": 14,
+        "freezerDays": 90
+      },
+      {
+        "name": "Pimento cheese (packaged)",
+        "fridgeDays": 28
+      },
+      {
+        "name": "Powdered milk",
+        "pantryDays": 1825
+      },
+      {
+        "name": "Pudding",
+        "fridgeDays": 2
+      },
+      {
+        "name": "Quark (fresh cheese)",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Rice milk",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Ricotta",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Soy milk",
+        "fridgeDays": 10
+      },
+      {
+        "name": "String Cheese",
+        "fridgeDays": 150
+      },
+      {
+        "name": "Vegan Cheddar Cheese",
+        "fridgeDays": 120
+      },
+      {
+        "name": "Whipped cream (aerosol can)",
+        "fridgeDays": 28
+      },
+      {
+        "name": "Whipped topping (aerosol can)",
+        "fridgeDays": 90
+      },
+      {
+        "name": "Whipped topping (tub)",
+        "fridgeDays": 14,
+        "freezerDays": 420
+      },
+      {
+        "name": "Yogurt",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      }
+    ]
+  },
+  {
+    "name": "Deli & Leftovers",
+    "types": [
+      {
+        "name": "Canadian bacon (sliced)",
+        "fridgeDays": 10,
+        "freezerDays": 360
+      },
+      {
+        "name": "Canadian bacon (whole)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Casseroles",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Chicken (pre-packaged, luncheon/deli meat)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Chicken salad",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Coleslaw (homemade, prepared)",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Commercial brand vacuum-packed dinners (with USDA seal)",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Cooked pasta",
+        "fridgeDays": 5,
+        "freezerDays": 60
+      },
+      {
+        "name": "Cooked rice",
+        "fridgeDays": 6,
+        "freezerDays": 180
+      },
+      {
+        "name": "Egg salad",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Fruit, cut",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Guacamole",
+        "fridgeDays": 4,
+        "freezerDays": 120
+      },
+      {
+        "name": "Ham (pre-packaged, luncheon/deli meat)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham salad",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Hummus (commercial (pasteurized, with preservatives))",
+        "fridgeDays": 90
+      },
+      {
+        "name": "Hummus (traditional (no preservatives, not pasteurized))",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Kugel (homemade)",
+        "fridgeDays": 4,
+        "freezerDays": 30
+      },
+      {
+        "name": "Leftovers (pizza)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Leftovers (with meat, fish, poultry, or egg)",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Leftovers (without meat, fish, poultry, or egg (such as cooked vegitables, rice, or potatoes))",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Luncheon meat or poultry (pre-packaged)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Luncheon meat or poultry (store-sliced)",
+        "fridgeDays": 5,
+        "freezerDays": 60
+      },
+      {
+        "name": "Main dishes or meals (hot or refrigerated)",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Meats (covered with gravy or broth)",
+        "fridgeDays": 4,
+        "freezerDays": 180
+      },
+      {
+        "name": "Olives (from olive bar)",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Pasta salad",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Pate",
+        "fridgeDays": 2,
+        "freezerDays": 60
+      },
+      {
+        "name": "Potato salad",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Poultry pieces (covered with gravy or broth)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Salami (pre-packaged, luncheon/deli meat)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Salsa (fresh)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Salsa (homemade, fresh)",
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Seafood salads ((tuna salad, shrimp salad, salmon salad, mixed seafood salad, etc.))",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Soup, stews",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Turkey (pre-packaged, luncheon/deli meat)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Vegetable soup (homemade)",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      }
+    ]
+  },
+  {
+    "name": "Drinks",
+    "types": [
+      {
+        "name": "Apple cider (fresh)",
+        "pantryDays": 3,
+        "fridgeDays": 21,
+        "freezerDays": 3650
+      },
+      {
+        "name": "Apple juice (fresh squeezed)",
+        "fridgeDays": 6,
+        "freezerDays": 360
+      },
+      {
+        "name": "Carrot juice (fresh squeezed)",
+        "fridgeDays": 6,
+        "freezerDays": 360
+      },
+      {
+        "name": "Coconut water",
+        "pantryDays": 360,
+        "fridgeDays": 2
+      },
+      {
+        "name": "Coffee (commercial ground, non-vacuum)",
+        "pantryDays": 730,
+        "fridgeDays": 30,
+        "freezerDays": 360
+      },
+      {
+        "name": "Coffee (home ground, non-vacuum)",
+        "pantryDays": 150,
+        "freezerDays": 730
+      },
+      {
+        "name": "Coffee (instant)",
+        "pantryDays": 365
+      },
+      {
+        "name": "Coffee (whole beans)",
+        "pantryDays": 150,
+        "fridgeDays": 120
+      },
+      {
+        "name": "Cream liquors (unopened)",
+        "pantryDays": 240
+      },
+      {
+        "name": "Diet powder mixes and drink mixes",
+        "pantryDays": 720
+      },
+      {
+        "name": "Fruit Juice in cartons, fruit drinks, punch",
+        "pantryDays": 21,
+        "fridgeDays": 12
+      },
+      {
+        "name": "Hard liquors",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Juice, boxes",
+        "fridgeDays": 12
+      },
+      {
+        "name": "Lemon juice",
+        "pantryDays": 540,
+        "fridgeDays": 60
+      },
+      {
+        "name": "Lemon juice (fresh squeezed)",
+        "fridgeDays": 6,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lime juice",
+        "pantryDays": 540,
+        "fridgeDays": 60
+      },
+      {
+        "name": "Nectar (papaya, mango, guava, or guavabana)",
+        "pantryDays": 540
+      },
+      {
+        "name": "Nutrition supplement drinks (canned)",
+        "pantryDays": 1825,
+        "fridgeDays": 2
+      },
+      {
+        "name": "Orange juice (commercially frozen concentrate)",
+        "freezerDays": 360
+      },
+      {
+        "name": "Orange juice (commercially packaged carton)",
+        "fridgeDays": 10,
+        "freezerDays": 360
+      },
+      {
+        "name": "Orange juice (freshly squeezed)",
+        "fridgeDays": 3,
+        "freezerDays": 21
+      },
+      {
+        "name": "Red wine",
+        "pantryDays": 1825,
+        "fridgeDays": 3
+      },
+      {
+        "name": "Soda (carbonated cola drinks, mixers, diet sodas; bottles or cans)",
+        "fridgeDays": 3
+      },
+      {
+        "name": "Soy or rice beverage",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Tea (bags)",
+        "pantryDays": 1080
+      },
+      {
+        "name": "Tea (instant)",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Tea (loose)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Vegetable juice (commercial, sold refrigerated)",
+        "fridgeDays": 30
+      },
+      {
+        "name": "Vegetable juice (homemade)",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Vegetable juice (shelf-stable)",
+        "pantryDays": 540
+      },
+      {
+        "name": "Water (commercially bottled)",
+        "pantryDays": 3650
+      },
+      {
+        "name": "White wine",
+        "pantryDays": 730,
+        "fridgeDays": 3
+      },
+      {
+        "name": "Yuzu (fruit, fresh)",
+        "fridgeDays": 7,
+        "freezerDays": 3650
+      },
+      {
+        "name": "Yuzu juice",
+        "pantryDays": 180,
+        "fridgeDays": 360,
+        "freezerDays": 730
+      }
+    ]
+  },
+  {
+    "name": "Fish & Seafood",
+    "types": [
+      {
+        "name": "Caviar (fresh, in jar)",
+        "fridgeDays": 28
+      },
+      {
+        "name": "Cooked fish (all)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Cooked shellfish (all)",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Crab legs (king, dungeness, snow)",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Crab meat (fresh)",
+        "fridgeDays": 3,
+        "freezerDays": 120
+      },
+      {
+        "name": "Crab meat (pasteurized)",
+        "fridgeDays": 360,
+        "freezerDays": 300
+      },
+      {
+        "name": "Fatty fish (bluefish, catfish, mackerel, mullet, salmon, tuna, etc.)",
+        "fridgeDays": 2,
+        "freezerDays": 90
+      },
+      {
+        "name": "Fish (cold smoked, air pack)",
+        "fridgeDays": 30,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fish (cold smoked, vacuum pack)",
+        "fridgeDays": 30,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fish (hot smoked, air pack)",
+        "fridgeDays": 45,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fish (hot smoked, vacuum pack)",
+        "fridgeDays": 45,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fresh clams, mussels, oysters",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Fresh lobster tails (cooked)",
+        "fridgeDays": 3,
+        "freezerDays": 28
+      },
+      {
+        "name": "Fresh whole lobster (frozen)",
+        "fridgeDays": 2,
+        "freezerDays": 28
+      },
+      {
+        "name": "Fresh whole lobster (live)",
+        "fridgeDays": 1
+      },
+      {
+        "name": "Herring (glass packed, in wine sauce)",
+        "fridgeDays": 180
+      },
+      {
+        "name": "Lean fish (cod, flounder, haddock, halibut, sole, etc.)",
+        "fridgeDays": 2,
+        "freezerDays": 240
+      },
+      {
+        "name": "Lean fish (pollock, ocean perch, rockfish, sea trout.)",
+        "fridgeDays": 2,
+        "freezerDays": 240
+      },
+      {
+        "name": "Live clams, mussels, crab, and oysters",
+        "fridgeDays": 2,
+        "freezerDays": 90
+      },
+      {
+        "name": "Scallops",
+        "fridgeDays": 3,
+        "freezerDays": 540
+      },
+      {
+        "name": "Shrimp, crayfish",
+        "fridgeDays": 3,
+        "freezerDays": 540
+      },
+      {
+        "name": "Shucked clams, mussels, and oysters",
+        "fridgeDays": 10,
+        "freezerDays": 120
+      },
+      {
+        "name": "Squid",
+        "fridgeDays": 3,
+        "freezerDays": 540
+      },
+      {
+        "name": "Surimi seafood",
+        "freezerDays": 270
+      }
+    ]
+  },
+  {
+    "name": "Frozen",
+    "types": [
+      {
+        "name": "Dough (commercial (bread or cookie))",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Edamame (frozen)",
+        "freezerDays": 730
+      },
+      {
+        "name": "Egg substitutes",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fish (breaded)",
+        "freezerDays": 540
+      },
+      {
+        "name": "Fish (raw but headed and gutted)",
+        "fridgeDays": 4,
+        "freezerDays": 180
+      },
+      {
+        "name": "Frozen entrees (prepared meals)",
+        "freezerDays": 360
+      },
+      {
+        "name": "Frozen potato products (fries, hashbrowns, tater tots)",
+        "freezerDays": 360
+      },
+      {
+        "name": "Frozen pretzels",
+        "fridgeDays": 4,
+        "freezerDays": 270
+      },
+      {
+        "name": "Fruits (such as berries, melons)",
+        "freezerDays": 540
+      },
+      {
+        "name": "Ice cream",
+        "freezerDays": 180
+      },
+      {
+        "name": "Ice pops",
+        "freezerDays": 270
+      },
+      {
+        "name": "Juice concentrates",
+        "freezerDays": 730
+      },
+      {
+        "name": "Kugel (commercial)",
+        "freezerDays": 365
+      },
+      {
+        "name": "Lobster tails",
+        "fridgeDays": 4,
+        "freezerDays": 240
+      },
+      {
+        "name": "Pancakes, waffles",
+        "freezerDays": 90
+      },
+      {
+        "name": "Pizza (frozen)",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Polenta (frozen)",
+        "freezerDays": 360
+      },
+      {
+        "name": "Sausages (precooked)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Sausages (uncooked)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Sherbet, sorbet",
+        "freezerDays": 270
+      },
+      {
+        "name": "Shrimp, shellfish",
+        "fridgeDays": 4,
+        "freezerDays": 540
+      },
+      {
+        "name": "Soy crumbles and hot dogs",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Soy meat substitutes",
+        "fridgeDays": 4,
+        "freezerDays": 540
+      },
+      {
+        "name": "Tempeh",
+        "fridgeDays": 4,
+        "freezerDays": 180
+      },
+      {
+        "name": "Vegetables",
+        "fridgeDays": 4,
+        "freezerDays": 540
+      }
+    ]
+  },
+  {
+    "name": "Fruit",
+    "types": [
+      {
+        "name": "Apples",
+        "pantryDays": 21,
+        "fridgeDays": 42,
+        "freezerDays": 240
+      },
+      {
+        "name": "Applesauce (homemade)",
+        "fridgeDays": 21,
+        "freezerDays": 360
+      },
+      {
+        "name": "Apricots",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Avocados",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Bananas",
+        "fridgeDays": 3,
+        "freezerDays": 90
+      },
+      {
+        "name": "Berries (blackberries, boysenberries, currant)",
+        "fridgeDays": 6,
+        "freezerDays": 360
+      },
+      {
+        "name": "Berries (cherries, goose berries, lychee)",
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Blueberries",
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cantaloupe",
+        "pantryDays": 4,
+        "fridgeDays": 15,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cherimoya",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cherries",
+        "fridgeDays": 3,
+        "freezerDays": 360
+      },
+      {
+        "name": "Citrus fruit (lemon, lime, orange, grapefruit, tangerines, clementines)",
+        "pantryDays": 10,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Coconut (shredded)",
+        "pantryDays": 365,
+        "fridgeDays": 240,
+        "freezerDays": 365
+      },
+      {
+        "name": "Coconuts (fresh)",
+        "pantryDays": 7,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Cranberries",
+        "fridgeDays": 60,
+        "freezerDays": 360
+      },
+      {
+        "name": "Dates",
+        "pantryDays": 60,
+        "fridgeDays": 360,
+        "freezerDays": 730
+      },
+      {
+        "name": "Grapes",
+        "pantryDays": 1,
+        "fridgeDays": 7,
+        "freezerDays": 30
+      },
+      {
+        "name": "Guava",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Honeydew",
+        "pantryDays": 7,
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Kiwi fruit",
+        "fridgeDays": 6
+      },
+      {
+        "name": "Kumquats",
+        "fridgeDays": 21
+      },
+      {
+        "name": "Melons",
+        "fridgeDays": 14,
+        "freezerDays": 30
+      },
+      {
+        "name": "Papaya, mango, feijoa, passionfruit, casaha melon",
+        "pantryDays": 5,
+        "fridgeDays": 7,
+        "freezerDays": 240
+      },
+      {
+        "name": "Peaches, nectarines, plums, pears, sapote",
+        "fridgeDays": 5,
+        "freezerDays": 60
+      },
+      {
+        "name": "Pineapple",
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pitaya/dragon fruit",
+        "pantryDays": 5,
+        "fridgeDays": 21,
+        "freezerDays": 360
+      },
+      {
+        "name": "Plantains",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pomegranate",
+        "pantryDays": 5,
+        "fridgeDays": 90,
+        "freezerDays": 360
+      },
+      {
+        "name": "Prickly pear",
+        "pantryDays": 5,
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Raspberries",
+        "fridgeDays": 3,
+        "freezerDays": 360
+      },
+      {
+        "name": "Star fruit",
+        "pantryDays": 7,
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Strawberries",
+        "fridgeDays": 3,
+        "freezerDays": 360
+      },
+      {
+        "name": "Watermelon",
+        "pantryDays": 2,
+        "fridgeDays": 4,
+        "freezerDays": 360
+      }
+    ]
+  },
+  {
+    "name": "Grains, Beans & Pasta",
+    "types": [
+      {
+        "name": "Amaranth (whole grain)",
+        "pantryDays": 120,
+        "freezerDays": 240
+      },
+      {
+        "name": "Barley (whole grain)",
+        "pantryDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beans (dried)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Buckwheat (whole grain)",
+        "pantryDays": 60,
+        "freezerDays": 120
+      },
+      {
+        "name": "Bulgur",
+        "pantryDays": 360
+      },
+      {
+        "name": "Dry egg noodles",
+        "pantryDays": 730
+      },
+      {
+        "name": "Farro (whole grain)",
+        "pantryDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Fresh pasta",
+        "fridgeDays": 2,
+        "freezerDays": 60
+      },
+      {
+        "name": "Lentils (dried)",
+        "pantryDays": 365
+      },
+      {
+        "name": "Millet (whole grain)",
+        "pantryDays": 60,
+        "freezerDays": 120
+      },
+      {
+        "name": "Mung bean (dry, food-grade bags)",
+        "pantryDays": 365,
+        "fridgeDays": 365,
+        "freezerDays": 365
+      },
+      {
+        "name": "Mung bean (dry, vacuum-sealed)",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Mung bean (sprouts)",
+        "fridgeDays": 42
+      },
+      {
+        "name": "Oats (whole grain)",
+        "pantryDays": 120,
+        "freezerDays": 240
+      },
+      {
+        "name": "Pasta (dry, without eggs)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Peanuts (boiled, shelled)",
+        "pantryDays": 1095,
+        "fridgeDays": 7,
+        "freezerDays": 3650
+      },
+      {
+        "name": "Peas (dried split)",
+        "pantryDays": 365
+      },
+      {
+        "name": "Quinoa (cooked)",
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Quinoa (uncooked)",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Refried beans",
+        "pantryDays": 1095,
+        "fridgeDays": 3
+      },
+      {
+        "name": "Rice (brown)",
+        "pantryDays": 365,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Rice (white or wild)",
+        "pantryDays": 730,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Rye (whole grain)",
+        "pantryDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Sorghum (whole grain)",
+        "pantryDays": 120,
+        "freezerDays": 240
+      },
+      {
+        "name": "Spelt (whole grain)",
+        "pantryDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Teff (whole grain)",
+        "pantryDays": 120,
+        "freezerDays": 240
+      },
+      {
+        "name": "Tortillas (corn)",
+        "pantryDays": 45,
+        "fridgeDays": 90
+      },
+      {
+        "name": "Tortillas (flour)",
+        "pantryDays": 90,
+        "fridgeDays": 90,
+        "freezerDays": 180
+      },
+      {
+        "name": "Whole wheat bread (commercially baked & pre-sliced)",
+        "pantryDays": 5,
+        "freezerDays": 90
+      },
+      {
+        "name": "Whole wheat bread (homemade)",
+        "pantryDays": 5,
+        "freezerDays": 90
+      }
+    ]
+  },
+  {
+    "name": "Meat",
+    "types": [
+      {
+        "name": "Bacon",
+        "fridgeDays": 7,
+        "freezerDays": 30
+      },
+      {
+        "name": "Bacon (fully cooked)",
+        "pantryDays": 180,
+        "fridgeDays": 14
+      },
+      {
+        "name": "Bacon (uncured)",
+        "fridgeDays": 7,
+        "freezerDays": 28
+      },
+      {
+        "name": "Beef (chuck roast, brisket)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (ground)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Beef (rib roast, bone-in)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (rib roast; boneless, rolled)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (round or rump roast)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (short ribs)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (steaks)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (stew, cubes)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (tenderloin, half)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Beef (tenderloin, whole)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Bison (ground)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Bison (whole)",
+        "fridgeDays": 5,
+        "freezerDays": 270
+      },
+      {
+        "name": "Bratwurst (fresh)",
+        "fridgeDays": 3,
+        "freezerDays": 90
+      },
+      {
+        "name": "Bratwurst (smoked and processed)",
+        "fridgeDays": 7,
+        "freezerDays": 90
+      },
+      {
+        "name": "Chorizo (fresh)",
+        "fridgeDays": 2,
+        "freezerDays": 60
+      },
+      {
+        "name": "Chorizo (smoked and processed, cooked)",
+        "pantryDays": 365,
+        "fridgeDays": 30,
+        "freezerDays": 180
+      },
+      {
+        "name": "Chorizo (smoked and processed, uncooked)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Corned beef (in pouch with pickling juices)",
+        "fridgeDays": 7,
+        "freezerDays": 30
+      },
+      {
+        "name": "Goat (ground)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Goat (less tender whole cuts (stew meat, riblets, shanks))",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Goat (tender whole cuts (legs, ribs, shoulder, loin))",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Ham (canned (“keep refrigerated” label))",
+        "fridgeDays": 270
+      },
+      {
+        "name": "Ham (country ham (whole or half))",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, cook-before-eating, arm picnic shoulder, boneless)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, cook-before-eating, bone-in, half)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, cook-before-eating, bone-in, whole)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, cook-before-eating, shank or butt portion, bone-in)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, cook-before-eating, shoulder roll (butt), boneless)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, uncooked, half leg, bone-in)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, uncooked, whole leg, bone-in)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fresh, uncooked, whole leg, boneless)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fully cooked, arm picnic shoulder, boneless)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fully cooked, bone-in, half)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fully cooked, bone-in, whole)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fully cooked, canned, boneless (refrigerated))",
+        "fridgeDays": 270,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fully cooked, slices, half, or spiral cut)",
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (fully cooked, vacuum packed, boneless)",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Ham (shelf-stable cans)",
+        "pantryDays": 270,
+        "fridgeDays": 14
+      },
+      {
+        "name": "Ham (uncured, fresh, cooked)",
+        "fridgeDays": 4,
+        "freezerDays": 120
+      },
+      {
+        "name": "Ham (uncured, fresh, uncooked)",
+        "fridgeDays": 5,
+        "freezerDays": 180
+      },
+      {
+        "name": "Hot dogs",
+        "fridgeDays": 14,
+        "freezerDays": 60
+      },
+      {
+        "name": "Jerky (commercially dried)",
+        "pantryDays": 360,
+        "fridgeDays": 90
+      },
+      {
+        "name": "Jerky (homemade)",
+        "pantryDays": 60,
+        "fridgeDays": 60
+      },
+      {
+        "name": "Lamb (breast, rolled)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (chops, ribs, or loin)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (crown roast)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (cubes for kabobs)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (ground)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Lamb (leg steaks)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (leg, bone-in - large)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (leg, bone-in - small)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (leg; boneless, rolled)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (shanks)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (shoulder roast or shank leg half)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lamb (stew meat, pieces)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Meat products (canned)",
+        "pantryDays": 1825,
+        "fridgeDays": 4
+      },
+      {
+        "name": "Pastrami",
+        "fridgeDays": 40
+      },
+      {
+        "name": "Pate (meat)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Pork (crown roast - large)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (crown roast - small)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (ground)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Pork (loin chops, bone-in)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (loin chops, boneless)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (loin roast, bone-in)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (loin roast, boneless)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (loin, cubes)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (ribs)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (shoulder)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (tenderloin medallions or loin cubes)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork (tenderloin)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pork roll",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Prosciutto",
+        "fridgeDays": 90,
+        "freezerDays": 30
+      },
+      {
+        "name": "Rabbit (whole, fresh)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Raw kabobs with vegetables",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Retort pouches or boxes",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Sausage (fully cooked smoked links, kielbasa)",
+        "fridgeDays": 7,
+        "freezerDays": 60
+      },
+      {
+        "name": "Sausage (hard, dry (pepperoni), sliced)",
+        "fridgeDays": 21,
+        "freezerDays": 60
+      },
+      {
+        "name": "Sausage (raw bulk type or patties)",
+        "fridgeDays": 2,
+        "freezerDays": 60
+      },
+      {
+        "name": "Stuffed, raw pork chops",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Variety meats (liver, tongue, chitterlings, etc.)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Veal (ground)",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Veal (leg rump or round roast, boneless)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Veal (loin roast, bone-in)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Veal (shoulder roast, boneless)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Venison (round, rump, loin, or rib roast)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      }
+    ]
+  },
+  {
+    "name": "Pantry",
+    "types": [
+      {
+        "name": "Almond butter",
+        "pantryDays": 365
+      },
+      {
+        "name": "Almond oil",
+        "pantryDays": 365,
+        "fridgeDays": 730
+      },
+      {
+        "name": "Almonds (no shell)",
+        "pantryDays": 120,
+        "fridgeDays": 240,
+        "freezerDays": 300
+      },
+      {
+        "name": "Almonds (shell)",
+        "pantryDays": 180,
+        "fridgeDays": 480,
+        "freezerDays": 600
+      },
+      {
+        "name": "Applesauce (commercial)",
+        "pantryDays": 540,
+        "fridgeDays": 10
+      },
+      {
+        "name": "Avocado Oil",
+        "pantryDays": 730
+      },
+      {
+        "name": "Bacon bits (imitation)",
+        "pantryDays": 365
+      },
+      {
+        "name": "Beets (pickled)",
+        "pantryDays": 365,
+        "fridgeDays": 60
+      },
+      {
+        "name": "Black pepper (cracked, dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Black pepper (ground, dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Breadcrumbs (commercial)",
+        "pantryDays": 180
+      },
+      {
+        "name": "Cajun seasoning blend (ground, dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Canned goods (high acid (such as juices, fruit, pickles, sauerkraut, tomato soup, and foods in vinegar-based sauce))",
+        "pantryDays": 540,
+        "fridgeDays": 7
+      },
+      {
+        "name": "Canned goods (low acid (such as meat, poultry, fish, gravy, stew, soups, beans, carrots, corn, pasta, peas, potatoes, spinach))",
+        "pantryDays": 1825,
+        "fridgeDays": 4
+      },
+      {
+        "name": "Canola oil",
+        "pantryDays": 365
+      },
+      {
+        "name": "Cashew butter",
+        "pantryDays": 90
+      },
+      {
+        "name": "Cashews (no shell)",
+        "pantryDays": 28,
+        "fridgeDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cereal (cook before eating (oatmeal, etc.))",
+        "pantryDays": 360
+      },
+      {
+        "name": "Cereal (ready-to-eat)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Cereal or granola bars",
+        "pantryDays": 360
+      },
+      {
+        "name": "Chia seeds",
+        "pantryDays": 540
+      },
+      {
+        "name": "Chocolate syrup",
+        "pantryDays": 730,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Cinnamon (ground, dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 1460
+      },
+      {
+        "name": "Coconut cream (canned)",
+        "pantryDays": 1825,
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Coconut milk (canned)",
+        "pantryDays": 1825,
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Coconut oil",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Corn syrup",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Crackers",
+        "pantryDays": 240,
+        "fridgeDays": 120,
+        "freezerDays": 120
+      },
+      {
+        "name": "Croutons",
+        "pantryDays": 180,
+        "fridgeDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cumin (ground, dried, commercially bottled or purchased in bulk, opened or unopened)",
+        "pantryDays": 1460
+      },
+      {
+        "name": "Dry stuffing mix (commercially packaged)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Edamame (salted, dry roasted, out of pod)",
+        "pantryDays": 360,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Flaxseed (ground)",
+        "fridgeDays": 360,
+        "freezerDays": 360
+      },
+      {
+        "name": "Flaxseed (whole seed)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Fruit cocktail (canned)",
+        "pantryDays": 540
+      },
+      {
+        "name": "Fruits, dried (raisins, apricots, mangoes, cranberries, etc.)",
+        "pantryDays": 180,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Garlic powder (dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 1460
+      },
+      {
+        "name": "Genuine Maple syrup (unopened, glass)",
+        "pantryDays": 1460,
+        "fridgeDays": 3650
+      },
+      {
+        "name": "Genuine Maple syrup (unopened, plastic)",
+        "pantryDays": 730,
+        "fridgeDays": 720
+      },
+      {
+        "name": "Graham cracker/animal cracker",
+        "pantryDays": 270
+      },
+      {
+        "name": "Granola",
+        "pantryDays": 270
+      },
+      {
+        "name": "Grapeseed oil",
+        "pantryDays": 365
+      },
+      {
+        "name": "Grits (boxed)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Gummy (fruit) snacks",
+        "pantryDays": 270
+      },
+      {
+        "name": "Instant breakfast drinks (bottled)",
+        "pantryDays": 180
+      },
+      {
+        "name": "Macadamias (no shell)",
+        "pantryDays": 28,
+        "fridgeDays": 360,
+        "freezerDays": 720
+      },
+      {
+        "name": "Marshmallow crème",
+        "pantryDays": 150
+      },
+      {
+        "name": "Marshmallows",
+        "pantryDays": 365
+      },
+      {
+        "name": "Milk (canned evaporated or condensed)",
+        "pantryDays": 360,
+        "fridgeDays": 5
+      },
+      {
+        "name": "Milk (shelf-stable)",
+        "pantryDays": 360,
+        "fridgeDays": 7
+      },
+      {
+        "name": "Milk (ultra-pasteurized)",
+        "fridgeDays": 90
+      },
+      {
+        "name": "Molasses",
+        "pantryDays": 730
+      },
+      {
+        "name": "Mushrooms (dried)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Mustard (dried, ground)",
+        "pantryDays": 180,
+        "freezerDays": 730
+      },
+      {
+        "name": "Nutmeg (ground, dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 1460
+      },
+      {
+        "name": "Nuts (jars or cans)",
+        "pantryDays": 365,
+        "fridgeDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Onion powder (dried, commercially bottled or purchased in bulk)",
+        "pantryDays": 1460
+      },
+      {
+        "name": "Peanut butter (commercial)",
+        "pantryDays": 720
+      },
+      {
+        "name": "Peanut butter (commercially produced, containing hydrogenated fat or other stabilizers)",
+        "pantryDays": 270,
+        "fridgeDays": 360
+      },
+      {
+        "name": "Peanut butter (natural)",
+        "fridgeDays": 360
+      },
+      {
+        "name": "Peanuts (no shell)",
+        "pantryDays": 28,
+        "fridgeDays": 360,
+        "freezerDays": 720
+      },
+      {
+        "name": "Peanuts (shell)",
+        "pantryDays": 120,
+        "fridgeDays": 360,
+        "freezerDays": 720
+      },
+      {
+        "name": "Pecans (chopped)",
+        "fridgeDays": 360,
+        "freezerDays": 730
+      },
+      {
+        "name": "Pecans (no shell)",
+        "pantryDays": 28,
+        "fridgeDays": 270,
+        "freezerDays": 720
+      },
+      {
+        "name": "Pecans (shell)",
+        "pantryDays": 28,
+        "fridgeDays": 360,
+        "freezerDays": 720
+      },
+      {
+        "name": "Pectin",
+        "pantryDays": 30
+      },
+      {
+        "name": "Pine nuts",
+        "pantryDays": 21,
+        "fridgeDays": 90,
+        "freezerDays": 270
+      },
+      {
+        "name": "Pistachios (shell or no shell)",
+        "pantryDays": 21,
+        "fridgeDays": 360,
+        "freezerDays": 720
+      },
+      {
+        "name": "Polenta (shelf-stable)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Popcorn (commercially popped in bags)",
+        "pantryDays": 90
+      },
+      {
+        "name": "Popcorn (dry kernels in jar)",
+        "pantryDays": 730
+      },
+      {
+        "name": "Popcorn (microwave packets)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Pork rinds",
+        "pantryDays": 120
+      },
+      {
+        "name": "Potato chips",
+        "pantryDays": 60
+      },
+      {
+        "name": "Potatoes (instant)",
+        "pantryDays": 450
+      },
+      {
+        "name": "Pretzels",
+        "pantryDays": 270
+      },
+      {
+        "name": "Pudding mixes",
+        "pantryDays": 365
+      },
+      {
+        "name": "Pumpkin seeds (raw, in-shell)",
+        "pantryDays": 180
+      },
+      {
+        "name": "Pumpkin seeds (raw, no shell)",
+        "pantryDays": 180,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Pumpkin seeds (roasted, in-shell)",
+        "pantryDays": 180
+      },
+      {
+        "name": "Pumpkin seeds (roasted, no-shell)",
+        "pantryDays": 180
+      },
+      {
+        "name": "Roasted nuts (peanuts, cashews, almonds)",
+        "pantryDays": 14,
+        "fridgeDays": 28
+      },
+      {
+        "name": "Roasted red peppers (jar)",
+        "fridgeDays": 180
+      },
+      {
+        "name": "Salt (table, plain, or iodized)",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Seafood (canned)",
+        "pantryDays": 365,
+        "fridgeDays": 2
+      },
+      {
+        "name": "Sesame oil",
+        "pantryDays": 730
+      },
+      {
+        "name": "Sesame seeds",
+        "pantryDays": 1825
+      },
+      {
+        "name": "Soup mixes (dry bouillon)",
+        "pantryDays": 365
+      },
+      {
+        "name": "Sun dried tomatoes (jar)",
+        "pantryDays": 365,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Sunflower oil",
+        "pantryDays": 365
+      },
+      {
+        "name": "Sunflower seeds (raw, unsalted, no shell)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Sunflower seeds (roasted, no shell)",
+        "pantryDays": 360,
+        "fridgeDays": 240
+      },
+      {
+        "name": "Syrup",
+        "pantryDays": 365,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Tapenade",
+        "pantryDays": 270,
+        "fridgeDays": 270
+      },
+      {
+        "name": "Toaster pastries",
+        "pantryDays": 360
+      },
+      {
+        "name": "Tomato paste",
+        "pantryDays": 810,
+        "fridgeDays": 5,
+        "freezerDays": 90
+      },
+      {
+        "name": "Tuna (canned)",
+        "pantryDays": 1095
+      },
+      {
+        "name": "Tuna (packet)",
+        "pantryDays": 540,
+        "fridgeDays": 4
+      },
+      {
+        "name": "Walnuts (shell or no shell)",
+        "pantryDays": 28,
+        "fridgeDays": 360,
+        "freezerDays": 720
+      }
+    ]
+  },
+  {
+    "name": "Plant Proteins",
+    "types": [
+      {
+        "name": "Miso",
+        "fridgeDays": 365
+      },
+      {
+        "name": "Re-hydrated textured soy protein ((TSP))",
+        "pantryDays": 120,
+        "fridgeDays": 4
+      },
+      {
+        "name": "Soy flour (full-fat)",
+        "pantryDays": 60,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Textured soy protein ((TSP))",
+        "pantryDays": 730
+      },
+      {
+        "name": "Tofu",
+        "fridgeDays": 7,
+        "freezerDays": 150
+      }
+    ]
+  },
+  {
+    "name": "Poultry",
+    "types": [
+      {
+        "name": "Canned chicken",
+        "pantryDays": 1825,
+        "fridgeDays": 4
+      },
+      {
+        "name": "Capon (whole)",
+        "fridgeDays": 2,
+        "freezerDays": 360
+      },
+      {
+        "name": "Chicken (whole)",
+        "fridgeDays": 2,
+        "freezerDays": 360
+      },
+      {
+        "name": "Chicken nuggets, patties",
+        "freezerDays": 90
+      },
+      {
+        "name": "Chicken parts (breast halves, bone-in)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Chicken parts (breast halves, boneless)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Chicken parts (legs or thighs)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Cooked poultry dishes",
+        "fridgeDays": 4,
+        "freezerDays": 180
+      },
+      {
+        "name": "Cornish Hens (whole)",
+        "fridgeDays": 2,
+        "freezerDays": 360
+      },
+      {
+        "name": "Duckling (domestic or wild, whole)",
+        "fridgeDays": 2,
+        "freezerDays": 180
+      },
+      {
+        "name": "Fried chicken",
+        "fridgeDays": 4,
+        "freezerDays": 120
+      },
+      {
+        "name": "Giblets",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Goose (domestic or wild, whole)",
+        "fridgeDays": 2,
+        "freezerDays": 180
+      },
+      {
+        "name": "Ground turkey or chicken",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Pate (poultry)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Pheasant (young, whole)",
+        "fridgeDays": 2,
+        "freezerDays": 180
+      },
+      {
+        "name": "Quail (whole)",
+        "fridgeDays": 2,
+        "freezerDays": 180
+      },
+      {
+        "name": "Raw kabobs with vegetables",
+        "fridgeDays": 2,
+        "freezerDays": 120
+      },
+      {
+        "name": "Retort pouches or boxes",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Rotisserie chicken",
+        "fridgeDays": 4,
+        "freezerDays": 120
+      },
+      {
+        "name": "Stuffed, raw chicken breasts",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Turducken",
+        "freezerDays": 270
+      },
+      {
+        "name": "Turkey (whole)",
+        "fridgeDays": 2,
+        "freezerDays": 360
+      },
+      {
+        "name": "Turkey bacon",
+        "fridgeDays": 14,
+        "freezerDays": 120
+      },
+      {
+        "name": "Turkey parts (breast halves, bone-in)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Turkey parts (breast halves, boneless)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      },
+      {
+        "name": "Turkey parts (legs or thighs)",
+        "fridgeDays": 2,
+        "freezerDays": 270
+      }
+    ]
+  },
+  {
+    "name": "Sauces & Condiments",
+    "types": [
+      {
+        "name": "Aioli (homemade)",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Anchovies (canned)",
+        "pantryDays": 1825,
+        "fridgeDays": 4,
+        "freezerDays": 60
+      },
+      {
+        "name": "Apple cider vinegar",
+        "pantryDays": 3650
+      },
+      {
+        "name": "Bacon grease",
+        "fridgeDays": 180,
+        "freezerDays": 360
+      },
+      {
+        "name": "Balsamic vinegar",
+        "pantryDays": 1825,
+        "fridgeDays": 540
+      },
+      {
+        "name": "Barbecue sauce (bottled)",
+        "pantryDays": 365,
+        "fridgeDays": 120
+      },
+      {
+        "name": "Barbecue Sauce (homemade, canned)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Beef broth/stock/consommé (commercially produced)",
+        "fridgeDays": 7,
+        "freezerDays": 90
+      },
+      {
+        "name": "Black bean sauce",
+        "pantryDays": 720,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Broth (homemade)",
+        "fridgeDays": 4,
+        "freezerDays": 90
+      },
+      {
+        "name": "Chicken broth/stock/consommé (commercially produced)",
+        "fridgeDays": 7,
+        "freezerDays": 90
+      },
+      {
+        "name": "Chutney",
+        "pantryDays": 365,
+        "fridgeDays": 60
+      },
+      {
+        "name": "Cranberry sauce (canned)",
+        "pantryDays": 730,
+        "fridgeDays": 14
+      },
+      {
+        "name": "Cranberry sauce (homemade)",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Cream sauces, milk solids",
+        "pantryDays": 360
+      },
+      {
+        "name": "Dry gravy mixes",
+        "pantryDays": 730,
+        "fridgeDays": 2
+      },
+      {
+        "name": "Duck fat",
+        "fridgeDays": 30
+      },
+      {
+        "name": "Frying oil (re-used)",
+        "fridgeDays": 30,
+        "freezerDays": 270
+      },
+      {
+        "name": "Gravy (jars and cans)",
+        "pantryDays": 1825,
+        "fridgeDays": 2
+      },
+      {
+        "name": "Hoisin sauce",
+        "pantryDays": 720,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Honey",
+        "pantryDays": 730
+      },
+      {
+        "name": "Horseradish (in jar)",
+        "fridgeDays": 360
+      },
+      {
+        "name": "Hot sauce",
+        "pantryDays": 180
+      },
+      {
+        "name": "Jams, jellies, and preserves",
+        "pantryDays": 540,
+        "fridgeDays": 360
+      },
+      {
+        "name": "Ketchup, cocktail, or chili sauce",
+        "pantryDays": 365,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Marinades",
+        "pantryDays": 365,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Mayonnaise (commercial)",
+        "pantryDays": 180,
+        "fridgeDays": 60
+      },
+      {
+        "name": "Mustard",
+        "pantryDays": 730,
+        "fridgeDays": 365
+      },
+      {
+        "name": "Olives (black and green)",
+        "pantryDays": 540,
+        "fridgeDays": 14
+      },
+      {
+        "name": "Oyster sauce",
+        "pantryDays": 720,
+        "fridgeDays": 180
+      },
+      {
+        "name": "Pesto (jarred)",
+        "fridgeDays": 180,
+        "freezerDays": 30
+      },
+      {
+        "name": "Pickles",
+        "pantryDays": 365,
+        "fridgeDays": 90
+      },
+      {
+        "name": "Relish",
+        "pantryDays": 900,
+        "fridgeDays": 270
+      },
+      {
+        "name": "Salad dressing (creamy)",
+        "pantryDays": 180,
+        "fridgeDays": 28
+      },
+      {
+        "name": "Salad dressing (dry,packaged)",
+        "fridgeDays": 28
+      },
+      {
+        "name": "Salad dressing (homemade)",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Salad dressing (vinaigrette)",
+        "pantryDays": 180,
+        "fridgeDays": 28
+      },
+      {
+        "name": "Salad dressing (vinaigrette,homemade)",
+        "fridgeDays": 21
+      },
+      {
+        "name": "Salad dressings (commercial, bottled)",
+        "pantryDays": 360,
+        "fridgeDays": 90
+      },
+      {
+        "name": "Salsa (homemade, canned)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Salsa (picante and taco sauces)",
+        "pantryDays": 365,
+        "fridgeDays": 30
+      },
+      {
+        "name": "Sauce mixes (nondairy (spaghetti, taco, etc.))",
+        "pantryDays": 730
+      },
+      {
+        "name": "Soy sauce or teriyaki sauce",
+        "pantryDays": 1095,
+        "fridgeDays": 30
+      },
+      {
+        "name": "Spaghetti sauce (in jars)",
+        "pantryDays": 540,
+        "fridgeDays": 4
+      },
+      {
+        "name": "Tahini",
+        "pantryDays": 365,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Thai red curry paste",
+        "pantryDays": 730,
+        "fridgeDays": 5
+      },
+      {
+        "name": "Tomato Sauce (homemade, canned)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Tomato sauce (spaghetti, pizza)",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Vegetable stock/broth (commercially produced)",
+        "fridgeDays": 7,
+        "freezerDays": 90
+      },
+      {
+        "name": "Vinegar",
+        "pantryDays": 730
+      },
+      {
+        "name": "Worcestershire sauce",
+        "pantryDays": 365
+      }
+    ]
+  },
+  {
+    "name": "Vegetables",
+    "types": [
+      {
+        "name": "Artichokes, whole",
+        "pantryDays": 2,
+        "fridgeDays": 14
+      },
+      {
+        "name": "Arugula",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Asparagus",
+        "fridgeDays": 4,
+        "freezerDays": 150
+      },
+      {
+        "name": "Baby carrots",
+        "pantryDays": 4,
+        "fridgeDays": 28,
+        "freezerDays": 90
+      },
+      {
+        "name": "Bagged greens (leaf, spinach, lettuce, etc.)",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Bamboo shoots",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Basil (dried)",
+        "pantryDays": 360
+      },
+      {
+        "name": "Basil (fresh)",
+        "pantryDays": 5,
+        "fridgeDays": 10
+      },
+      {
+        "name": "Bean sprouts",
+        "fridgeDays": 10
+      },
+      {
+        "name": "Beans and peas (green, fava, lima, soybean, wax, snow, sugar snap)",
+        "fridgeDays": 5,
+        "freezerDays": 240
+      },
+      {
+        "name": "Beets",
+        "pantryDays": 1,
+        "fridgeDays": 14,
+        "freezerDays": 240
+      },
+      {
+        "name": "Bok choy",
+        "fridgeDays": 3,
+        "freezerDays": 360
+      },
+      {
+        "name": "Broccoli and broccoli raab (rapini)",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Brussels sprouts",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cabbage",
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Carrots, parsnips",
+        "fridgeDays": 21,
+        "freezerDays": 360
+      },
+      {
+        "name": "Cauliflower",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Celery",
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Celery root",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Cherry tomatoes",
+        "pantryDays": 10,
+        "fridgeDays": 5
+      },
+      {
+        "name": "Chives",
+        "pantryDays": 14,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Cilantro",
+        "pantryDays": 14,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Corn on the cob",
+        "fridgeDays": 2,
+        "freezerDays": 240
+      },
+      {
+        "name": "Cucumbers",
+        "fridgeDays": 6
+      },
+      {
+        "name": "Edamame (fresh)",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Eggplant",
+        "pantryDays": 1,
+        "fridgeDays": 7,
+        "freezerDays": 240
+      },
+      {
+        "name": "Garlic",
+        "pantryDays": 30,
+        "fridgeDays": 14,
+        "freezerDays": 30
+      },
+      {
+        "name": "Ginger root",
+        "pantryDays": 5,
+        "fridgeDays": 21,
+        "freezerDays": 180
+      },
+      {
+        "name": "Greens",
+        "fridgeDays": 4,
+        "freezerDays": 360
+      },
+      {
+        "name": "Herbs",
+        "fridgeDays": 10,
+        "freezerDays": 60
+      },
+      {
+        "name": "Hot peppers",
+        "fridgeDays": 7,
+        "freezerDays": 270
+      },
+      {
+        "name": "Jicama (fresh)",
+        "pantryDays": 120,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Kale",
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Kimchi",
+        "fridgeDays": 360
+      },
+      {
+        "name": "Kohlrabi",
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Leeks",
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Lemongrass",
+        "fridgeDays": 9,
+        "freezerDays": 180
+      },
+      {
+        "name": "Lettuce (iceberg, romaine)",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Lettuce (leaf, spinach)",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Marinated vegetables (in oil)",
+        "fridgeDays": 4
+      },
+      {
+        "name": "Mint",
+        "pantryDays": 14,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Mushrooms",
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Okra",
+        "pantryDays": 1,
+        "fridgeDays": 3,
+        "freezerDays": 360
+      },
+      {
+        "name": "Onions (spring or green)",
+        "pantryDays": 30,
+        "fridgeDays": 7,
+        "freezerDays": 360
+      },
+      {
+        "name": "Onions (yellow, white, red, etc.)",
+        "pantryDays": 30,
+        "fridgeDays": 60,
+        "freezerDays": 360
+      },
+      {
+        "name": "Oregano",
+        "pantryDays": 14,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Parsley (fresh)",
+        "fridgeDays": 3,
+        "freezerDays": 120
+      },
+      {
+        "name": "Peppers",
+        "fridgeDays": 14,
+        "freezerDays": 240
+      },
+      {
+        "name": "Potatoes",
+        "pantryDays": 60,
+        "fridgeDays": 14,
+        "freezerDays": 360
+      },
+      {
+        "name": "Pumpkins",
+        "pantryDays": 90,
+        "fridgeDays": 150
+      },
+      {
+        "name": "Radicchio",
+        "fridgeDays": 21
+      },
+      {
+        "name": "Radishes",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Rhubarb",
+        "fridgeDays": 7
+      },
+      {
+        "name": "Rosemary",
+        "pantryDays": 14,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Rutabagas",
+        "pantryDays": 7,
+        "fridgeDays": 21,
+        "freezerDays": 300
+      },
+      {
+        "name": "Spaghetti squash (cut)",
+        "fridgeDays": 5
+      },
+      {
+        "name": "Spaghetti squash (whole)",
+        "pantryDays": 60,
+        "fridgeDays": 14
+      },
+      {
+        "name": "Squash (summer and zucchini)",
+        "pantryDays": 5,
+        "fridgeDays": 5,
+        "freezerDays": 360
+      },
+      {
+        "name": "Squash (winter)",
+        "pantryDays": 42,
+        "fridgeDays": 90,
+        "freezerDays": 360
+      },
+      {
+        "name": "Swiss chard",
+        "fridgeDays": 14
+      },
+      {
+        "name": "Tamarind",
+        "pantryDays": 21,
+        "fridgeDays": 180,
+        "freezerDays": 365
+      },
+      {
+        "name": "Taro",
+        "pantryDays": 7,
+        "fridgeDays": 3
+      },
+      {
+        "name": "Thyme",
+        "pantryDays": 14,
+        "fridgeDays": 21
+      },
+      {
+        "name": "Tomatoes",
+        "freezerDays": 60
+      },
+      {
+        "name": "Turnips",
+        "fridgeDays": 14,
+        "freezerDays": 300
+      },
+      {
+        "name": "Yams/sweet potatoes",
+        "pantryDays": 21
+      },
+      {
+        "name": "Yuca/cassava",
+        "pantryDays": 7,
+        "fridgeDays": 3,
+        "freezerDays": 60
+      },
+      {
+        "name": "Zucchini (fresh, whole)",
+        "fridgeDays": 7,
+        "freezerDays": 300
+      }
+    ]
+  }
+]
