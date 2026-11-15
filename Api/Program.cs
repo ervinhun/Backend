@@ -95,6 +95,10 @@ builder.Services.AddOptions<InviteCodeRateLimitOptions>()
     .Bind(builder.Configuration.GetSection(InviteCodeRateLimitOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<CatalogRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(CatalogRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddRateLimiter(_ => { });
 builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 

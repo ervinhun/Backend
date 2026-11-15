@@ -64,8 +64,6 @@ public class ProductsEndpointsTests : DatabaseTest
     [Theory]
     [InlineData("/api/products")]
     [InlineData("/api/products/123")]
-    [InlineData("/api/product-types")]
-    [InlineData("/api/product-categories")]
     public async Task Get_WithoutAToken_Returns401(string url)
     {
         var response = await SendAsync(null, HttpMethod.Get, url);
@@ -213,5 +211,16 @@ public class ProductsEndpointsTests : DatabaseTest
         Assert.All(types, t => Assert.Equal(dairy.Id, t.CategoryId));
         var butter = types.Single(t => t.Name == "Butter");
         Assert.Equal((60, 270), (butter.FridgeExpiryDays, butter.FreezerExpiryDays));
+    }
+
+    [Theory]
+    [InlineData("/api/product-categories")]
+    [InlineData("/api/product-types")]
+    public async Task Catalogue_WithoutAToken_ReturnsTheList(string url)
+    {
+        var response = await SendAsync(null, HttpMethod.Get, url);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotEmpty((await response.Content.ReadFromJsonAsync<List<object>>())!);
     }
 }
