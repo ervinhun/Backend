@@ -1304,6 +1304,191 @@
         }
       }
     },
+    "/api/fridges/{fridgeId}/notification-dispatches": {
+      "post": {
+        "tags": [
+          "NotificationDispatches"
+        ],
+        "operationId": "ReportDispatches",
+        "parameters": [
+          {
+            "name": "fridgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDispatchesRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDispatchesRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDispatchesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/fridges/{fridgeId}/notification-items": {
+      "get": {
+        "tags": [
+          "NotificationItems"
+        ],
+        "operationId": "GetNotificationItems",
+        "parameters": [
+          {
+            "name": "fridgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationItemsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationItemsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationItemsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fridges/{fridgeId}/notification-settings": {
+      "get": {
+        "tags": [
+          "NotificationSettings"
+        ],
+        "operationId": "Get",
+        "parameters": [
+          {
+            "name": "fridgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "NotificationSettings"
+        ],
+        "operationId": "Update",
+        "parameters": [
+          {
+            "name": "fridgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveNotificationSettingsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveNotificationSettingsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveNotificationSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/product-categories": {
       "get": {
         "tags": [
@@ -1705,6 +1890,21 @@
           }
         }
       },
+      "DispatchedItem": {
+        "required": [
+          "stage"
+        ],
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage": {
+            "type": "string"
+          }
+        }
+      },
       "ExternalLoginRequest": {
         "required": [
           "provider",
@@ -1953,6 +2153,96 @@
           }
         }
       },
+      "NotificationItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "skipWarning": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NotificationItemsResponse": {
+        "type": "object",
+        "properties": {
+          "fridgeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warningDaysBefore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dangerDaysBefore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "notificationTime": {
+            "type": "string",
+            "format": "time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationItemResponse"
+            }
+          }
+        }
+      },
+      "NotificationSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "fridgeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warningDaysBefore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dangerDaysBefore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "notificationTime": {
+            "type": "string",
+            "format": "time"
+          },
+          "recipientsScope": {
+            "type": "string"
+          },
+          "recipientUserIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "ProductCategoryResponse": {
         "type": "object",
         "properties": {
@@ -2020,6 +2310,33 @@
               "string"
             ],
             "format": "int32"
+          },
+          "pantryExpiryDays": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "fridgeExpiryDays": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "freezerExpiryDays": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -2080,6 +2397,30 @@
           }
         }
       },
+      "ReportDispatchesRequest": {
+        "required": [
+          "sentAt",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "sentAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "items": {
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DispatchedItem"
+            }
+          }
+        }
+      },
       "SaveContainerRequest": {
         "required": [
           "name",
@@ -2107,6 +2448,51 @@
             "maxLength": 100,
             "minLength": 1,
             "type": "string"
+          }
+        }
+      },
+      "SaveNotificationSettingsRequest": {
+        "required": [
+          "recipientsScope"
+        ],
+        "type": "object",
+        "properties": {
+          "warningDaysBefore": {
+            "maximum": 365,
+            "minimum": 1,
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dangerDaysBefore": {
+            "maximum": 365,
+            "minimum": 0,
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "notificationTime": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "time"
+          },
+          "recipientsScope": {
+            "type": "string"
+          },
+          "recipientUserIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2258,6 +2644,15 @@
     },
     {
       "name": "Items"
+    },
+    {
+      "name": "NotificationDispatches"
+    },
+    {
+      "name": "NotificationItems"
+    },
+    {
+      "name": "NotificationSettings"
     },
     {
       "name": "ProductCategories"

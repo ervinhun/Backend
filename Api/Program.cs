@@ -38,6 +38,8 @@ builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
 builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
 builder.Services.AddScoped<IContainerRepository, ContainerRepository>();
+builder.Services.AddScoped<INotificationSettingsRepository, NotificationSettingsRepository>();
+builder.Services.AddScoped<INotificationDispatchRepository, NotificationDispatchRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
 
@@ -50,6 +52,9 @@ builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
 builder.Services.AddScoped<IFridgeService, FridgeService>();
 builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 builder.Services.AddScoped<IContainerService, ContainerService>();
+builder.Services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
+builder.Services.AddScoped<INotificationDispatchService, NotificationDispatchService>();
+builder.Services.AddScoped<INotificationItemsService, NotificationItemsService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 
