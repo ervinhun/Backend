@@ -180,7 +180,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             product.Property(p => p.ProductTypeId).HasColumnName("product_type_id");
             product.Property(p => p.Name).HasColumnName("name").IsRequired();
             product.Property(p => p.ImageUrl).HasColumnName("image_url");
-            product.Property(p => p.Source).HasColumnName("source").IsRequired();
+            product.Property(p => p.Source).HasColumnName("source").IsRequired()
+                .HasConversion(
+                    s => s == ProductSource.OpenFoodFacts ? "open_food_facts" : "manual",
+                    s => s == "open_food_facts" ? ProductSource.OpenFoodFacts : ProductSource.Manual);
             product.Property(p => p.CachedAt).HasColumnName("cached_at").HasDefaultValueSql("now()");
             product.Property(p => p.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
             // Bumped server-side by the trg_product_catalog_updated_at trigger.
