@@ -14,6 +14,7 @@ public static class NotificationSettingsMapper
             FridgeId = stored.Settings.FridgeId,
             WarningDaysBefore = stored.Settings.WarningDaysBefore,
             DangerDaysBefore = stored.Settings.DangerDaysBefore,
+            NotificationTime = stored.Settings.NotificationTime,
             RecipientsScope = stored.Settings.RecipientsScope.ToWireName(),
             RecipientUserIds = stored.RecipientUserIds,
         };

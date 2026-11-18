@@ -20,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CatalogProduct> CatalogProducts => Set<CatalogProduct>();
     public DbSet<FridgeNotificationSettings> NotificationSettings => Set<FridgeNotificationSettings>();
     public DbSet<FridgeNotificationRecipient> NotificationRecipients => Set<FridgeNotificationRecipient>();
+    public DbSet<NotificationDispatch> NotificationDispatches => Set<NotificationDispatch>();
     public DbSet<Item> Items => Set<Item>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -230,6 +231,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             settings.Property(s => s.FridgeId).HasColumnName("fridge_id");
             settings.Property(s => s.WarningDaysBefore).HasColumnName("warning_days_before");
             settings.Property(s => s.DangerDaysBefore).HasColumnName("danger_days_before");
+            settings.Property(s => s.NotificationTime).HasColumnName("notification_time");
             // The column only accepts 'all_members', 'adder_and_owners' and 'custom'.
             settings.Property(s => s.RecipientsScope).HasColumnName("recipients_scope")
                 .HasConversion(
@@ -261,6 +263,29 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             recipient.Property(r => r.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
             recipient.Property(r => r.DeletedAt).HasColumnName("deleted_at");
+        });
+
+        modelBuilder.Entity<NotificationDispatch>(dispatch =>
+        {
+            dispatch.ToTable("notification_dispatches");
+            dispatch.HasKey(d => d.Id);
+            dispatch.HasQueryFilter(d => d.DeletedAt == null);
+
+            dispatch.Property(d => d.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            dispatch.Property(d => d.ItemId).HasColumnName("item_id");
+            // The column only accepts 'warning' and 'expiry'.
+            dispatch.Property(d => d.Stage).HasColumnName("stage")
+                .HasConversion(s => s.ToString().ToLowerInvariant(), s => Enum.Parse<NotificationStage>(s, true));
+            dispatch.Property(d => d.Sent).HasColumnName("sent");
+            dispatch.Property(d => d.DevicesNotifiedCount).HasColumnName("devices_notified_count");
+            dispatch.Property(d => d.SentAt).HasColumnName("sent_at");
+            dispatch.Property(d => d.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            // Bumped server-side by the trg_notification_dispatches_updated_at trigger.
+            dispatch.Property(d => d.UpdatedAt).HasColumnName("updated_at")
+                .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+            dispatch.Property(d => d.DeletedAt).HasColumnName("deleted_at");
+
+            dispatch.HasOne<Item>().WithMany().HasForeignKey(d => d.ItemId);
         });
 
         modelBuilder.Entity<Item>(item =>

@@ -45,6 +45,7 @@ public class NotificationSettingsRepository(AppDbContext db) : INotificationSett
         RecipientsScope scope,
         IReadOnlyCollection<Guid> recipientUserIds,
         DateTimeOffset now,
+        TimeOnly? notificationTime = null,
         CancellationToken ct = default
     )
     {
@@ -62,6 +63,8 @@ public class NotificationSettingsRepository(AppDbContext db) : INotificationSett
         settings.WarningDaysBefore = warningDaysBefore;
         settings.DangerDaysBefore = dangerDaysBefore;
         settings.RecipientsScope = scope;
+        if (notificationTime is not null)
+            settings.NotificationTime = notificationTime.Value;
 
         var existing = await db
             .NotificationRecipients.Where(r => r.FridgeId == fridgeId)

@@ -61,6 +61,7 @@ public class NotificationSettingsService(
             scope,
             recipients,
             timeProvider.GetUtcNow(),
+            request.NotificationTime,
             ct
         );
 
@@ -75,6 +76,7 @@ public class NotificationSettingsService(
             FridgeId = fridgeId,
             WarningDaysBefore = defaults.WarningDaysBefore,
             DangerDaysBefore = defaults.DangerDaysBefore,
+            NotificationTime = defaults.NotificationTime,
             RecipientsScope = defaults.RecipientsScope.ToWireName(),
         };
     }

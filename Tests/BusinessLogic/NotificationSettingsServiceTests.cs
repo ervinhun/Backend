@@ -164,6 +164,20 @@ public class NotificationSettingsServiceTests(PostgresFixture database) : Databa
     }
 
     [Fact]
+    public async Task Update_SavesTheNotificationTime_AndKeepsItWhenOmitted()
+    {
+        var fridge = await AddFridgeAsync();
+        var request = Save();
+        request.NotificationTime = new TimeOnly(8, 30);
+        await Service.UpdateAsync(fridge.Id, fridge.CreatedByUserId, request);
+
+        var kept = await Service.UpdateAsync(fridge.Id, fridge.CreatedByUserId, Save(warning: 9));
+
+        Assert.Equal(new TimeOnly(8, 30), kept.NotificationTime);
+        Assert.Equal(9, kept.WarningDaysBefore);
+    }
+
+    [Fact]
     public async Task Update_ByAMemberWhoIsNotTheOwner_ThrowsForbidden()
     {
         var fridge = await AddFridgeAsync();

@@ -12,6 +12,9 @@ public class SaveNotificationSettingsRequest : IValidatableObject
     [Range(0, 365)]
     public int DangerDaysBefore { get; set; }
 
+    /// <summary>The time of day the app shows the reminders, such as "16:00". Left as it was when omitted.</summary>
+    public TimeOnly? NotificationTime { get; set; }
+
     /// <summary>all_members, adder_and_owners or custom.</summary>
     [Required, AllowedValues("all_members", "adder_and_owners", "custom")]
     public string RecipientsScope { get; set; } = string.Empty;

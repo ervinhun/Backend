@@ -12,6 +12,9 @@ public class FridgeNotificationSettings
     /// <summary>Days before an item's expiry date that its danger notification goes out.</summary>
     public int DangerDaysBefore { get; set; } = 2;
 
+    /// <summary>The time of day, in the device's own time zone, that the app shows the reminders.</summary>
+    public TimeOnly NotificationTime { get; set; } = new(16, 0);
+
     public RecipientsScope RecipientsScope { get; set; } = RecipientsScope.AllMembers;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }

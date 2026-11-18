@@ -15,7 +15,8 @@ public interface INotificationSettingsRepository
 
     /// <summary>
     /// Creates or replaces the fridge's settings and its custom recipients together; recipients not listed
-    /// are soft-deleted at <paramref name="now"/>.
+    /// are soft-deleted at <paramref name="now"/>. A null <paramref name="notificationTime"/> keeps the stored
+    /// time, or the default for a fridge's first save.
     /// </summary>
     Task SaveAsync(
         Guid fridgeId,
@@ -24,6 +25,7 @@ public interface INotificationSettingsRepository
         RecipientsScope scope,
         IReadOnlyCollection<Guid> recipientUserIds,
         DateTimeOffset now,
+        TimeOnly? notificationTime = null,
         CancellationToken ct = default
     );
 }

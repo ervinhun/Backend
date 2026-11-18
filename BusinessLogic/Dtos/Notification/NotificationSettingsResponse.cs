@@ -6,6 +6,9 @@ public class NotificationSettingsResponse
     public int WarningDaysBefore { get; set; }
     public int DangerDaysBefore { get; set; }
 
+    /// <summary>The time of day the app shows the reminders.</summary>
+    public TimeOnly NotificationTime { get; set; }
+
     /// <summary>all_members, adder_and_owners or custom.</summary>
     public string RecipientsScope { get; set; } = string.Empty;
 
