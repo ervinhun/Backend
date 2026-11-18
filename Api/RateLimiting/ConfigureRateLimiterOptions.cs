@@ -15,6 +15,9 @@ public static class RateLimitPolicies
 
     /// <summary>Joining a fridge with an invite code and replacing a fridge's code.</summary>
     public const string InviteCode = "invite-code";
+
+    /// <summary>The product catalogue, which anyone may read, signed in or not.</summary>
+    public const string Catalog = "catalog";
 }
 
 /// <summary>
@@ -23,12 +26,14 @@ public static class RateLimitPolicies
 /// </summary>
 public class ConfigureRateLimiterOptions(
     IOptions<AuthRateLimitOptions> authOptions,
-    IOptions<InviteCodeRateLimitOptions> inviteCodeOptions) : IConfigureOptions<RateLimiterOptions>
+    IOptions<InviteCodeRateLimitOptions> inviteCodeOptions,
+    IOptions<CatalogRateLimitOptions> catalogOptions) : IConfigureOptions<RateLimiterOptions>
 {
     public void Configure(RateLimiterOptions options)
     {
         var auth = authOptions.Value;
         var inviteCode = inviteCodeOptions.Value;
+        var catalog = catalogOptions.Value;
 
         // Per client IP: slows password guessing and mass sign-ups without
         // touching the account being targeted. Behind a reverse proxy this needs
@@ -48,6 +53,14 @@ public class ConfigureRateLimiterOptions(
             RateLimitPolicies.InviteCode,
             inviteCode.PermitLimit,
             inviteCode.WindowSeconds,
+            UserOrClientIp);
+
+        // Anonymous, so guests and signed-out apps can load it: per user when there's a token, else per IP.
+        AddFixedWindowPolicy(
+            options,
+            RateLimitPolicies.Catalog,
+            catalog.PermitLimit,
+            catalog.WindowSeconds,
             UserOrClientIp);
 
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
