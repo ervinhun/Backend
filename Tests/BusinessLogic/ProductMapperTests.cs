@@ -15,7 +15,7 @@ public class ProductMapperTests
             Name = "Milk",
             ProductTypeId = Guid.NewGuid(),
             ImageUrl = "https://example.com/m.jpg",
-            Source = "open_food_facts",
+            Source = ProductSource.OpenFoodFacts,
         };
 
         var response = product.ToResponse();

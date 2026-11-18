@@ -43,6 +43,29 @@ public class ContainerRepositoryTests(PostgresFixture database) : DatabaseTest(d
         return fridge;
     }
 
+    private async Task AddItemAsync(Guid containerId, Guid userId, ItemStatus status = ItemStatus.Active)
+    {
+        await using var db = Database.CreateDbContext();
+        db.Items.Add(
+            new Item
+            {
+                ContainerId = containerId,
+                Name = "Milk",
+                AddedByUserId = userId,
+                AddedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                ExpiryDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(5),
+                Status = status,
+            }
+        );
+        await db.SaveChangesAsync();
+    }
+
+    private async Task<int> DeletedItemsAsync()
+    {
+        await using var db = Database.CreateDbContext();
+        return await db.Items.IgnoreQueryFilters().CountAsync(i => i.DeletedAt != null);
+    }
+
     private static Container NewContainer(
         Guid fridgeId,
         string name = "Top shelf",
@@ -267,5 +290,58 @@ public class ContainerRepositoryTests(PostgresFixture database) : DatabaseTest(d
             1,
             await db.Containers.IgnoreQueryFilters().CountAsync(c => c.DeletedAt != null)
         );
+    }
+
+    [Fact]
+    public async Task Delete_DeletesTheContainersItems_OfEveryStatus_AndNoOthers()
+    {
+        var anna = await AddUserAsync();
+        var home = await AddFridgeAsync(anna);
+        var gone = NewContainer(home.Id);
+        var kept = NewContainer(home.Id);
+        await Repository.AddAsync(gone);
+        await Repository.AddAsync(kept);
+        await AddItemAsync(gone.Id, anna.Id);
+        await AddItemAsync(gone.Id, anna.Id, ItemStatus.Consumed);
+        await AddItemAsync(kept.Id, anna.Id);
+
+        Assert.True(await Repository.DeleteAsync(home.Id, gone.Id, DateTimeOffset.UtcNow));
+
+        Assert.Equal(2, await DeletedItemsAsync());
+    }
+
+    [Fact]
+    public async Task Delete_FromAnotherFridge_LeavesTheItemsAlone()
+    {
+        var anna = await AddUserAsync();
+        var home = await AddFridgeAsync(anna, code: "CODE0001");
+        var cabin = await AddFridgeAsync(anna, code: "CODE0002");
+        var container = NewContainer(home.Id);
+        await Repository.AddAsync(container);
+        await AddItemAsync(container.Id, anna.Id);
+
+        Assert.False(await Repository.DeleteAsync(cabin.Id, container.Id, DateTimeOffset.UtcNow));
+
+        Assert.Equal(0, await DeletedItemsAsync());
+    }
+
+    [Fact]
+    public async Task DeletingTheFridge_DeletesItsItemsToo_ButNotOtherFridgesItems()
+    {
+        var anna = await AddUserAsync();
+        var home = await AddFridgeAsync(anna, code: "CODE0001");
+        var cabin = await AddFridgeAsync(anna, code: "CODE0002");
+        var inHome = NewContainer(home.Id);
+        var inCabin = NewContainer(cabin.Id);
+        await Repository.AddAsync(inHome);
+        await Repository.AddAsync(inCabin);
+        await AddItemAsync(inHome.Id, anna.Id);
+        await AddItemAsync(inHome.Id, anna.Id, ItemStatus.Removed);
+        await AddItemAsync(inCabin.Id, anna.Id);
+        var fridges = new FridgeRepository(Database.CreateDbContext(), TimeProvider.System);
+
+        Assert.True(await fridges.DeleteAsync(home.Id, DateTimeOffset.UtcNow));
+
+        Assert.Equal(2, await DeletedItemsAsync());
     }
 }
