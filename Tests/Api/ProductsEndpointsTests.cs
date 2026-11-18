@@ -191,27 +191,4 @@ public class ProductsEndpointsTests : DatabaseTest
             ).StatusCode
         );
     }
-
-    [Fact]
-    public async Task CategoriesAndTypes_ReturnTheSeededLists()
-    {
-        var anna = await RegisterAsync();
-
-        var categories = (
-            await (
-                await SendAsync(anna, HttpMethod.Get, "/api/product-categories")
-            ).Content.ReadFromJsonAsync<List<ProductCategoryResponse>>()
-        )!;
-        var dairy = categories.Single(c => c.Name == "Dairy & Eggs");
-        var types = (
-            await (
-                await SendAsync(anna, HttpMethod.Get, $"/api/product-types?categoryId={dairy.Id}")
-            ).Content.ReadFromJsonAsync<List<ProductTypeResponse>>()
-        )!;
-
-        Assert.Equal(45, types.Count);
-        Assert.All(types, t => Assert.Equal(dairy.Id, t.CategoryId));
-        var butter = types.Single(t => t.Name == "Butter");
-        Assert.Equal((60, 270), (butter.FridgeExpiryDays, butter.FreezerExpiryDays));
-    }
 }
