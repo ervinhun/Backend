@@ -281,7 +281,7 @@ public class ItemServiceTests(PostgresFixture database) : DatabaseTest(database)
         );
 
         Assert.Equal(
-            "An expiry date is required when the product has no default shelf life.",
+            "An expiry date is required unless the product's type has a default shelf life.",
             plain.Message
         );
         Assert.Equal(plain.Message, fromProduct.Message);
