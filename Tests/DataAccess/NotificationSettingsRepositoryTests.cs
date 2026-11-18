@@ -60,7 +60,7 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
     {
         var (fridge, _) = await AddFridgeAsync();
 
-        Assert.Null(await Repository.GetAsync(fridge.Id));
+        Assert.Null(await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow));
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
 
         await Repository.SaveAsync(fridge.Id, 5, 2, RecipientsScope.AdderAndOwners, [], DateTimeOffset.UtcNow);
 
-        var stored = (await Repository.GetAsync(fridge.Id))!;
+        var stored = (await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow))!;
         Assert.NotEqual(Guid.Empty, stored.Settings.Id);
         Assert.Equal(5, stored.Settings.WarningDaysBefore);
         Assert.Equal(2, stored.Settings.DangerDaysBefore);
@@ -87,7 +87,7 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
 
         await Repository.SaveAsync(fridge.Id, 10, 3, RecipientsScope.AdderAndOwners, [], DateTimeOffset.UtcNow);
 
-        var stored = (await Repository.GetAsync(fridge.Id))!;
+        var stored = (await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow))!;
         Assert.Equal(10, stored.Settings.WarningDaysBefore);
         Assert.Equal(3, stored.Settings.DangerDaysBefore);
         Assert.Equal(RecipientsScope.AdderAndOwners, stored.Settings.RecipientsScope);
@@ -104,7 +104,7 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
 
         await Repository.SaveAsync(fridge.Id, 6, 1, RecipientsScope.Custom, [ben.Id], DateTimeOffset.UtcNow);
 
-        var stored = (await Repository.GetAsync(fridge.Id))!;
+        var stored = (await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow))!;
         Assert.Equal([ben.Id], stored.RecipientUserIds);
         await using var db = Database.CreateDbContext();
         Assert.NotNull(
@@ -123,7 +123,22 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
 
         await Repository.SaveAsync(fridge.Id, 6, 1, RecipientsScope.Custom, [owner.Id], DateTimeOffset.UtcNow);
 
-        Assert.Equal([owner.Id], (await Repository.GetAsync(fridge.Id))!.RecipientUserIds);
+        Assert.Equal([owner.Id], (await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow))!.RecipientUserIds);
+    }
+
+    [Fact]
+    public async Task Get_LeavesOutRecipientsWhoseAccessHasExpired()
+    {
+        var (fridge, owner) = await AddFridgeAsync();
+        var ben = await AddMemberAsync(fridge);
+        await Repository.SaveAsync(fridge.Id, 6, 1, RecipientsScope.Custom, [owner.Id, ben.Id], DateTimeOffset.UtcNow);
+        await using (var db = Database.CreateDbContext())
+        {
+            db.FridgeMembers.Single(m => m.UserId == ben.Id).AccessExpiresAt = DateTimeOffset.UtcNow.AddMinutes(-1);
+            await db.SaveChangesAsync();
+        }
+
+        Assert.Equal([owner.Id], (await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow))!.RecipientUserIds);
     }
 
     [Fact]
@@ -139,7 +154,7 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
             await db.SaveChangesAsync();
         }
 
-        Assert.Equal([owner.Id], (await Repository.GetAsync(fridge.Id))!.RecipientUserIds);
+        Assert.Equal([owner.Id], (await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow))!.RecipientUserIds);
     }
 
     [Fact]
@@ -151,6 +166,6 @@ public class NotificationSettingsRepositoryTests(PostgresFixture database) : Dat
         await new FridgeRepository(Database.CreateDbContext(), TimeProvider.System)
             .DeleteAsync(fridge.Id, DateTimeOffset.UtcNow);
 
-        Assert.Null(await Repository.GetAsync(fridge.Id));
+        Assert.Null(await Repository.GetAsync(fridge.Id, DateTimeOffset.UtcNow));
     }
 }

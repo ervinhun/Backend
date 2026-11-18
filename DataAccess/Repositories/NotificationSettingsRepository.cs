@@ -9,6 +9,7 @@ public class NotificationSettingsRepository(AppDbContext db) : INotificationSett
 {
     public async Task<NotificationSettingsWithRecipients?> GetAsync(
         Guid fridgeId,
+        DateTimeOffset now,
         CancellationToken ct = default
     )
     {
@@ -18,12 +19,16 @@ public class NotificationSettingsRepository(AppDbContext db) : INotificationSett
         if (settings is null)
             return null;
 
-        // Members who left are not recipients any more, even if their row is still there.
+        // Members who left or whose access has expired are not recipients, even if their row is still there.
         var recipients = await db
             .NotificationRecipients.AsNoTracking()
             .Where(r =>
                 r.FridgeId == fridgeId
-                && db.FridgeMembers.Any(m => m.FridgeId == fridgeId && m.UserId == r.UserId)
+                && db.FridgeMembers.Any(m =>
+                    m.FridgeId == fridgeId
+                    && m.UserId == r.UserId
+                    && (m.AccessExpiresAt == null || m.AccessExpiresAt > now)
+                )
             )
             .OrderBy(r => r.CreatedAt)
             .ThenBy(r => r.Id)

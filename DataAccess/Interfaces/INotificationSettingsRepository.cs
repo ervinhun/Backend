@@ -6,9 +6,10 @@ namespace DataAccess.Interfaces;
 /// <summary>A fridge's notification settings and custom recipients (fridge_notification_settings, fridge_notification_recipients). Deleted rows are never returned.</summary>
 public interface INotificationSettingsRepository
 {
-    /// <summary>Null if the fridge has never saved any settings.</summary>
+    /// <summary>Null if the fridge has never saved any settings. Recipients whose fridge access has expired at <paramref name="now"/> are left out.</summary>
     Task<NotificationSettingsWithRecipients?> GetAsync(
         Guid fridgeId,
+        DateTimeOffset now,
         CancellationToken ct = default
     );
 

@@ -261,6 +261,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             recipient.Property(r => r.UpdatedAt).HasColumnName("updated_at")
                 .HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
             recipient.Property(r => r.DeletedAt).HasColumnName("deleted_at");
+        });
+
         modelBuilder.Entity<Item>(item =>
         {
             item.ToTable("items");

@@ -86,8 +86,8 @@ public class NotificationSettingsServiceTests(PostgresFixture database) : Databa
         var settings = await Service.GetAsync(fridge.Id, fridge.CreatedByUserId);
 
         Assert.Equal(fridge.Id, settings.FridgeId);
-        Assert.Equal(6, settings.WarningDaysBefore);
-        Assert.Equal(1, settings.DangerDaysBefore);
+        Assert.Equal(7, settings.WarningDaysBefore);
+        Assert.Equal(2, settings.DangerDaysBefore);
         Assert.Equal("all_members", settings.RecipientsScope);
         Assert.Empty(settings.RecipientUserIds);
     }
@@ -158,7 +158,7 @@ public class NotificationSettingsServiceTests(PostgresFixture database) : Databa
         );
 
         Assert.Equal(
-            6,
+            7,
             (await Service.GetAsync(fridge.Id, fridge.CreatedByUserId)).WarningDaysBefore
         );
     }

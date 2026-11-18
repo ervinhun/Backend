@@ -102,8 +102,8 @@ public class NotificationSettingsEndpointsTests : DatabaseTest
         var response = await SendAsync(anna, HttpMethod.Get, Url(fridge));
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var defaults = (await response.Content.ReadFromJsonAsync<NotificationSettingsResponse>())!;
-        Assert.Equal(6, defaults.WarningDaysBefore);
-        Assert.Equal(1, defaults.DangerDaysBefore);
+        Assert.Equal(7, defaults.WarningDaysBefore);
+        Assert.Equal(2, defaults.DangerDaysBefore);
         Assert.Equal("all_members", defaults.RecipientsScope);
 
         response = await SendAsync(

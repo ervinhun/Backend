@@ -27,7 +27,7 @@ public class NotificationSettingsService(
     {
         await AuthorizeAsync(fridgeId, userId, write: false, ct);
 
-        var stored = await settings.GetAsync(fridgeId, ct);
+        var stored = await settings.GetAsync(fridgeId, timeProvider.GetUtcNow(), ct);
         return stored is null ? Defaults(fridgeId) : stored.ToResponse();
     }
 
@@ -64,7 +64,7 @@ public class NotificationSettingsService(
             ct
         );
 
-        return (await settings.GetAsync(fridgeId, ct))!.ToResponse();
+        return (await settings.GetAsync(fridgeId, timeProvider.GetUtcNow(), ct))!.ToResponse();
     }
 
     private static NotificationSettingsResponse Defaults(Guid fridgeId)
