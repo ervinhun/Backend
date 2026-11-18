@@ -39,7 +39,9 @@ public class ItemService(
     )
     {
         await AuthorizeAsync(fridgeId, userId, Access.Put, ct);
-        await RequireContainerAsync(fridgeId, request.ContainerId!.Value, ct);
+        var containerId = request.ContainerId!.Value;
+        await RequireContainerAsync(fridgeId, containerId, ct);
+        await RequireCategoryAsync(request.CategoryId, ct);
 
         var product = request.ProductCatalogId is { } productId
             ? await catalog.GetProductAsync(productId, ct)
@@ -48,32 +50,35 @@ public class ItemService(
         var type = product?.ProductTypeId is { } typeId
             ? await catalog.GetTypeAsync(typeId, ct)
             : null;
-        await RequireCategoryAsync(request.CategoryId, ct);
+
+        var name =
+            Clean(request.Name)
+            ?? product?.Name
+            ?? throw new BadRequestException("A name is required when no product is given.");
 
         var today = Today();
+        var expiryDate =
+            request.ExpiryDate
+            ?? (
+                type is null
+                    ? throw new BadRequestException(
+                        "An expiry date is required unless the product's type has a default shelf life."
+                    )
+                    : today.AddDays(type.DefaultExpiryDays)
+            );
+
         var item = new Item
         {
-            ContainerId = request.ContainerId.Value,
+            ContainerId = containerId,
             ProductCatalogId = product?.Id,
-            Name =
-                Clean(request.Name)
-                ?? product?.Name
-                ?? throw new BadRequestException("A name is required when no product is given."),
+            Name = name,
             CategoryId = request.CategoryId ?? type?.CategoryId,
             Amount = Clean(request.Amount),
             Unit = Clean(request.Unit),
             ImageUrl = Clean(request.ImageUrl) ?? product?.ImageUrl,
             AddedByUserId = userId,
             AddedAt = today,
-            ExpiryDate =
-                request.ExpiryDate
-                ?? (
-                    type is null
-                        ? throw new BadRequestException(
-                            "An expiry date is required when the product has no default shelf life."
-                        )
-                        : today.AddDays(type.DefaultExpiryDays)
-                ),
+            ExpiryDate = expiryDate,
             Comment = Clean(request.Comment),
         };
 
