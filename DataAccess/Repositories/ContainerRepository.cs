@@ -75,8 +75,21 @@ public class ContainerRepository(AppDbContext db) : IContainerRepository
         Guid containerId,
         DateTimeOffset now,
         CancellationToken ct = default
-    ) =>
-        await db
+    )
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+        var deleted = await db
             .Containers.Where(c => c.FridgeId == fridgeId && c.Id == containerId)
-            .ExecuteUpdateAsync(s => s.SetProperty(c => c.DeletedAt, now), ct) == 1;
+            .ExecuteUpdateAsync(s => s.SetProperty(c => c.DeletedAt, now), ct);
+        if (deleted == 0)
+            return false;
+
+        await db
+            .Items.Where(i => i.ContainerId == containerId)
+            .ExecuteUpdateAsync(s => s.SetProperty(i => i.DeletedAt, now), ct);
+
+        await transaction.CommitAsync(ct);
+        return true;
+    }
 }

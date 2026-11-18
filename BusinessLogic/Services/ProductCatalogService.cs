@@ -62,7 +62,7 @@ public class ProductCatalogService(IProductCatalogRepository catalog) : IProduct
             Name = request.Name.Trim(),
             ProductTypeId = request.ProductTypeId,
             ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim(),
-            Source = CatalogProduct.ManualSource,
+            Source = ProductSource.Manual,
         };
         try
         {

@@ -18,7 +18,7 @@ public class ContainersController(IContainerService containers)
     private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
 
     [HttpPost]
-    public async Task<ActionResult<ContainerResponse>> Create(
+    public async Task<ActionResult<ContainerResponse>> CreateContainer(
         Guid fridgeId,
         SaveContainerRequest request,
         CancellationToken ct
@@ -26,14 +26,14 @@ public class ContainersController(IContainerService containers)
     {
         var container = await containers.CreateAsync(fridgeId, CurrentUserId, request, ct);
         return CreatedAtAction(
-            nameof(Get),
+            nameof(GetContainer),
             new { fridgeId, containerId = container.Id },
             container
         );
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ContainerResponse>>> GetAll(
+    public async Task<ActionResult<IReadOnlyList<ContainerResponse>>> GetContainers(
         Guid fridgeId,
         CancellationToken ct
     )
@@ -42,7 +42,7 @@ public class ContainersController(IContainerService containers)
     }
 
     [HttpGet("{containerId:guid}")]
-    public async Task<ActionResult<ContainerResponse>> Get(
+    public async Task<ActionResult<ContainerResponse>> GetContainer(
         Guid fridgeId,
         Guid containerId,
         CancellationToken ct
@@ -52,7 +52,7 @@ public class ContainersController(IContainerService containers)
     }
 
     [HttpPut("{containerId:guid}")]
-    public async Task<ActionResult<ContainerResponse>> Update(
+    public async Task<ActionResult<ContainerResponse>> UpdateContainer(
         Guid fridgeId,
         Guid containerId,
         SaveContainerRequest request,
@@ -63,7 +63,7 @@ public class ContainersController(IContainerService containers)
     }
 
     [HttpDelete("{containerId:guid}")]
-    public async Task<IActionResult> Delete(Guid fridgeId, Guid containerId, CancellationToken ct)
+    public async Task<IActionResult> DeleteContainer(Guid fridgeId, Guid containerId, CancellationToken ct)
     {
         await containers.DeleteAsync(fridgeId, containerId, CurrentUserId, ct);
         return NoContent();

@@ -38,6 +38,8 @@ builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
 builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
 builder.Services.AddScoped<IContainerRepository, ContainerRepository>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddScoped<IProductCatalogRepository, ProductCatalogRepository>();
 
 // Business logic
 builder.Services.AddSingleton(TimeProvider.System);
@@ -48,6 +50,8 @@ builder.Services.AddSingleton<IFridgeLimitDefaults, FridgeLimitDefaults>();
 builder.Services.AddScoped<IFridgeService, FridgeService>();
 builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 builder.Services.AddScoped<IContainerService, ContainerService>();
+builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 
 // Google / Apple sign-in. Singleton so the providers' signing keys stay cached.
 builder.Services.AddOptions<ExternalAuthOptions>()

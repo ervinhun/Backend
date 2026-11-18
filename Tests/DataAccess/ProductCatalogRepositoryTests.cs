@@ -164,7 +164,7 @@ public class ProductCatalogRepositoryTests(PostgresFixture database) : DatabaseT
         Assert.Equal(added.Id, found!.Id);
         Assert.Equal("Milk", found.Name);
         Assert.Equal(type.Id, found.ProductTypeId);
-        Assert.Equal(CatalogProduct.ManualSource, found.Source);
+        Assert.Equal(ProductSource.Manual, found.Source);
         Assert.NotEqual(default, found.CachedAt);
     }
 
@@ -201,7 +201,7 @@ public class ProductCatalogRepositoryTests(PostgresFixture database) : DatabaseT
             Name = "New",
             ProductTypeId = type.Id,
             ImageUrl = "https://example.com/n.jpg",
-            Source = "other",
+            Source = ProductSource.OpenFoodFacts,
         };
         await Repository.AddAsync(added);
 
@@ -211,7 +211,7 @@ public class ProductCatalogRepositoryTests(PostgresFixture database) : DatabaseT
         Assert.Equal("New", found.Name);
         Assert.Equal(type.Id, found.ProductTypeId);
         Assert.Equal("https://example.com/n.jpg", found.ImageUrl);
-        Assert.Equal("other", found.Source);
+        Assert.Equal(ProductSource.OpenFoodFacts, found.Source);
         Assert.True(found.CachedAt > DateTimeOffset.UtcNow.AddMinutes(-1));
         await using var check = Database.CreateDbContext();
         Assert.Equal(1, await check.CatalogProducts.IgnoreQueryFilters().CountAsync());

@@ -13,7 +13,7 @@ public static class ProductMapper
             Name = product.Name,
             ProductTypeId = product.ProductTypeId,
             ImageUrl = product.ImageUrl,
-            Source = product.Source,
+            Source = product.Source == ProductSource.OpenFoodFacts ? "open_food_facts" : "manual",
         };
 
     public static ProductTypeResponse ToResponse(this ProductType type) =>
