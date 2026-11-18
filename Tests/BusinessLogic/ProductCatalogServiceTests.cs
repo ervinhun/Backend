@@ -29,9 +29,14 @@ public class ProductCatalogServiceTests(PostgresFixture database) : DatabaseTest
 
         var types = await Service.GetTypesAsync(dairy.Id);
 
-        Assert.Equal(7, categories.Count);
-        Assert.Equal(["Eggs", "Hard cheese", "Milk"], types.Select(t => t.Name));
-        Assert.Equal(7, types.Single(t => t.Name == "Milk").DefaultExpiryDays);
+        Assert.Equal(16, categories.Count);
+        Assert.Equal(45, types.Count);
+        Assert.Contains("Eggs (in shell)", types.Select(t => t.Name));
+        var butter = types.Single(t => t.Name == "Butter");
+        Assert.Equal(60, butter.DefaultExpiryDays);
+        Assert.Null(butter.PantryExpiryDays);
+        Assert.Equal(60, butter.FridgeExpiryDays);
+        Assert.Equal(270, butter.FreezerExpiryDays);
         Assert.True((await Service.GetTypesAsync(null)).Count > types.Count);
     }
 

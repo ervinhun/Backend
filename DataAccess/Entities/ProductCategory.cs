@@ -14,7 +14,10 @@ public class ProductCategory
     private ProductCategory(ILazyLoader lazyLoader) => _lazyLoader = lazyLoader;
 
     public Guid Id { get; set; }
+
+    /// <summary>Unique across all categories, including deleted ones.</summary>
     public string Name { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 

@@ -8,7 +8,8 @@ using Testcontainers.PostgreSql;
 namespace Tests.Database;
 
 /// <summary>
-/// One Postgres container per test run, migrated from the real db/migrations files.
+/// One Postgres container per test run, migrated from the real db/migrations files and seeded like the API
+/// seeds on startup (DbInitializer).
 /// <see cref="ResetAsync"/> empties the data tables between tests but keeps the seeded reference data.
 /// </summary>
 public class PostgresFixture : IAsyncLifetime
@@ -37,6 +38,11 @@ public class PostgresFixture : IAsyncLifetime
                 connection
             );
             await command.ExecuteNonQueryAsync();
+        }
+
+        await using (var db = CreateDbContext())
+        {
+            await DbInitializer.SeedAsync(db);
         }
 
         _respawner = await Respawner.CreateAsync(
