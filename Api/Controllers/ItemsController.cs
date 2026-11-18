@@ -17,19 +17,19 @@ public class ItemsController(IItemService items) : ControllerBase
     private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
 
     [HttpPost]
-    public async Task<ActionResult<ItemResponse>> Create(
+    public async Task<ActionResult<ItemResponse>> CreateItem(
         Guid fridgeId,
         CreateItemRequest request,
         CancellationToken ct
     )
     {
         var item = await items.CreateAsync(fridgeId, CurrentUserId, request, ct);
-        return CreatedAtAction(nameof(Get), new { fridgeId, itemId = item.Id }, item);
+        return CreatedAtAction(nameof(GetItem), new { fridgeId, itemId = item.Id }, item);
     }
 
     /// <summary>The fridge's items that are still active unless a status is given, soonest to expire first.</summary>
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ItemResponse>>> GetAll(
+    public async Task<ActionResult<IReadOnlyList<ItemResponse>>> GetItems(
         Guid fridgeId,
         Guid? containerId,
         string? status,
@@ -40,7 +40,7 @@ public class ItemsController(IItemService items) : ControllerBase
     }
 
     [HttpGet("{itemId:guid}")]
-    public async Task<ActionResult<ItemResponse>> Get(
+    public async Task<ActionResult<ItemResponse>> GetItem(
         Guid fridgeId,
         Guid itemId,
         CancellationToken ct
@@ -50,7 +50,7 @@ public class ItemsController(IItemService items) : ControllerBase
     }
 
     [HttpPut("{itemId:guid}")]
-    public async Task<ActionResult<ItemResponse>> Update(
+    public async Task<ActionResult<ItemResponse>> UpdateItem(
         Guid fridgeId,
         Guid itemId,
         UpdateItemRequest request,
@@ -62,7 +62,7 @@ public class ItemsController(IItemService items) : ControllerBase
 
     /// <summary>Marks the item consumed or removed, or active again. Members who may use things can do this.</summary>
     [HttpPut("{itemId:guid}/status")]
-    public async Task<ActionResult<ItemResponse>> SetStatus(
+    public async Task<ActionResult<ItemResponse>> SetItemStatus(
         Guid fridgeId,
         Guid itemId,
         SetItemStatusRequest request,
@@ -73,7 +73,7 @@ public class ItemsController(IItemService items) : ControllerBase
     }
 
     [HttpDelete("{itemId:guid}")]
-    public async Task<IActionResult> Delete(Guid fridgeId, Guid itemId, CancellationToken ct)
+    public async Task<IActionResult> DeleteItem(Guid fridgeId, Guid itemId, CancellationToken ct)
     {
         await items.DeleteAsync(fridgeId, itemId, CurrentUserId, ct);
         return NoContent();

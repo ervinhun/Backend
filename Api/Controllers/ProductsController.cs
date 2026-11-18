@@ -25,7 +25,7 @@ public class ProductsController(IProductCatalogService catalog) : ControllerBase
     ) => await catalog.GetByBarcodeAsync(barcode, ct);
 
     [HttpPost]
-    public async Task<ActionResult<ProductResponse>> Create(
+    public async Task<ActionResult<ProductResponse>> CreateProduct(
         CreateProductRequest request,
         CancellationToken ct
     )

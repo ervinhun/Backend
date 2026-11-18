@@ -14,7 +14,8 @@ public class AuthService(
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService,
     IUserSessionRepository sessions,
-    TimeProvider timeProvider) : IAuthService
+    TimeProvider timeProvider,
+    IExternalTokenValidator externalTokens) : IAuthService
 {
     private const string EmailTakenMessage = "There was an error registering this e-mail, try another one.";
     private const string InvalidRefreshMessage = "Your session has expired. Please sign in again.";
@@ -66,6 +67,63 @@ public class AuthService(
             throw new UnauthorizedException("Invalid email or password.");
 
         return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);
+    }
+
+    public async Task<AuthResponse> ExternalLoginAsync(ExternalLoginRequest request, CancellationToken ct = default)
+    {
+        var identity = await externalTokens.ValidateAsync(request.Provider, request.IdToken, ct);
+
+        // Returning user: this Google/Apple account is already linked.
+        var user = await users.GetByLoginAsync(identity.Provider, identity.ProviderUserId, ct);
+        if (user is not null)
+            return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);
+
+        // Linking or creating by email is only safe when the provider vouches for the address.
+        if (string.IsNullOrWhiteSpace(identity.Email) || !identity.EmailVerified)
+            throw new UnauthorizedException("The sign-in provider did not return a verified email address.");
+
+        var email = NormalizeEmail(identity.Email);
+        var login = new UserLogin
+        {
+            Provider = identity.Provider,
+            ProviderUserId = identity.ProviderUserId,
+        };
+
+        try
+        {
+            // Existing account with the same verified email: link this provider to it.
+            user = await users.GetByEmailAsync(email, ct);
+            if (user is not null)
+            {
+                // A password account's email was never verified, so it may not belong to this person.
+                if (user.PasswordHash is not null)
+                    throw new ConflictException("An account with this email already exists. Sign in with your password.");
+
+                login.UserId = user.Id;
+                await users.AddLoginAsync(login, ct);
+                return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);
+            }
+
+            // The email belongs to a soft-deleted account.
+            if (await users.EmailExistsAsync(email, ct))
+                throw new ConflictException(EmailTakenMessage);
+
+            user = await users.AddAsync(new User
+            {
+                Email = email,
+                PasswordHash = null,
+                AuthProvider = identity.Provider,
+                DefaultDisplayName = FirstNonBlank(request.DisplayName, identity.Name) ?? email.Split('@')[0],
+                Locale = FirstNonBlank(request.Locale) ?? "en",
+                Logins = [login],
+            }, ct);
+            return await StartSessionAsync(user, request.PhoneModel, request.Platform, ct);
+        }
+        catch (DuplicateKeyException)
+        {
+            // Lost a race with a concurrent first sign-in, or the login belongs to a deleted account.
+            throw new ConflictException("This sign-in could not be completed. Please try again.");
+        }
     }
 
     public async Task<UserDto> GetUserAsync(Guid userId, CancellationToken ct = default)
@@ -127,6 +185,9 @@ public class AuthService(
     }
 
     private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+    private static string? FirstNonBlank(params string?[] values) =>
+        values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v))?.Trim();
 
     private static string? TrimToNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

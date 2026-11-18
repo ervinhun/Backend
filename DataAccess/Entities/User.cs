@@ -15,9 +15,14 @@ public class User
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
+
+    /// <summary>Linked external sign-ins. Added together with the user when it is created.</summary>
+    public List<UserLogin> Logins { get; set; } = [];
 }
 
 public static class AuthProviders
 {
     public const string Password = "password";
+    public const string Google = "google";
+    public const string Apple = "apple";
 }

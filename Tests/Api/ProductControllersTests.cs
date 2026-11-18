@@ -12,7 +12,7 @@ public class ProductControllersTests
     [Fact]
     public async Task Create_ValidRequest_ReturnsCreatedPointingAtGetByBarcode()
     {
-        var result = await new ProductsController(_service).Create(
+        var result = await new ProductsController(_service).CreateProduct(
             new CreateProductRequest { Barcode = "5901234123457", Name = "Milk" },
             CancellationToken.None
         );
@@ -56,7 +56,7 @@ public class ProductControllersTests
     {
         var categoryId = Guid.NewGuid();
 
-        var result = await new ProductTypesController(_service).GetAll(
+        var result = await new ProductTypesController(_service).GetProductTypes(
             categoryId,
             CancellationToken.None
         );
@@ -68,7 +68,7 @@ public class ProductControllersTests
     [Fact]
     public async Task ProductCategories_GetAll_ReturnsTheCategories()
     {
-        var result = await new ProductCategoriesController(_service).GetAll(CancellationToken.None);
+        var result = await new ProductCategoriesController(_service).GetProductCategories(CancellationToken.None);
 
         Assert.Equal("Dairy", Assert.Single(result).Name);
     }
@@ -83,11 +83,11 @@ public class ProductControllersTests
         Assert.Equal(cts.Token, _service.LastToken);
         await products.GetByBarcode("1", cts.Token);
         Assert.Equal(cts.Token, _service.LastToken);
-        await products.Create(new CreateProductRequest { Barcode = "1", Name = "A" }, cts.Token);
+        await products.CreateProduct(new CreateProductRequest { Barcode = "1", Name = "A" }, cts.Token);
         Assert.Equal(cts.Token, _service.LastToken);
-        await new ProductTypesController(_service).GetAll(null, cts.Token);
+        await new ProductTypesController(_service).GetProductTypes(null, cts.Token);
         Assert.Equal(cts.Token, _service.LastToken);
-        await new ProductCategoriesController(_service).GetAll(cts.Token);
+        await new ProductCategoriesController(_service).GetProductCategories(cts.Token);
         Assert.Equal(cts.Token, _service.LastToken);
     }
 }

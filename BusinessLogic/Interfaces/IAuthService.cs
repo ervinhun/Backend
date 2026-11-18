@@ -6,6 +6,12 @@ public interface IAuthService
 {
     Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
     Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default);
+
+    /// <summary>
+    /// Signs in with a verified Google or Apple ID token. Creates the account on first
+    /// sign-in, or links the provider to an existing account with the same verified email.
+    /// </summary>
+    Task<AuthResponse> ExternalLoginAsync(ExternalLoginRequest request, CancellationToken ct = default);
     Task<UserDto> GetUserAsync(Guid userId, CancellationToken ct = default);
 
     /// <summary>Swaps a refresh token for a new access + refresh token pair. The old refresh token stops working.</summary>

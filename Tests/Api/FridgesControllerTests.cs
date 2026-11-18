@@ -43,11 +43,11 @@ public class FridgesControllerTests
     public async Task Create_ValidRequest_ReturnsCreatedWithFridge()
     {
         var result = await ControllerFor(_ownerId)
-            .Create(new SaveFridgeRequest { Name = "Home" }, CancellationToken.None);
+            .CreateFridge(new SaveFridgeRequest { Name = "Home" }, CancellationToken.None);
 
         var created = Assert.IsType<CreatedAtActionResult>(result.Result);
         var fridge = Assert.IsType<FridgeResponse>(created.Value);
-        Assert.Equal(nameof(FridgesController.Get), created.ActionName);
+        Assert.Equal(nameof(FridgesController.GetFridge), created.ActionName);
         Assert.Equal(fridge.Id, created.RouteValues!["id"]);
         Assert.Equal("Home", fridge.Name);
     }
@@ -71,7 +71,7 @@ public class FridgesControllerTests
         Assert.Equal(cts.Token, _service.LastToken);
 
         await ControllerFor(_ownerId)
-            .Update(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, cts.Token);
+            .UpdateFridge(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, cts.Token);
         Assert.Equal(cts.Token, _service.LastToken);
 
         await ControllerFor(_ownerId).RemoveMember(_fridgeId, _memberId, cts.Token);
@@ -93,7 +93,7 @@ public class FridgesControllerTests
     public async Task Get_Member_ReturnsFridge(bool asOwner)
     {
         var result = await ControllerFor(asOwner ? _ownerId : _memberId)
-            .Get(_fridgeId, CancellationToken.None);
+            .GetFridge(_fridgeId, CancellationToken.None);
 
         Assert.Equal(_fridgeId, result.Value!.Id);
     }
@@ -102,7 +102,7 @@ public class FridgesControllerTests
     public async Task Update_Owner_ReturnsUpdatedFridge()
     {
         var result = await ControllerFor(_ownerId)
-            .Update(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, CancellationToken.None);
+            .UpdateFridge(_fridgeId, new SaveFridgeRequest { Name = "Renamed" }, CancellationToken.None);
 
         Assert.Equal("Renamed", result.Value!.Name);
     }
@@ -110,7 +110,7 @@ public class FridgesControllerTests
     [Fact]
     public async Task Delete_Owner_ReturnsNoContentAndDeletes()
     {
-        var result = await ControllerFor(_ownerId).Delete(_fridgeId, CancellationToken.None);
+        var result = await ControllerFor(_ownerId).DeleteFridge(_fridgeId, CancellationToken.None);
 
         Assert.IsType<NoContentResult>(result);
         Assert.Contains(nameof(FakeFridgeService.DeleteAsync), _service.Calls);

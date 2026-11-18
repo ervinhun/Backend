@@ -18,13 +18,13 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
     private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
 
     [HttpPost]
-    public async Task<ActionResult<FridgeResponse>> Create(
+    public async Task<ActionResult<FridgeResponse>> CreateFridge(
         SaveFridgeRequest request,
         CancellationToken ct
     )
     {
         var fridge = await fridges.CreateAsync(CurrentUserId, request, ct);
-        return CreatedAtAction(nameof(Get), new { id = fridge.Id }, fridge);
+        return CreatedAtAction(nameof(GetFridge), new { id = fridge.Id }, fridge);
     }
 
     [HttpGet]
@@ -39,11 +39,11 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
     ) => await fridges.JoinAsync(CurrentUserId, request, ct);
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<FridgeResponse>> Get(Guid id, CancellationToken ct)
+    public async Task<ActionResult<FridgeResponse>> GetFridge(Guid id, CancellationToken ct)
         => await fridges.GetAsync(id, CurrentUserId, ct);
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<FridgeResponse>> Update(
+    public async Task<ActionResult<FridgeResponse>> UpdateFridge(
         Guid id,
         SaveFridgeRequest request,
         CancellationToken ct
@@ -51,7 +51,7 @@ public class FridgesController(IFridgeService fridges) : ControllerBase
         => await fridges.UpdateAsync(id, CurrentUserId, request, ct);
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeleteFridge(Guid id, CancellationToken ct)
     {
         await fridges.DeleteAsync(id, CurrentUserId, ct);
         return NoContent();
