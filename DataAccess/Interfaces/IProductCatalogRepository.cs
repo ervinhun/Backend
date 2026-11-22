@@ -16,6 +16,14 @@ public interface IProductCatalogRepository
 
     Task<bool> ProductTypeExistsAsync(Guid productTypeId, CancellationToken ct = default);
 
+    /// <summary>Null if there is no such product type.</summary>
+    Task<ProductType?> GetTypeAsync(Guid productTypeId, CancellationToken ct = default);
+
+    Task<bool> CategoryExistsAsync(Guid categoryId, CancellationToken ct = default);
+
+    /// <summary>Null if there is no such product.</summary>
+    Task<CatalogProduct?> GetProductAsync(Guid productId, CancellationToken ct = default);
+
     /// <summary>Null if no product has this barcode.</summary>
     Task<CatalogProduct?> GetByBarcodeAsync(string barcode, CancellationToken ct = default);
 

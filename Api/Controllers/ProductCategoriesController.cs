@@ -15,6 +15,6 @@ namespace Api.Controllers;
 public class ProductCategoriesController(IProductCatalogService catalog) : ControllerBase
 {
     [HttpGet]
-    public async Task<IReadOnlyList<ProductCategoryResponse>> GetAll(CancellationToken ct) =>
+    public async Task<IReadOnlyList<ProductCategoryResponse>> GetProductCategories(CancellationToken ct) =>
         await catalog.GetCategoriesAsync(ct);
 }

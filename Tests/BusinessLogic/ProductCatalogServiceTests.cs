@@ -61,7 +61,7 @@ public class ProductCatalogServiceTests(PostgresFixture database) : DatabaseTest
         Assert.Equal("Milk", found.Name);
         Assert.Equal(type.Id, found.ProductTypeId);
         Assert.Equal("https://example.com/m.jpg", found.ImageUrl);
-        Assert.Equal(CatalogProduct.ManualSource, found.Source);
+        Assert.Equal("manual", found.Source);
     }
 
     [Fact]
