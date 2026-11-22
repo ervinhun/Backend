@@ -196,7 +196,7 @@ public class AuthEndpointsTests : DatabaseTest
         var email = $"{Guid.NewGuid():N}@example.com";
 
         var signIn = await _client.PostAsJsonAsync(
-            "/api/auth/external", new { provider = "google", idToken = IssueGoogleToken(email), displayName = "Anna" });
+            "/api/auth/externallogin", new { provider = "google", idToken = IssueGoogleToken(email), displayName = "Anna" });
         Assert.Equal(HttpStatusCode.OK, signIn.StatusCode);
         var auth = await signIn.Content.ReadFromJsonAsync<AuthResponse>();
 
@@ -213,7 +213,7 @@ public class AuthEndpointsTests : DatabaseTest
     [InlineData("google", "")]
     public async Task External_InvalidBody_Returns400(string provider, string idToken)
     {
-        var response = await _client.PostAsJsonAsync("/api/auth/external", new { provider, idToken });
+        var response = await _client.PostAsJsonAsync("/api/auth/externallogin", new { provider, idToken });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -221,7 +221,7 @@ public class AuthEndpointsTests : DatabaseTest
     [Fact]
     public async Task External_ForgedToken_Returns401()
     {
-        var response = await _client.PostAsJsonAsync("/api/auth/external", new { provider = "google", idToken = "forged" });
+        var response = await _client.PostAsJsonAsync("/api/auth/externallogin", new { provider = "google", idToken = "forged" });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -230,7 +230,7 @@ public class AuthEndpointsTests : DatabaseTest
     public async Task External_SignIn_ReturnsRefreshToken_ThatWorks()
     {
         var idToken = IssueGoogleToken($"{Guid.NewGuid():N}@example.com");
-        var auth = await (await _client.PostAsJsonAsync("/api/auth/external", new { provider = "google", idToken }))
+        var auth = await (await _client.PostAsJsonAsync("/api/auth/externallogin", new { provider = "google", idToken }))
             .Content.ReadFromJsonAsync<AuthResponse>();
 
         var refresh = await _client.PostAsJsonAsync("/api/auth/refresh", new { refreshToken = auth!.RefreshToken });

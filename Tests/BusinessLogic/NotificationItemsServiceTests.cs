@@ -147,7 +147,7 @@ public class NotificationItemsServiceTests(PostgresFixture database) : DatabaseT
 
         Assert.Equal([bens.Id], (await Service.GetAsync(fridge.Id, ben.Id)).Items.Select(i => i.Id));
         Assert.Equal(
-            [annas.Id, bens.Id],
+            new[] { annas.Id, bens.Id }.Order(),
             (await Service.GetAsync(fridge.Id, owner.Id)).Items.Select(i => i.Id).Order()
         );
     }
