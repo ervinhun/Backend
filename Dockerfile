@@ -6,7 +6,8 @@ RUN dotnet publish "Api/Api.csproj" \
     -o /app/publish \
     --runtime linux-musl-x64 \
     --self-contained true \
-    /p:PublishSingleFile=true
+    /p:PublishSingleFile=true \
+    /p:OpenApiGenerateDocumentsOnBuild=false
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
 WORKDIR /app
