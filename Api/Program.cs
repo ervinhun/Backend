@@ -100,8 +100,8 @@ builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 
 var app = builder.Build();
 
-// The Api tests run without a database.
-if (!app.Environment.IsEnvironment("Testing"))
+// The Api tests and the build's OpenAPI document generation run without a database.
+if (!app.Environment.IsEnvironment("Testing") && !OpenApiExtensions.IsGeneratingDocument)
 {
     using var scope = app.Services.CreateScope();
     await DbInitializer.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
