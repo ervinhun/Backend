@@ -13,9 +13,15 @@ public static class DbInitializer
 {
     public static async Task SeedAsync(AppDbContext db, CancellationToken ct = default)
     {
-        await using var stream = typeof(DbInitializer).Assembly.GetManifestResourceStream("foodkeeper.json")!;
+        await using var stream = typeof(DbInitializer).Assembly.GetManifestResourceStream("foodkeeper.json")
+            ?? throw new InvalidOperationException("The embedded resource 'foodkeeper.json' is missing from DataAccess.");
         var seed = await JsonSerializer.DeserializeAsync<List<SeedCategory>>(
             stream, JsonSerializerOptions.Web, ct) ?? [];
+
+        // On most startups there is nothing to add, and no need to lock.
+        var existingTypes = await GetExistingTypesAsync(db, ct);
+        if (seed.All(c => c.Types.All(t => existingTypes.Contains((c.Name, t.Name)))))
+            return;
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
@@ -23,17 +29,13 @@ public static class DbInitializer
         await db.Database.ExecuteSqlRawAsync(
             "LOCK TABLE product_categories, product_types IN SHARE ROW EXCLUSIVE MODE", ct);
 
+        // Read again under the lock: another instance may have added them while this one waited.
+        existingTypes = await GetExistingTypesAsync(db, ct);
         var categories = await db.ProductCategories.IgnoreQueryFilters().ToDictionaryAsync(c => c.Name, ct);
-        var existingTypes = (await db.ProductTypes.IgnoreQueryFilters()
-                .Select(t => new { t.CategoryId, t.Name })
-                .ToListAsync(ct))
-            .Select(t => (t.CategoryId, t.Name))
-            .ToHashSet();
 
         foreach (var seedCategory in seed)
         {
-            var isNewCategory = !categories.TryGetValue(seedCategory.Name, out var category);
-            if (isNewCategory)
+            if (!categories.TryGetValue(seedCategory.Name, out var category))
             {
                 category = new ProductCategory { Name = seedCategory.Name };
                 db.ProductCategories.Add(category);
@@ -41,7 +43,7 @@ public static class DbInitializer
 
             foreach (var seedType in seedCategory.Types)
             {
-                if (!isNewCategory && existingTypes.Contains((category!.Id, seedType.Name)))
+                if (existingTypes.Contains((seedCategory.Name, seedType.Name)))
                     continue;
 
                 db.ProductTypes.Add(new ProductType
@@ -60,6 +62,15 @@ public static class DbInitializer
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
     }
+
+    private static async Task<HashSet<(string Category, string Name)>> GetExistingTypesAsync(
+        AppDbContext db, CancellationToken ct) =>
+        (await db.ProductTypes.IgnoreQueryFilters()
+            .Where(t => t.Category != null)
+            .Select(t => new { Category = t.Category!.Name, t.Name })
+            .ToListAsync(ct))
+        .Select(t => (t.Category, t.Name))
+        .ToHashSet();
 
     private sealed record SeedCategory(string Name, List<SeedType> Types);
 
