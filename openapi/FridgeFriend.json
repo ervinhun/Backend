@@ -5,6 +5,64 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/feature-toggles/{feature}": {
+      "get": {
+        "tags": [
+          "Api"
+        ],
+        "operationId": "FeatureToggles",
+        "parameters": [
+          {
+            "name": "feature",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planTier",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Auth/Register": {
       "post": {
         "tags": [
@@ -2633,6 +2691,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "Api"
+    },
     {
       "name": "Auth"
     },

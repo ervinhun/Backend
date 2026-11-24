@@ -15,6 +15,9 @@ public static class RateLimitPolicies
 
     /// <summary>Joining a fridge with an invite code and replacing a fridge's code.</summary>
     public const string InviteCode = "invite-code";
+
+    /// <summary>Flag lookups through /feature-toggles/{feature}.</summary>
+    public const string FeatureToggles = "feature-toggles";
 }
 
 /// <summary>
@@ -23,7 +26,8 @@ public static class RateLimitPolicies
 /// </summary>
 public class ConfigureRateLimiterOptions(
     IOptions<AuthRateLimitOptions> authOptions,
-    IOptions<InviteCodeRateLimitOptions> inviteCodeOptions) : IConfigureOptions<RateLimiterOptions>
+    IOptions<InviteCodeRateLimitOptions> inviteCodeOptions,
+    IOptions<FeatureToggleRateLimitOptions> featureToggleOptions) : IConfigureOptions<RateLimiterOptions>
 {
     public void Configure(RateLimiterOptions options)
     {
@@ -48,6 +52,14 @@ public class ConfigureRateLimiterOptions(
             RateLimitPolicies.InviteCode,
             inviteCode.PermitLimit,
             inviteCode.WindowSeconds,
+            UserOrClientIp);
+
+        var featureToggles = featureToggleOptions.Value;
+        AddFixedWindowPolicy(
+            options,
+            RateLimitPolicies.FeatureToggles,
+            featureToggles.PermitLimit,
+            featureToggles.WindowSeconds,
             UserOrClientIp);
 
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;

@@ -1,5 +1,9 @@
+using FeatureHubHelper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Tests.Fakes;
 
 namespace Tests.Api;
 
@@ -21,6 +25,11 @@ public class ApiFactory(
         // Most tests share one client IP; the rate limit tests lower this themselves.
         builder.UseSetting("RateLimiting:Auth:PermitLimit", "10000");
         builder.UseSetting("RateLimiting:InviteCode:PermitLimit", "10000");
+        builder.UseSetting("RateLimiting:FeatureToggles:PermitLimit", "10000");
+
+        // No FeatureHub in tests: every flag is on.
+        builder.ConfigureServices(services =>
+            services.Replace(ServiceDescriptor.Singleton<IFeatureFlags, FakeFeatureFlags>()));
 
         if (settings is not null)
             foreach (var (key, value) in settings)
