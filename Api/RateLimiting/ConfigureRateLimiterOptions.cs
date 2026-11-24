@@ -20,6 +20,14 @@ public static class RateLimitPolicies
     public const string Catalog = "catalog";
 }
 
+public static class RateLimitHeaders
+{
+    /// <summary>
+    /// A random GUID the app keeps per install. Tells apart signed-out devices that share an IP; it proves nothing.
+    /// </summary>
+    public const string DeviceId = "X-Device-Id";
+}
+
 /// <summary>
 /// Rate limit policies, applied per endpoint with <c>[EnableRateLimiting(RateLimitPolicies.X)]</c>.
 /// Rejected requests get 429 with a Retry-After header and a ProblemDetails body.
@@ -36,8 +44,9 @@ public class ConfigureRateLimiterOptions(
         var catalog = catalogOptions.Value;
 
         // Per client IP: slows password guessing and mass sign-ups without
-        // touching the account being targeted. Behind a reverse proxy this needs
-        // forwarded headers, or every client shares the proxy's IP.
+        // touching the account being targeted. Never per device id: a new one per
+        // guess would get around it. Behind a reverse proxy this needs
+        // ReverseProxyOptions, or every client shares the proxy's IP.
         AddFixedWindowPolicy(
             options,
             RateLimitPolicies.Auth,
@@ -55,13 +64,20 @@ public class ConfigureRateLimiterOptions(
             inviteCode.WindowSeconds,
             UserOrClientIp);
 
-        // Anonymous, so guests and signed-out apps can load it: per user when there's a token, else per IP.
+        // Anonymous, so guests and signed-out apps can load it: per user when there's a token, else per device,
+        // so people sharing an IP don't share a budget.
         AddFixedWindowPolicy(
             options,
             RateLimitPolicies.Catalog,
             catalog.PermitLimit,
             catalog.WindowSeconds,
-            UserOrClientIp);
+            UserOrDevice);
+
+        // On top of the catalog policy, as a device id can be made up.
+        options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            IsAnonymousCatalogRequest(context)
+                ? FixedWindow(ClientIp(context), catalog.AnonymousIpPermitLimit, catalog.WindowSeconds)
+                : RateLimitPartition.GetNoLimiter(string.Empty));
 
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         options.OnRejected = async (context, ct) =>
@@ -96,6 +112,18 @@ public class ConfigureRateLimiterOptions(
             ? $"user:{userId}"
             : $"ip:{ClientIp(context)}";
 
+    // The IP is part of the key so that a device id seen elsewhere can't be used to spend that device's budget.
+    private static string UserOrDevice(HttpContext context) =>
+        context.User.FindFirstValue(JwtRegisteredClaimNames.Sub) is null
+        && Guid.TryParse(context.Request.Headers[RateLimitHeaders.DeviceId], out var deviceId)
+            ? $"device:{ClientIp(context)}:{deviceId}"
+            : UserOrClientIp(context);
+
+    private static bool IsAnonymousCatalogRequest(HttpContext context) =>
+        context.User.FindFirstValue(JwtRegisteredClaimNames.Sub) is null
+        && context.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName
+            == RateLimitPolicies.Catalog;
+
     private static void AddFixedWindowPolicy(
         RateLimiterOptions options,
         string policyName,
@@ -103,12 +131,15 @@ public class ConfigureRateLimiterOptions(
         int windowSeconds,
         Func<HttpContext, string> partitionKey) =>
         options.AddPolicy(policyName, context =>
-            RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey(context),
-                _ => new FixedWindowRateLimiterOptions
-                {
-                    PermitLimit = permitLimit,
-                    Window = TimeSpan.FromSeconds(windowSeconds),
-                    QueueLimit = 0,
-                }));
+            FixedWindow(partitionKey(context), permitLimit, windowSeconds));
+
+    private static RateLimitPartition<string> FixedWindow(string partitionKey, int permitLimit, int windowSeconds) =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permitLimit,
+                Window = TimeSpan.FromSeconds(windowSeconds),
+                QueueLimit = 0,
+            });
 }

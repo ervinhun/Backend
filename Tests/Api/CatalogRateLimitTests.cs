@@ -9,6 +9,7 @@ namespace Tests.Api;
 public class CatalogRateLimitTests : DatabaseTest
 {
     private const int Limit = 3;
+    private const int IpLimit = 8;
 
     private readonly ApiFactory _factory;
     private readonly HttpClient _client;
@@ -21,6 +22,7 @@ public class CatalogRateLimitTests : DatabaseTest
             new Dictionary<string, string?>
             {
                 ["RateLimiting:Catalog:PermitLimit"] = Limit.ToString(),
+                ["RateLimiting:Catalog:AnonymousIpPermitLimit"] = IpLimit.ToString(),
                 ["RateLimiting:Catalog:WindowSeconds"] = "60",
             }
         );
@@ -47,11 +49,13 @@ public class CatalogRateLimitTests : DatabaseTest
         return (await response.Content.ReadFromJsonAsync<AuthResponse>())!;
     }
 
-    private Task<HttpResponseMessage> GetAsync(string url, AuthResponse? caller = null)
+    private Task<HttpResponseMessage> GetAsync(string url, AuthResponse? caller = null, string? deviceId = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         if (caller is not null)
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", caller.AccessToken);
+        if (deviceId is not null)
+            request.Headers.Add("X-Device-Id", deviceId);
         return _client.SendAsync(request);
     }
 
@@ -89,5 +93,60 @@ public class CatalogRateLimitTests : DatabaseTest
 
         Assert.Equal(HttpStatusCode.TooManyRequests, anonymousBlocked.StatusCode);
         Assert.Equal(HttpStatusCode.OK, annaAllowed.StatusCode);
+    }
+
+    [Fact]
+    public async Task Devices_HaveTheirOwnBudget_OnTheSameIp()
+    {
+        var phone = Guid.NewGuid().ToString();
+        for (var i = 0; i < Limit; i++)
+            await GetAsync("/api/product-types", deviceId: phone);
+
+        var phoneBlocked = await GetAsync("/api/product-types", deviceId: phone);
+        var tabletAllowed = await GetAsync("/api/product-types", deviceId: Guid.NewGuid().ToString());
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, phoneBlocked.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, tabletAllowed.StatusCode);
+    }
+
+    [Fact]
+    public async Task NewDeviceIdEachTime_IsStoppedByTheIpLimit_ButSignedInUsersAreNot()
+    {
+        var anna = await RegisterAsync();
+        for (var i = 0; i < IpLimit; i++)
+            Assert.Equal(
+                HttpStatusCode.OK,
+                (await GetAsync("/api/product-types", deviceId: Guid.NewGuid().ToString())).StatusCode
+            );
+
+        var blocked = await GetAsync("/api/product-types", deviceId: Guid.NewGuid().ToString());
+        var annaAllowed = await GetAsync("/api/product-types", anna);
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, blocked.StatusCode);
+        Assert.True(blocked.Headers.RetryAfter?.Delta > TimeSpan.Zero);
+        Assert.Equal(HttpStatusCode.OK, annaAllowed.StatusCode);
+    }
+
+    [Fact]
+    public async Task InvalidDeviceIds_ShareTheIpBudget()
+    {
+        for (var i = 0; i < Limit; i++)
+            await GetAsync("/api/product-types", deviceId: $"not-a-guid-{i}");
+
+        var blocked = await GetAsync("/api/product-types", deviceId: "another");
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, blocked.StatusCode);
+    }
+
+    [Fact]
+    public async Task SignedInUser_GetsNoExtraBudget_FromADeviceId()
+    {
+        var anna = await RegisterAsync();
+        for (var i = 0; i < Limit; i++)
+            await GetAsync("/api/product-types", anna, Guid.NewGuid().ToString());
+
+        var blocked = await GetAsync("/api/product-types", anna, Guid.NewGuid().ToString());
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, blocked.StatusCode);
     }
 }

@@ -102,7 +102,15 @@ builder.Services.AddOptions<CatalogRateLimitOptions>()
 builder.Services.AddRateLimiter(_ => { });
 builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 
+// The client's IP when the API runs behind a reverse proxy
+var reverseProxy = builder.Configuration.GetSection(ReverseProxyOptions.SectionName).Get<ReverseProxyOptions>() ?? new();
+builder.Services.Configure<ForwardedHeadersOptions>(reverseProxy.Apply);
+
 var app = builder.Build();
+
+// First, so everything after it sees the client's IP.
+if (reverseProxy.KnownNetworks.Length > 0)
+    app.UseForwardedHeaders();
 
 app.UseExceptionHandler();
 
