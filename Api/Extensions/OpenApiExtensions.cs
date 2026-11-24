@@ -12,7 +12,7 @@ public static class OpenApiExtensions
     /// `dotnet build` runs the app's startup in this tool to write the OpenAPI document.
     /// It never serves a request, and has no secrets (CI has no .env).
     /// </summary>
-    private static bool IsGeneratingDocument =>
+    public static bool IsGeneratingDocument =>
         Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
 
     /// <summary>

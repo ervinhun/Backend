@@ -8,9 +8,11 @@ public class PostgresFixtureTests(PostgresFixture database) : DatabaseTest(datab
     {
         await using var db = Database.CreateDbContext();
         // Table names are test-controlled constants, never user input, so the interpolation is not injectable.
+#pragma warning disable EF1002
         return await db
             .Database.SqlQueryRaw<int>($"SELECT count(*)::int AS \"Value\" FROM {table}")
             .SingleAsync();
+#pragma warning restore EF1002
     }
 
     [Fact]

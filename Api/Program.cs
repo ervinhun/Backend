@@ -61,7 +61,17 @@ builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
 // Google / Apple sign-in. Singleton so the providers' signing keys stay cached.
 builder.Services.AddOptions<ExternalAuthOptions>()
     .Bind(builder.Configuration.GetSection(ExternalAuthOptions.SectionName));
-builder.Services.AddSingleton<IExternalTokenValidator, OidcExternalTokenValidator>();
+if (builder.Environment.IsDevelopment())
+{
+    // Lets the simulator sign in with a fake Apple token (see DevAppleTokenValidator).
+    builder.Services.AddSingleton<OidcExternalTokenValidator>();
+    builder.Services.AddSingleton<IExternalTokenValidator>(sp =>
+        new DevAppleTokenValidator(sp.GetRequiredService<OidcExternalTokenValidator>()));
+}
+else
+{
+    builder.Services.AddSingleton<IExternalTokenValidator, OidcExternalTokenValidator>();
+}
 
 // JWT authentication
 builder.Services.AddOptions<JwtOptions>()
@@ -96,8 +106,8 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
-// The Api tests run without a database.
-if (!app.Environment.IsEnvironment("Testing"))
+// The Api tests and the build's OpenAPI document generation run without a database.
+if (!app.Environment.IsEnvironment("Testing") && !OpenApiExtensions.IsGeneratingDocument)
 {
     using var scope = app.Services.CreateScope();
     await DbInitializer.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
