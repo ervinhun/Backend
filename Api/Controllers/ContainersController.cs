@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using BusinessLogic.Dtos.Container;
+using BusinessLogic.Exceptions;
 using BusinessLogic.Interfaces;
+using FeatureHubHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -11,7 +13,7 @@ namespace Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/fridges/{fridgeId:guid}/containers")]
-public class ContainersController(IContainerService containers)
+public class ContainersController(IContainerService containers, IFeatureFlags featureFlags)
     : ControllerBase
 {
     // AppJwtBearerEvents rejects any token whose sub isn't a GUID, so this can't fail behind [Authorize].
@@ -24,6 +26,11 @@ public class ContainersController(IContainerService containers)
         CancellationToken ct
     )
     {
+        // Example of gating an action behind a FeatureHub flag.
+        if (!await featureFlags.IsEnabledAsync("createContainer", CurrentUserId.ToString()))
+        {
+            throw new FeatureNotEnabledException("createContainer");
+        }
         var container = await containers.CreateAsync(fridgeId, CurrentUserId, request, ct);
         return CreatedAtAction(
             nameof(GetContainer),

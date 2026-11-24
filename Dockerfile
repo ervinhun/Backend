@@ -1,10 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 COPY ["./", "."]
-RUN dotnet publish "Api/Api.csproj" \
+# Match the build host (arm64 on Apple Silicon, x64 elsewhere); a hardcoded x64 binary fails to start in an arm64 image.
+RUN ARCH=$([ "$(uname -m)" = "aarch64" ] && echo arm64 || echo x64) && \
+    dotnet publish "Api/Api.csproj" \
     -c Release \
     -o /app/publish \
-    --runtime linux-musl-x64 \
+    --runtime linux-musl-$ARCH \
     --self-contained true \
     /p:PublishSingleFile=true \
     /p:OpenApiGenerateDocumentsOnBuild=false

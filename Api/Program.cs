@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Api.Authentication;
 using Api.Extensions;
 using Api.Middleware;
@@ -10,9 +11,11 @@ using DataAccess.Entities;
 using DataAccess.Interfaces;
 using DataAccess.Repositories;
 using DotNetEnv;
+using FeatureHubHelper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 // Load variables from the .env file (searching parent directories) without
 // overriding variables already set in the real environment.
@@ -33,6 +36,7 @@ builder.Services.AddAppOpenApi();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddSingleton<IFeatureFlags, FeatureStateProvider>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 builder.Services.AddScoped<IFridgeRepository, FridgeRepository>();
@@ -126,6 +130,12 @@ app.UseRateLimiter();
 
 app.MapGet("/", () => "Hello World!")
     .ExcludeFromDescription();
+
+app.MapGet("/feature-toggles/{feature}",
+        (IFeatureFlags flags, string feature, string? country, string? platform, string? version, string? planTier, ClaimsPrincipal user) =>
+            flags.IsEnabledAsync(feature, user.FindFirstValue(JwtRegisteredClaimNames.Sub), country, platform, version, planTier))
+    .RequireAuthorization()
+    .WithName("FeatureToggles");
 
 app.MapControllers();
 
