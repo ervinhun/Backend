@@ -99,6 +99,10 @@ builder.Services.AddOptions<InviteCodeRateLimitOptions>()
     .Bind(builder.Configuration.GetSection(InviteCodeRateLimitOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<FeatureToggleRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(FeatureToggleRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddRateLimiter(_ => { });
 builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 
@@ -109,6 +113,9 @@ if (!app.Environment.IsEnvironment("Testing") && !OpenApiExtensions.IsGenerating
 {
     using var scope = app.Services.CreateScope();
     await DbInitializer.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
+
+    // Builds the singleton now, so missing FEATUREHUB_* settings fail on boot instead of on the first request.
+    app.Services.GetRequiredService<IFeatureFlags>();
 }
 
 app.UseExceptionHandler();
@@ -135,6 +142,7 @@ app.MapGet("/feature-toggles/{feature}",
         (IFeatureFlags flags, string feature, string? country, string? platform, string? version, string? planTier, ClaimsPrincipal user) =>
             flags.IsEnabledAsync(feature, user.FindFirstValue(JwtRegisteredClaimNames.Sub), country, platform, version, planTier))
     .RequireAuthorization()
+    .RequireRateLimiting(RateLimitPolicies.FeatureToggles)
     .WithName("FeatureToggles");
 
 app.MapControllers();

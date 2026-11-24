@@ -31,13 +31,13 @@ public class FeatureStateProvider : IFeatureFlags
       }
       
       // Country rollout
-      if (Enum.TryParse<StrategyAttributeCountryName>(countryName, ignoreCase: true, out var country))
+      if (Enum.TryParse<StrategyAttributeCountryName>(countryName, ignoreCase: true, out var country) && Enum.IsDefined(country))
       {
          builder.Country(country);
       }
 
       // Platform rollout (eg.: Android vs iOS)
-      if (Enum.TryParse<StrategyAttributePlatformName>(platform, ignoreCase: true, out var platformName))
+      if (Enum.TryParse<StrategyAttributePlatformName>(platform, ignoreCase: true, out var platformName) && Enum.IsDefined(platformName))
       {
          builder.Platform(platformName);
       }
