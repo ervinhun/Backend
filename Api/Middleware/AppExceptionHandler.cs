@@ -16,6 +16,7 @@ public class AppExceptionHandler(IProblemDetailsService problemDetails, ILogger<
             UnauthorizedException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden"),
             NotFoundException =>(StatusCodes.Status404NotFound, "Not found"),
+            GoneException => (StatusCodes.Status410Gone, "Gone"),
             ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred"),
         };

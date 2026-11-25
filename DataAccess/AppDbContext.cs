@@ -304,7 +304,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             item.Property(i => i.ImageUrl).HasColumnName("image_url");
             item.Property(i => i.AddedByUserId).HasColumnName("added_by_user_id");
             item.Property(i => i.AddedAt).HasColumnName("added_at");
+            item.Property(i => i.ProductTypeId).HasColumnName("product_type_id");
             item.Property(i => i.ExpiryDate).HasColumnName("expiry_date");
+            item.Property(i => i.BestBefore).HasColumnName("best_before");
+            item.Property(i => i.OpenedOn).HasColumnName("opened_on");
+            item.Property(i => i.ChangedAt).HasColumnName("changed_at").HasDefaultValueSql("now()");
             item.Property(i => i.Comment).HasColumnName("comment");
             // The column only accepts 'active', 'consumed', 'expired' and 'removed'.
             item.Property(i => i.Status).HasColumnName("status")
@@ -318,6 +322,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             item.HasOne<Container>().WithMany().HasForeignKey(i => i.ContainerId);
             item.HasOne<CatalogProduct>().WithMany().HasForeignKey(i => i.ProductCatalogId);
             item.HasOne<ProductCategory>().WithMany().HasForeignKey(i => i.CategoryId);
+            item.HasOne<ProductType>().WithMany().HasForeignKey(i => i.ProductTypeId);
             item.HasOne<User>().WithMany().HasForeignKey(i => i.AddedByUserId);
         });
     }

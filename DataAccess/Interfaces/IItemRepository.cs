@@ -34,6 +34,17 @@ public interface IItemRepository
         CancellationToken ct = default
     );
 
+    /// <summary>
+    /// Adds the item, or changes it unless it was changed later than <see cref="SyncedItem.ChangedAt"/>. Sending the
+    /// same one again changes nothing.
+    /// </summary>
+    Task<SyncItemResult> SyncAsync(
+        Guid fridgeId,
+        Guid userId,
+        SyncedItem synced,
+        CancellationToken ct = default
+    );
+
     /// <summary>Returns false if there is no such item in this fridge.</summary>
     Task<bool> SetStatusAsync(
         Guid fridgeId,

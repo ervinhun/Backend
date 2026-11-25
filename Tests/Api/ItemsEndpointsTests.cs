@@ -360,4 +360,208 @@ public class ItemsEndpointsTests : DatabaseTest
             StatusCodes.Status404NotFound
         );
     }
+
+    private static object Synced(
+        DateTimeOffset changedAt,
+        string name = "Milk",
+        string storage = "fridge",
+        Guid? productTypeId = null,
+        string? openedOn = null
+    ) =>
+        new
+        {
+            storage,
+            name,
+            productTypeId,
+            amount = "1 l",
+            expiryDate = openedOn is null ? "2030-07-01" : "2030-06-20",
+            bestBefore = "2030-07-01",
+            openedOn,
+            changedAt,
+        };
+
+    private Task<HttpResponseMessage> SyncAsync(Setup s, AuthResponse caller, Guid id, object body) =>
+        SendAsync(caller, HttpMethod.Put, Url(s, id, "/sync"), body);
+
+    private async Task<ItemResponse> SyncedAsync(Setup s, Guid id, object body)
+    {
+        var response = await SyncAsync(s, s.Owner, id, body);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<ItemResponse>())!;
+    }
+
+    private async Task<List<ItemResponse>> ListAsync(Setup s) =>
+        (await (await SendAsync(s.Owner, HttpMethod.Get, Url(s))).Content.ReadFromJsonAsync<List<ItemResponse>>())!;
+
+    [Fact]
+    public async Task Sync_AddsTheItemUnderItsOwnId_OnlyOnce()
+    {
+        var s = await CreateFridgeAsync();
+        var id = Guid.NewGuid();
+        var changedAt = DateTimeOffset.UtcNow.AddDays(-2);
+
+        await SyncedAsync(s, id, Synced(changedAt));
+        await SyncedAsync(s, id, Synced(changedAt));
+
+        var item = Assert.Single(await ListAsync(s));
+        Assert.Equal((id, s.Container.Id, "Milk", "1 l"), (item.Id, item.ContainerId, item.Name, item.Amount));
+        // Added when the user added it, not when it got here.
+        Assert.Equal(DateOnly.FromDateTime(changedAt.UtcDateTime), item.AddedAt);
+    }
+
+    [Fact]
+    public async Task Sync_KeepsTheTypeAndWhenItWasOpened()
+    {
+        var s = await CreateFridgeAsync();
+        var id = Guid.NewGuid();
+        ProductType type;
+        using (var scope = _factory.Services.CreateScope())
+            type = scope.ServiceProvider.GetRequiredService<AppDbContext>().ProductTypes
+                .First(t => t.CategoryId != null);
+        var now = DateTimeOffset.UtcNow;
+        await SyncedAsync(s, id, Synced(now.AddHours(-1), productTypeId: type.Id));
+
+        // A type that isn't known any more, or is left out, doesn't lose the old one.
+        var opened = await SyncedAsync(
+            s, id, Synced(now, productTypeId: Guid.NewGuid(), openedOn: "2030-06-16"));
+
+        Assert.Equal((type.Id, type.CategoryId), (opened.ProductTypeId!.Value, opened.CategoryId));
+        Assert.Equal(new DateOnly(2030, 6, 16), opened.OpenedOn);
+        Assert.Equal(new DateOnly(2030, 6, 20), opened.ExpiryDate);
+        Assert.Equal(new DateOnly(2030, 7, 1), opened.BestBefore);
+    }
+
+    [Fact]
+    public async Task Sync_LaterChangeWins_WhicheverArrivesFirst()
+    {
+        var s = await CreateFridgeAsync();
+        var id = Guid.NewGuid();
+        var now = DateTimeOffset.UtcNow;
+        await SyncedAsync(s, id, Synced(now.AddHours(-1), "Later change"));
+
+        var answer = await SyncedAsync(s, id, Synced(now.AddHours(-2), "Earlier, sent late"));
+        Assert.Equal("Later change", answer.Name);
+
+        Assert.Equal("Latest", (await SyncedAsync(s, id, Synced(now, "Latest"))).Name);
+    }
+
+    [Fact]
+    public async Task Sync_WithAClockThatIsAhead_DoesNotBlockLaterChanges()
+    {
+        var s = await CreateFridgeAsync();
+        var id = Guid.NewGuid();
+        await SyncedAsync(s, id, Synced(DateTimeOffset.UtcNow.AddYears(1), "From the future"));
+
+        Assert.Equal("Now", (await SyncedAsync(s, id, Synced(DateTimeOffset.UtcNow, "Now"))).Name);
+    }
+
+    [Fact]
+    public async Task Sync_OlderThanAChangeMadeOnline_KeepsThatChange()
+    {
+        var s = await CreateFridgeAsync();
+        var item = await CreateItemAsync(s, s.Owner);
+        await SendAsync(
+            s.Owner,
+            HttpMethod.Put,
+            Url(s, item.Id),
+            new { containerId = s.Container.Id, name = "Oat milk", expiryDate = "2030-08-01" }
+        );
+
+        var answer = await SyncedAsync(s, item.Id, Synced(DateTimeOffset.UtcNow.AddMinutes(-5), "Old"));
+
+        Assert.Equal("Oat milk", answer.Name);
+    }
+
+    [Theory]
+    [InlineData("deleted")]
+    [InlineData("removed")]
+    [InlineData("consumed")]
+    public async Task Sync_OfARemovedItem_Returns410_AndDoesNotBringItBack(string how)
+    {
+        var s = await CreateFridgeAsync();
+        var item = await CreateItemAsync(s, s.Owner);
+        if (how == "deleted")
+            await SendAsync(s.Owner, HttpMethod.Delete, Url(s, item.Id));
+        else
+            await SendAsync(s.Owner, HttpMethod.Put, Url(s, item.Id, "/status"), new { status = how });
+
+        var response = await SyncAsync(s, s.Owner, item.Id, Synced(DateTimeOffset.UtcNow.AddMinutes(1)));
+
+        await AssertProblemAsync(response, StatusCodes.Status410Gone);
+        Assert.Empty(await ListAsync(s));
+    }
+
+    [Fact]
+    public async Task Sync_OfAnItemInAnotherFridge_Returns410_AndLeavesIt()
+    {
+        var s = await CreateFridgeAsync();
+        var other = await CreateFridgeAsync();
+        var item = await CreateItemAsync(other, other.Owner, "Theirs");
+
+        var response = await SyncAsync(s, s.Owner, item.Id, Synced(DateTimeOffset.UtcNow, "Mine"));
+
+        await AssertProblemAsync(response, StatusCodes.Status410Gone);
+        Assert.Equal("Theirs", Assert.Single(await ListAsync(other)).Name);
+    }
+
+    [Fact]
+    public async Task Sync_CreatesTheContainerOnce_AndLeavesAnItemWhereItIs()
+    {
+        var s = await CreateFridgeAsync();
+        var now = DateTimeOffset.UtcNow;
+        var door = (await (
+            await SendAsync(
+                s.Owner,
+                HttpMethod.Post,
+                $"/api/fridges/{s.Fridge.Id}/containers",
+                new { name = "Door", type = "fridge" }
+            )
+        ).Content.ReadFromJsonAsync<ContainerResponse>())!;
+        var inDoor = await CreateItemAsync(s with { Container = door }, s.Owner);
+
+        var peas = await SyncedAsync(s, Guid.NewGuid(), Synced(now, "Peas", "freezer"));
+        var fish = await SyncedAsync(s, Guid.NewGuid(), Synced(now, "Fish", "freezer"));
+        var stillInDoor = await SyncedAsync(s, inDoor.Id, Synced(now.AddMinutes(1), "Milk"));
+
+        Assert.Equal(peas.ContainerId, fish.ContainerId);
+        Assert.NotEqual(s.Container.Id, peas.ContainerId);
+        Assert.Equal(door.Id, stillInDoor.ContainerId);
+    }
+
+    [Fact]
+    public async Task Sync_AtTheSameTime_AddsOneItemAndOneContainer()
+    {
+        var s = await CreateFridgeAsync();
+        var id = Guid.NewGuid();
+        var body = Synced(DateTimeOffset.UtcNow, "Rice", "pantry");
+
+        var responses = await Task.WhenAll(
+            Enumerable.Range(0, 5).Select(_ => SyncAsync(s, s.Owner, id, body)));
+
+        Assert.All(responses, r => Assert.Equal(HttpStatusCode.OK, r.StatusCode));
+        Assert.Single(await ListAsync(s));
+        var containers = await (
+            await SendAsync(s.Owner, HttpMethod.Get, $"/api/fridges/{s.Fridge.Id}/containers")
+        ).Content.ReadFromJsonAsync<List<ContainerResponse>>();
+        Assert.Single(containers!, c => c.Type == "pantry");
+    }
+
+    [Fact]
+    public async Task Sync_WithoutRights_IsRefused()
+    {
+        var s = await CreateFridgeAsync();
+        var ben = await RegisterAsync("Ben");
+        var cleo = await RegisterAsync("Cleo");
+        await AddMemberAsync(s, ben, canPut: false, canUse: true);
+        var body = Synced(DateTimeOffset.UtcNow);
+
+        await AssertProblemAsync(
+            await SyncAsync(s, ben, Guid.NewGuid(), body), StatusCodes.Status403Forbidden);
+        await AssertProblemAsync(
+            await SyncAsync(s, cleo, Guid.NewGuid(), body), StatusCodes.Status404NotFound);
+        await AssertProblemAsync(
+            await SyncAsync(s, s.Owner, Guid.NewGuid(), Synced(DateTimeOffset.UtcNow, storage: "shed")),
+            StatusCodes.Status400BadRequest);
+        Assert.Empty(await ListAsync(s));
+    }
 }
