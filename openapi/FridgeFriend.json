@@ -1234,6 +1234,76 @@
         }
       }
     },
+    "/api/fridges/{fridgeId}/items/{itemId}/sync": {
+      "put": {
+        "tags": [
+          "Items"
+        ],
+        "operationId": "SyncItem",
+        "parameters": [
+          {
+            "name": "fridgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncItemRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncItemRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/fridges/{fridgeId}/items/{itemId}/status": {
       "put": {
         "tags": [
@@ -1525,7 +1595,8 @@
               }
             }
           }
-        }
+        },
+        "security": [ ]
       }
     },
     "/api/products": {
@@ -1720,7 +1791,8 @@
               }
             }
           }
-        }
+        },
+        "security": [ ]
       }
     }
   },
@@ -2064,6 +2136,13 @@
             ],
             "format": "uuid"
           },
+          "productTypeId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "amount": {
             "type": [
               "null",
@@ -2092,6 +2171,20 @@
           },
           "expiryDate": {
             "type": "string",
+            "format": "date"
+          },
+          "bestBefore": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "openedOn": {
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date"
           },
           "comment": {
@@ -2504,6 +2597,68 @@
         "properties": {
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "SyncItemRequest": {
+        "required": [
+          "storage",
+          "name",
+          "expiryDate",
+          "changedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "storage": {
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "productTypeId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "amount": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "expiryDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "bestBefore": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "openedOn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "changedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         }
       },

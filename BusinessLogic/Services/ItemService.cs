@@ -147,6 +147,51 @@ public class ItemService(
         return await FindAsync(fridgeId, itemId, ct);
     }
 
+    public async Task<ItemResponse> SyncAsync(
+        Guid fridgeId,
+        Guid itemId,
+        Guid userId,
+        SyncItemRequest request,
+        CancellationToken ct = default
+    )
+    {
+        await AuthorizeAsync(fridgeId, userId, Access.Put, ct);
+
+        // The type may have been deleted while the phone was offline. The food is still worth keeping.
+        var type = request.ProductTypeId is { } typeId ? await catalog.GetTypeAsync(typeId, ct) : null;
+        var now = timeProvider.GetUtcNow();
+        var changedAt = request.ChangedAt!.Value.ToUniversalTime();
+
+        var result = await items.SyncAsync(
+            fridgeId,
+            userId,
+            new SyncedItem(
+                itemId,
+                Enum.Parse<ContainerType>(request.Storage, ignoreCase: true),
+                request.Name.Trim(),
+                type?.Id,
+                type?.CategoryId,
+                Clean(request.Amount),
+                request.ExpiryDate!.Value,
+                request.BestBefore,
+                request.OpenedOn,
+                changedAt > now ? now : changedAt
+            ),
+            ct
+        );
+
+        return result.Status switch
+        {
+            SyncItemStatus.Saved => result.Item!.ToResponse(),
+            SyncItemStatus.FridgeNotFound => throw new NotFoundException(FridgeNotFoundMessage),
+            SyncItemStatus.Gone => throw new GoneException("This item has been removed."),
+            SyncItemStatus.ContainersFull => throw new ConflictException(
+                $"This fridge has reached its limit of {result.MaxContainers} containers."
+            ),
+            _ => throw new InvalidOperationException($"Unexpected sync result {result.Status}."),
+        };
+    }
+
     public async Task<ItemResponse> SetStatusAsync(
         Guid fridgeId,
         Guid itemId,

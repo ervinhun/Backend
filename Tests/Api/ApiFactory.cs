@@ -21,6 +21,8 @@ public class ApiFactory(
         // Most tests share one client IP; the rate limit tests lower this themselves.
         builder.UseSetting("RateLimiting:Auth:PermitLimit", "10000");
         builder.UseSetting("RateLimiting:InviteCode:PermitLimit", "10000");
+        builder.UseSetting("RateLimiting:Catalog:PermitLimit", "10000");
+        builder.UseSetting("RateLimiting:Catalog:AnonymousIpPermitLimit", "10000");
 
         if (settings is not null)
             foreach (var (key, value) in settings)

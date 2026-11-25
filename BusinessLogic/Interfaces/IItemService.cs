@@ -32,6 +32,18 @@ public interface IItemService
         UpdateItemRequest request,
         CancellationToken ct = default
     );
+
+    /// <summary>
+    /// Adds the item with this id, or changes it unless it was changed later than the request says: then it returns
+    /// that later version. Throws GoneException if the item was removed, as removal wins over a change.
+    /// </summary>
+    Task<ItemResponse> SyncAsync(
+        Guid fridgeId,
+        Guid itemId,
+        Guid userId,
+        SyncItemRequest request,
+        CancellationToken ct = default
+    );
     Task<ItemResponse> SetStatusAsync(
         Guid fridgeId,
         Guid itemId,

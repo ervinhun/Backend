@@ -95,10 +95,24 @@ builder.Services.AddOptions<InviteCodeRateLimitOptions>()
     .Bind(builder.Configuration.GetSection(InviteCodeRateLimitOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<CatalogRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(CatalogRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddRateLimiter(_ => { });
 builder.Services.ConfigureOptions<ConfigureRateLimiterOptions>();
 
+// The client's IP when the API runs behind a reverse proxy
+var reverseProxy = builder.Configuration.GetSection(ReverseProxyOptions.SectionName).Get<ReverseProxyOptions>() ?? new();
+builder.Services.Configure<ForwardedHeadersOptions>(reverseProxy.Apply);
+
 var app = builder.Build();
+
+// First, so everything after it sees the client's IP.
+if (reverseProxy.KnownNetworks.Length > 0)
+    app.UseForwardedHeaders();
+
+app.UseExceptionHandler();
 
 // The Api tests and the build's OpenAPI document generation run without a database.
 if (!app.Environment.IsEnvironment("Testing") && !OpenApiExtensions.IsGeneratingDocument)
@@ -107,7 +121,6 @@ if (!app.Environment.IsEnvironment("Testing") && !OpenApiExtensions.IsGenerating
     await DbInitializer.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
 }
 
-app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
