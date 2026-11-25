@@ -60,6 +60,21 @@ public class ItemsController(IItemService items) : ControllerBase
         return await items.UpdateAsync(fridgeId, itemId, CurrentUserId, request, ct);
     }
 
+    /// <summary>
+    /// Adds or changes an item under the id the phone gave it, so it can be sent again after a lost answer. Returns the
+    /// item as it now is: someone's later change wins. 410 if it was removed.
+    /// </summary>
+    [HttpPut("{itemId:guid}/sync")]
+    public async Task<ActionResult<ItemResponse>> SyncItem(
+        Guid fridgeId,
+        Guid itemId,
+        SyncItemRequest request,
+        CancellationToken ct
+    )
+    {
+        return await items.SyncAsync(fridgeId, itemId, CurrentUserId, request, ct);
+    }
+
     /// <summary>Marks the item consumed or removed, or active again. Members who may use things can do this.</summary>
     [HttpPut("{itemId:guid}/status")]
     public async Task<ActionResult<ItemResponse>> SetItemStatus(
