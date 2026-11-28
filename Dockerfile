@@ -14,5 +14,7 @@ WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
+# The image's built-in non-root user (uid 1654)
+USER $APP_UID
 
 ENTRYPOINT ["./Api"]
