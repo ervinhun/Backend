@@ -4,9 +4,11 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
+# target-branch: otherwise Dependabot targets the default branch, main, not development
 updates:
   - package-ecosystem: "nuget"
     directory: "/"
+    target-branch: "development"
     schedule:
       interval: "weekly"
     groups:
@@ -16,13 +18,16 @@ updates:
           - "System.*"
   - package-ecosystem: "docker"
     directory: "/"
+    target-branch: "development"
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker-compose"
     directory: "/"
+    target-branch: "development"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "development"
     schedule:
       interval: "weekly"
