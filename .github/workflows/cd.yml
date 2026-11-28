@@ -1,32 +1,57 @@
 name: CD
 
-# Draft pipeline — real deploy steps (target host, secrets, etc.) land once
-# hosting is decided (see root README's "Planned tech stack"). For now this
-# only handles automatic versioning: every push to main that passes CI gets
-# a new semver tag and a GitHub release, computed from commit messages
-# (append "(MAJOR)" or "(MINOR)" to a commit message to bump those; anything
-# else bumps patch).
+# Runs after the Release Gates of a push to main have passed (CI -> Release Gates -> CD):
+#   gates    -> confirm the gates really passed
+#   version  -> next semver tag + GitHub release, computed from commit messages (append "(MAJOR)" or "(MINOR)"
+#               to a commit message to bump those; anything else bumps patch)
+#   migrate  -> apply the Flyway migrations to the production Neon database
+#   deploy   -> deploy the API to Fly.io, then check the same facts as the gate against it (read-only)
 #
-# Triggered off CI actually completing (workflow_run), not a second
-# independent `push:` trigger, so a release is never tagged from a commit
-# whose build/test hasn't actually finished and passed.
+# Triggered off Release Gates completing (workflow_run), so a release is never tagged from a commit whose image,
+# migrations and facts have not passed.
 #
-# Pinned to ubuntu-24.04 rather than ubuntu-latest: GitHub is migrating
-# that floating tag to Ubuntu 26 starting 2026-10-19 (actions/runner-
-# images#14748) — pin so a runner-image change can't silently break a
-# release push, and bump deliberately once Ubuntu 26 is verified fine.
-
+# Pinned to ubuntu-24.04 rather than ubuntu-latest: GitHub is migrating that floating tag to Ubuntu 26 starting
+# 2026-10-19 (actions/runner-images#14748). Bump deliberately once Ubuntu 26 is verified fine.
 on:
   workflow_run:
-    workflows: ['CI']
+    workflows: ["Release Gates"]
     types: [completed]
+    branches: ["main"]
+
+# One release at a time, and never cancel one that is already tagging or migrating
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
+  # Release Gates still runs when CI failed, with every job skipped, and a workflow with only skipped jobs
+  # reports "success". So check that the gate actually ran and passed.
+  gates:
+    name: Confirm the release gates passed
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+    steps:
+      - name: Check verify-release-stack succeeded
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          result=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs" --paginate \
+            --jq '.jobs[] | select(.name == "verify-release-stack") | .conclusion')
+          echo "verify-release-stack: ${result:-not found}"
+          [ "$result" = "success" ]
+
   version:
     name: Compute next version & tag
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
+    needs: gates
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -34,14 +59,14 @@ jobs:
       version_tag: ${{ steps.semver.outputs.version_tag }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Compute next semantic version
         id: semver
-        uses: paulhatch/semantic-version@v5.4.0
+        uses: paulhatch/semantic-version@a8f8f59fd7f0625188492e945240f12d7ad2dca3 # v5.4.0
         with:
           tag_prefix: 'v'
           major_pattern: '(MAJOR)'
@@ -54,17 +79,58 @@ jobs:
           git push origin "${{ steps.semver.outputs.version_tag }}"
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ steps.semver.outputs.version_tag }}
           generate_release_notes: true
 
-  deploy-dev:
-    name: Deploy to dev (TODO)
+  # Migrations run before the new code starts, so they must keep working with the version still running
+  # (add columns/tables first, drop them in a later release).
+  migrate:
+    name: Migrate the production database
     needs: version
     runs-on: ubuntu-24.04
+    environment: production
     steps:
-      - name: Placeholder — real deploy not implemented yet
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      # PRODUCTION_DB_URL is the Neon JDBC URL, e.g. jdbc:postgresql://<host>/<db>?sslmode=require
+      - name: Apply Flyway migrations to production
+        env:
+          FLYWAY_URL: ${{ secrets.PRODUCTION_DB_URL }}
+          FLYWAY_USER: ${{ secrets.PRODUCTION_DB_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
         run: |
-          echo "TODO: deploy ${{ needs.version.outputs.version_tag }} once a hosting target is picked."
-          echo "See docs/ci-cd/backend-ci-cd in the Final project repo for a fly.io/NeonDB reference implementation."
+          docker run --rm -e FLYWAY_URL -e FLYWAY_USER -e FLYWAY_PASSWORD \
+            -v "$PWD/db/migrations:/flyway/sql" redgate/flyway:11.12.0 \
+            -baselineOnMigrate=true -connectRetries=60 migrate
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: [version, migrate]
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://fridgefriend-api.fly.dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Set up flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
+
+      - name: Deploy the API
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --config fly.toml --remote-only --image-label "${{ needs.version.outputs.version_tag }}"
+
+      # Read-only: nothing is created in production
+      - name: Check the facts of the deployed API
+        run: WAIT=180 bash scripts/e2e-facts.sh https://fridgefriend-api.fly.dev
