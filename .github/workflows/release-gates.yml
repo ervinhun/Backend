@@ -1,0 +1,129 @@
+name: Release Gates
+
+# Runs after a successful CI run of a push (not for pull requests). The gates test what really ships and what really
+# runs, by FACTS about the working API (scripts/e2e-facts.sh), not by "did it answer":
+#
+#   verify-release-stack (development and main)
+#       builds the real image from the Dockerfile, migrates a throw-away Postgres with the real Flyway migrations,
+#       starts the image the way Fly runs it (Production settings, no Swagger) and checks the facts, including a
+#       sign-up that writes data
+#   development -> only if that passed: migrate the staging Neon database, deploy to the staging Fly app, then check
+#                  the same facts against it (read-only: nothing is written to staging)
+#   main        -> verify-release-stack is the gate; cd.yml releases and deploys to production only once it passed
+#
+# Pinned to ubuntu-24.04 rather than ubuntu-latest so a runner-image change cannot silently break a release.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: ["development", "main"]
+
+# Never run two migrations of the same branch at the same time
+concurrency:
+  group: release-gates-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # The real artifact, the real migrations, real requests. cd.yml checks this job by name.
+  verify-release-stack:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      (github.event.workflow_run.head_branch == 'development' || github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      # Exactly what Fly builds and runs
+      - name: Build the API image
+        run: docker build -q -t fridgefriend-api:gate .
+
+      # Random secrets, thrown away with the runner
+      - name: Start Postgres and run the migrations
+        run: |
+          DB_PASSWORD=$(openssl rand -hex 16)
+          echo "DB_PASSWORD=$DB_PASSWORD" >> "$GITHUB_ENV"
+          docker network create gate
+          docker run -d --name db --network gate \
+            -e POSTGRES_DB=fridgefriend -e POSTGRES_USER=fridgefriend -e POSTGRES_PASSWORD="$DB_PASSWORD" \
+            --health-cmd 'pg_isready -U fridgefriend' --health-interval 2s postgres:17
+          for _ in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' db)" = healthy ] && break
+            sleep 2
+          done
+          # The same Flyway image and flags as docker-compose.production.yml
+          docker run --rm --network gate -v "$PWD/db/migrations:/flyway/sql" redgate/flyway:11.12.0 \
+            -url=jdbc:postgresql://db:5432/fridgefriend -user=fridgefriend -password="$DB_PASSWORD" \
+            -baselineOnMigrate=true -connectRetries=60 migrate
+
+      - name: Start the API the way production does
+        run: |
+          docker run -d --name api --network gate -p 8080:8080 \
+            -e ASPNETCORE_ENVIRONMENT=Production \
+            -e "ConnectionStrings__DefaultConnection=Host=db;Database=fridgefriend;Username=fridgefriend;Password=$DB_PASSWORD" \
+            -e "Jwt__Secret=$(openssl rand -base64 48)" \
+            fridgefriend-api:gate
+
+      # WRITE=1: only here, in a throw-away database
+      - name: Check the facts of the running API
+        run: WAIT=60 WRITE=1 bash scripts/e2e-facts.sh http://localhost:8080
+
+      - name: Logs of the API
+        if: failure()
+        run: docker logs --tail 150 api || true
+
+  # STAGING (Fly.io + Neon): runs for pushes to `development`, only once the real artifact passed
+  migrate-db-staging:
+    needs: verify-release-stack
+    if: github.event.workflow_run.head_branch == 'development'
+    runs-on: ubuntu-24.04
+    environment: staging
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      # STAGING_DB_URL is the Neon JDBC URL, e.g. jdbc:postgresql://<host>/<db>?sslmode=require
+      - name: Apply Flyway migrations to staging
+        env:
+          FLYWAY_URL: ${{ secrets.STAGING_DB_URL }}
+          FLYWAY_USER: ${{ secrets.STAGING_DB_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: |
+          docker run --rm -e FLYWAY_URL -e FLYWAY_USER -e FLYWAY_PASSWORD \
+            -v "$PWD/db/migrations:/flyway/sql" redgate/flyway:11.12.0 \
+            -baselineOnMigrate=true -connectRetries=60 migrate
+
+  deploy-staging:
+    needs: migrate-db-staging
+    runs-on: ubuntu-24.04
+    environment:
+      name: staging
+      url: https://fridgefriend-api-staging.fly.dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Set up flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
+      - name: Deploy the API to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --config fly.staging.toml --remote-only
+
+      # Read-only: nothing is created on staging. A stopped Fly machine gets up to 3 minutes to start.
+      - name: Check the facts of the deployed staging API
+        run: WAIT=180 bash scripts/e2e-facts.sh https://fridgefriend-api-staging.fly.dev

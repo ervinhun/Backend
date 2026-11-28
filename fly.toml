@@ -1,0 +1,31 @@
+# The FridgeFriend API on Fly.io (production). Deployed by .github/workflows/cd.yml.
+# Secrets (set once with "fly secrets set -a fridgefriend-api ..."):
+#   ConnectionStrings__DefaultConnection  Npgsql connection string of the production Neon database
+#   Jwt__Secret                           at least 32 characters, e.g. openssl rand -base64 48
+app = "fridgefriend-api"
+primary_region = "iad" # near Neon's us-east-2 (create the databases there), like fridgefriend-featurehub
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # shortcut: machines stop when idle (first request after that waits a few seconds), set "off" + min 1 for real users
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/"
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "20s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
